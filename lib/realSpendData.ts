@@ -32,16 +32,6 @@ interface SpendBreakdown {
 }
 
 /**
- * Calculate cost for a model based on input/output tokens
- */
-function calculateModelCost(model: string, inputTokens: number, outputTokens: number): number {
-  const pricing = MODEL_PRICING[model.toLowerCase()] || MODEL_PRICING.haiku;
-  const inputCost = (inputTokens / 1_000_000) * pricing.inputCost;
-  const outputCost = (outputTokens / 1_000_000) * pricing.outputCost;
-  return inputCost + outputCost;
-}
-
-/**
  * Parse real spend data from session logs
  * Returns mock data for now (will integrate with actual OpenClaw logs)
  */
