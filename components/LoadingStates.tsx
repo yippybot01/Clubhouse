@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Zap, TrendingUp, BarChart3 } from "lucide-react";
+import { Zap, TrendingUp } from "lucide-react";
 
 export const ChartSkeleton = () => (
   <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6 backdrop-blur-sm animate-pulse">
