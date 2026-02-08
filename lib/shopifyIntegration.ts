@@ -154,7 +154,7 @@ export class ShopifyAPIClient {
 
 export function calculateMetrics(orders: ShopifyOrder[]) {
   const totalOrders = orders.length;
-  const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price), 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + order.total_price, 0);
   const averageOrderValue = totalRevenue / totalOrders || 0;
 
   // Customer segmentation
@@ -203,7 +203,7 @@ export function calculateProductMetrics(orders: ShopifyOrder[]) {
           orders: 0,
         };
       }
-      productStats[item.product_id].revenue += parseFloat(item.price) * item.quantity;
+      productStats[item.product_id].revenue += item.price * item.quantity;
       productStats[item.product_id].units += item.quantity;
       productStats[item.product_id].orders += 1;
     });
@@ -243,7 +243,7 @@ export function calculateGeographicMetrics(orders: ShopifyOrder[]) {
     }
 
     geoStats[countryCode].orders += 1;
-    geoStats[countryCode].revenue += parseFloat(order.total_price);
+    geoStats[countryCode].revenue += order.total_price;
   });
 
   return Object.values(geoStats).sort((a, b) => b.revenue - a.revenue);
@@ -253,7 +253,7 @@ export function calculateCACAndROAS(
   orders: ShopifyOrder[],
   marketingSpend: number
 ) {
-  const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.total_price), 0);
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total_price, 0);
   const uniqueCustomers = new Set(orders.map((o) => o.customer?.id || o.email)).size;
 
   const cac = uniqueCustomers > 0 ? marketingSpend / uniqueCustomers : 0;
