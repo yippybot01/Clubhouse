@@ -8,7 +8,6 @@ import {
   TrendingUp,
   TrendingDown,
   Clock,
-  Target,
   Zap,
   ArrowRight,
   AlertCircle,
