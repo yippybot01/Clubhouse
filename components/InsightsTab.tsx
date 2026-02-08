@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Lightbulb,
   AlertTriangle,
@@ -285,8 +285,6 @@ const SmartRecommendation = ({
 };
 
 export default function InsightsTab() {
-  const [expandedSection, setExpandedSection] = useState("opportunities");
-
   return (
     <div className="space-y-8">
       {/* Executive Summary */}
