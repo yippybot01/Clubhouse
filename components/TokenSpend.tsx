@@ -11,7 +11,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { AlertCircle, TrendingUp, Zap, DollarSign, AlertTriangle } from "lucide-react";
