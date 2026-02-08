@@ -9,7 +9,6 @@ import {
   TrendingDown,
   Clock,
   Zap,
-  ArrowRight,
   AlertCircle,
   Star,
 } from "lucide-react";
