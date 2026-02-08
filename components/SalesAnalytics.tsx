@@ -80,7 +80,7 @@ export default function SalesAnalytics() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {revenueData.map((entry, index) => (
+                {revenueData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index]} />
                 ))}
               </Pie>
@@ -149,7 +149,7 @@ export default function SalesAnalytics() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {channelData.map((entry, index) => (
+                {channelData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={CHANNEL_COLORS[index]} />
                 ))}
               </Pie>
