@@ -77,6 +77,21 @@ export const getScheduledTasks = query({
   },
 });
 
+// Delete a scheduled task by task_id
+export const deleteScheduledTask = mutation({
+  args: { task_id: v.string() },
+  handler: async (ctx, args) => {
+    const task = await ctx.db
+      .query("scheduledTasks")
+      .filter((q) => q.eq(q.field("task_id"), args.task_id))
+      .first();
+
+    if (task) {
+      await ctx.db.delete(task._id);
+    }
+  },
+});
+
 // Index a memory file
 export const indexMemory = mutation({
   args: {

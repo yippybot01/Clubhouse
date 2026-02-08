@@ -21,7 +21,7 @@ export default function GlobalSearch() {
     displayResults.memories.length + displayResults.documents.length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Search Input */}
       <div className="relative">
         <div className="relative">

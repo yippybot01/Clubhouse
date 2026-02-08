@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import AuthWrapper from "@/components/AuthWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mission Control - Yippybot Dashboard",
+  title: "Clubhouse - Yippybot Dashboard",
   description: "Real-time monitoring and control of Yippybot activities",
 };
 
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <AuthWrapper>{children}</AuthWrapper>
       </body>
     </html>
   );

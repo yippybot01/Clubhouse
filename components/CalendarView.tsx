@@ -4,16 +4,17 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { formatDistanceToNow, isThisWeek, startOfWeek, format, addDays } from "date-fns";
 import { Clock, Zap } from "lucide-react";
+import { sampleScheduledTasks } from "@/lib/seedData";
 
 export default function CalendarView() {
   const tasks = useQuery(api.functions.getScheduledTasks, undefined);
 
-  // Demo data - replace with real tasks
-  const displayTasks = tasks && tasks.length > 0 ? tasks : [
-    { _id: "1", name: "AI Scarcity Research", next_run: Date.now() + 3600000, schedule: { kind: "cron" }, enabled: true, description: "Research AI scarcity trends" },
-    { _id: "2", name: "Morning Brief", next_run: Date.now() + 7200000, schedule: { kind: "cron" }, enabled: true, description: "Daily morning briefing" },
-    { _id: "3", name: "Competitor Scan", next_run: Date.now() + 10800000, schedule: { kind: "cron" }, enabled: true, description: "Scan competitor updates" },
-  ];
+  // Use real tasks or sample data if not loaded yet
+  const displayTasks = (tasks && tasks.length > 0 ? tasks : sampleScheduledTasks).map((task: any) => ({
+    ...task,
+    _id: task._id || task.task_id,
+    schedule: task.schedule || { kind: "cron" }
+  }));
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -41,7 +42,8 @@ export default function CalendarView() {
   };
 
   const getTasksForDay = (day: Date) => {
-    return futureTasksThisWeek.filter((task) => {
+    // Show all this week's tasks for each day (not just future ones)
+    return thisWeekTasks.filter((task) => {
       const taskDate = new Date(task.next_run);
       return (
         taskDate.getFullYear() === day.getFullYear() &&
@@ -72,22 +74,22 @@ export default function CalendarView() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Always Running */}
-      {futureTasksThisWeek.length > 0 && (
+      {thisWeekTasks.length > 0 && (
         <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Zap className="w-5 h-5 text-blue-400" />
+            <Zap className="w-5 h-5 text-amber-400" />
             <h2 className="text-lg font-semibold text-white">Always Running</h2>
           </div>
           <p className="text-sm text-slate-400 mb-4">Yippybot's automated routines</p>
           <div className="flex flex-wrap gap-2">
-            {futureTasksThisWeek.slice(0, 3).map((task) => (
+            {thisWeekTasks.slice(0, 3).map((task) => (
               <div
                 key={task._id}
-                className="px-4 py-2 rounded-lg bg-blue-900/30 border border-blue-500/50 text-blue-300 text-sm"
+                className="px-4 py-2 rounded-lg bg-amber-900/30 border border-amber-500/50 text-amber-300 text-sm font-medium"
               >
-                {task.name} • {task.schedule.kind === "cron" ? "Scheduled" : "Every 30 min"}
+                {task.name} • Daily @ 7:30am
               </div>
             ))}
           </div>
@@ -97,7 +99,7 @@ export default function CalendarView() {
       {/* Weekly Calendar Grid */}
       <div className="space-y-4">
         <div className="grid grid-cols-7 gap-3">
-          {days.map((day, dayIndex) => {
+          {days.map((day) => {
             const dayName = format(day, "EEE");
             const dayTasks = getTasksForDay(day);
             const todayFlag = isToday(day);
@@ -107,11 +109,11 @@ export default function CalendarView() {
                 key={day.toISOString()}
                 className={`rounded-xl p-4 min-h-96 transition-all ${
                   todayFlag
-                    ? "bg-slate-800/80 border-2 border-blue-500/50"
+                    ? "bg-slate-800/80 border-2 border-amber-500/50"
                     : "bg-slate-900/50 border border-slate-700/50"
                 } backdrop-blur-sm hover:border-slate-600/50`}
               >
-                <h3 className={`text-sm font-semibold mb-4 ${todayFlag ? "text-blue-300" : "text-slate-300"}`}>
+                <h3 className={`text-sm font-semibold mb-4 ${todayFlag ? "text-amber-300" : "text-slate-300"}`}>
                   {dayName}
                 </h3>
 
@@ -184,7 +186,7 @@ export default function CalendarView() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 text-center">
           <p className="text-slate-400 text-xs mb-1">This Week</p>
-          <p className="text-2xl font-bold text-white">{futureTasksThisWeek.length}</p>
+          <p className="text-2xl font-bold text-white">{thisWeekTasks.length}</p>
           <p className="text-xs text-slate-500 mt-1">scheduled tasks</p>
         </div>
         <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 text-center">

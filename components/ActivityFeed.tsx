@@ -5,10 +5,20 @@ import { api } from "@/convex/_generated/api";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, AlertCircle, Hourglass, Clock, Zap, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { sampleActivities } from "@/lib/seedData";
 
 export default function ActivityFeed() {
   const activities = useQuery(api.functions.getActivityFeed, { limit: 50 });
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  // Use sample data if no real activities exist
+  const displayActivities = activities && activities.length > 0 
+    ? activities 
+    : sampleActivities.map((activity, index) => ({
+        _id: `sample_${index}`,
+        timestamp: Date.now() - (sampleActivities.length - index) * 300000,
+        ...activity
+      }));
 
   const getIcon = (status: string) => {
     switch (status) {
@@ -45,7 +55,7 @@ export default function ActivityFeed() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Activity Stream */}
       <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl shadow-2xl overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-800/40">
@@ -69,14 +79,14 @@ export default function ActivityFeed() {
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
               <p className="text-slate-400 mt-4">Loading activities...</p>
             </div>
-          ) : activities.length === 0 ? (
+          ) : displayActivities.length === 0 ? (
             <div className="px-6 py-12 text-center text-slate-400">
               <Clock className="w-16 h-16 mx-auto mb-4 opacity-30" />
               <p className="text-lg">No activities yet</p>
               <p className="text-sm mt-2">Activities will appear here as they happen</p>
             </div>
           ) : (
-            activities.map((activity, index) => {
+            displayActivities.map((activity, index) => {
               const actionStyle = getActionColor(activity.action);
               const isExpanded = expandedId === activity._id;
               
@@ -148,7 +158,13 @@ export default function ActivityFeed() {
 
                       {/* Expanded Details */}
                       {isExpanded && (
-                        <div className="mt-4 pt-4 border-t border-slate-700/50 space-y-2 animate-fadeIn">
+                        <div className="mt-4 pt-4 border-t border-slate-700/50 space-y-4 animate-fadeIn">
+                          {activity.metadata?.brief_content && (
+                            <div className="bg-slate-700/20 rounded-lg p-4 border border-slate-700/50">
+                              <p className="text-amber-300 font-semibold mb-3">Morning Brief</p>
+                              <p className="text-slate-200 text-sm whitespace-pre-line leading-relaxed">{activity.metadata.brief_content}</p>
+                            </div>
+                          )}
                           <div className="grid grid-cols-2 gap-3 text-xs">
                             <div className="bg-slate-700/30 rounded-lg p-3">
                               <p className="text-slate-400 mb-1">Timestamp</p>

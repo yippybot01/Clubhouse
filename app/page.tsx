@@ -4,96 +4,94 @@ import { useState } from "react";
 import ActivityFeed from "@/components/ActivityFeed";
 import CalendarView from "@/components/CalendarView";
 import GlobalSearch from "@/components/GlobalSearch";
-import DashboardStats from "@/components/DashboardStats";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { BarChart3, Calendar, Search, Activity } from "lucide-react";
+import EnhancedDashboard from "@/components/EnhancedDashboard";
+import EnhancedSalesAnalytics from "@/components/EnhancedSalesAnalytics";
+import InsightsTab from "@/components/InsightsTab";
+import TokenSpend from "@/components/TokenSpend";
+import { BarChart3, Calendar, Search, Activity, TrendingUp, Lightbulb, Zap } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("stats");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white">
-      {/* Animated background */}
-      <div className="fixed inset-0 -z-10 opacity-30">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "8s" }}></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "6s", animationDelay: "2s" }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white">
+      {/* Animated premium background */}
+      <div className="fixed inset-0 -z-10 opacity-15">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-amber-600 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "8s" }}></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "6s", animationDelay: "2s" }}></div>
+        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "7s", animationDelay: "1s" }}></div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <header className="sticky top-0 z-50 border-b border-amber-600/20 bg-slate-950/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
-                <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Mission Control
-                </h1>
+              <div className="flex items-center gap-4 mb-3">
+                <img src="/yippy-logo.png" alt="Yippy" className="h-12 w-auto drop-shadow-lg" />
+                <div>
+                  <h1 className="text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
+                    Clubhouse
+                  </h1>
+                  <p className="text-xs text-amber-300/70 mt-1">🏌️ Yippybot Performance Hub</p>
+                </div>
               </div>
-              <p className="text-slate-400 text-sm">Yippybot Real-Time Visibility Hub</p>
+              <p className="text-slate-400 text-sm ml-16">Real-time visibility into every action, token, and dollar spent</p>
             </div>
-            <div className="text-right text-xs text-slate-400">
-              <p className="text-slate-300 font-semibold mb-1">Status: LIVE</p>
-              <p>Updated: {new Date().toLocaleTimeString()}</p>
+            <div className="text-right">
+              <div className="flex items-center gap-2 justify-end mb-2">
+                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+                <p className="text-amber-300 font-bold text-sm">LIVE</p>
+              </div>
+              <p className="text-xs text-slate-400">Always Running</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm p-1 rounded-xl">
-            <TabsTrigger 
-              value="stats" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white transition-all rounded-lg"
+      <main className="max-w-7xl mx-auto px-6 pt-20 pb-16">
+        {/* Custom Tab Navigation */}
+        <div className="flex gap-2 mb-8 justify-center flex-wrap">
+          {[
+            { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+            { id: "sales", label: "Sales", icon: TrendingUp },
+            { id: "insights", label: "Insights", icon: Lightbulb },
+            { id: "tokens", label: "Token Spend", icon: Zap },
+            { id: "activity", label: "Activity", icon: Activity },
+            { id: "calendar", label: "Calendar", icon: Calendar },
+            { id: "search", label: "Search", icon: Search },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex flex-col items-center gap-2 px-10 py-4 rounded-lg font-bold text-sm transition-all duration-300 ${
+                activeTab === id
+                  ? "bg-gradient-to-br from-amber-600 via-amber-500 to-amber-600 text-slate-900 border border-amber-400 shadow-2xl shadow-amber-500/40"
+                  : "bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/60 hover:border-amber-500/30"
+              }`}
             >
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="activity" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white transition-all rounded-lg"
-            >
-              <Activity className="w-4 h-4" />
-              <span className="hidden sm:inline">Activity</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="calendar" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white transition-all rounded-lg"
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Calendar</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="search" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white transition-all rounded-lg"
-            >
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Search</span>
-            </TabsTrigger>
-          </TabsList>
+              <Icon className="w-5 h-5" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
 
-          <TabsContent value="stats" className="mt-8">
-            <DashboardStats />
-          </TabsContent>
-
-          <TabsContent value="activity" className="mt-8">
-            <ActivityFeed />
-          </TabsContent>
-
-          <TabsContent value="calendar" className="mt-8">
-            <CalendarView />
-          </TabsContent>
-
-          <TabsContent value="search" className="mt-8">
-            <GlobalSearch />
-          </TabsContent>
-        </Tabs>
+        {/* Content */}
+        <div className="mt-12 animate-fadeIn">
+          {activeTab === "dashboard" && <EnhancedDashboard />}
+          {activeTab === "sales" && <EnhancedSalesAnalytics />}
+          {activeTab === "insights" && <InsightsTab />}
+          {activeTab === "tokens" && <TokenSpend />}
+          {activeTab === "activity" && <ActivityFeed />}
+          {activeTab === "calendar" && <CalendarView />}
+          {activeTab === "search" && <GlobalSearch />}
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-400 text-xs">
-          <p>Mission Control • Powered by Yippybot • Real-time activity monitoring with token & cost transparency</p>
+      <footer className="border-t border-amber-600/20 bg-slate-950/50 backdrop-blur-sm mt-16">
+        <div className="max-w-7xl mx-auto px-6 py-8 text-center">
+          <p className="text-slate-400 text-xs mb-2">🏌️ Clubhouse • Powered by Yippybot</p>
+          <p className="text-slate-500 text-xs">Real-time activity monitoring with token & cost transparency • Yippy Pouches Performance Hub</p>
         </div>
       </footer>
     </div>
