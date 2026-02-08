@@ -3,7 +3,7 @@
  * Logs all Yippybot actions to Convex for real-time visibility
  */
 
-interface ActivityLogEntry {
+export interface ActivityLogEntry {
   action: string;
   description: string;
   duration_ms: number;
