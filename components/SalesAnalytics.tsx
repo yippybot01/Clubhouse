@@ -26,11 +26,6 @@ export default function SalesAnalytics() {
     { week: "Jan 31-Feb 6", orders: 48, revenue: 2079 }
   ];
 
-  // Correct totals for reference
-  const totalOrders = 106;
-  const totalUnits = 640;
-  const totalRevenue = 4597;
-
   // Channel breakdown
   const channelData = [
     { name: "Direct", value: 98, label: "Direct 92.5%" },
