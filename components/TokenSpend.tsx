@@ -22,11 +22,6 @@ export default function TokenSpend() {
   const operationBreakdown = getOperationBreakdown();
   const modelInsights = getModelInsights();
 
-  // Daily spend
-  const todaySpend = spendData.dailySpend[spendData.dailySpend.length - 1]?.amount || 0;
-  const dailyLimit = 5.0;
-  const todayPercentage = (todaySpend / dailyLimit) * 100;
-
   // Monthly/Total Spend Tracking
   const monthlySpend = spendData.totalSpend;
   const monthlyBudget = 200.0; // Operation budget for tracking purposes
