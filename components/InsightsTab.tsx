@@ -16,7 +16,6 @@ import {
   keyOpportunities,
   actionItems,
   alerts,
-  coreMetrics,
 } from "@/lib/demoData";
 
 const OpportunityCard = ({
