@@ -25,7 +25,6 @@ export default function TokenSpend() {
   // Daily spend
   const todaySpend = spendData.dailySpend[spendData.dailySpend.length - 1]?.amount || 0;
   const dailyLimit = 5.0;
-  const remainingToday = dailyLimit - todaySpend;
   const todayPercentage = (todaySpend / dailyLimit) * 100;
 
   // Monthly/Total Spend Tracking
@@ -36,7 +35,6 @@ export default function TokenSpend() {
 
   // Credit Balance (REAL ACCOUNT BALANCE as of Feb 8, 2026)
   const creditBalance = 33.96; // Your actual Anthropic account balance
-  const budgetPercentageOfBalance = (monthlyBudget / creditBalance) * 100;
 
   // Efficiency metrics
   const avgCostPerDay = spendData.avgDailySpend.toFixed(4);
