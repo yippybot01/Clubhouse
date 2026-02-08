@@ -126,7 +126,6 @@ export default function SalesAnalytics() {
                 contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569" }}
                 labelStyle={{ color: "#fff" }}
               />
-              <Legend />
               <Line yAxisId="left" type="monotone" dataKey="orders" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981" }} />
               <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={2} dot={{ fill: "#f59e0b" }} />
             </LineChart>
