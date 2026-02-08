@@ -7,13 +7,6 @@
  * - Sonnet (claude-sonnet-4-5): $3/1M input, $15/1M output
  */
 
-// Model pricing (per 1M tokens)
-const MODEL_PRICING = {
-  "haiku": { inputCost: 0.80, outputCost: 4.00 },
-  "opus": { inputCost: 15.00, outputCost: 75.00 },
-  "sonnet": { inputCost: 3.00, outputCost: 15.00 },
-};
-
 interface TokenUsage {
   model: string;
   inputTokens: number;
