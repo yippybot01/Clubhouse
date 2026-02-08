@@ -180,7 +180,6 @@ const AlertCard = ({
   current,
   previous,
   change,
-  status,
   description,
   actionRequired,
 }: {
@@ -189,7 +188,6 @@ const AlertCard = ({
   current: number;
   previous: number;
   change: number;
-  status: string;
   description: string;
   actionRequired: boolean;
 }) => {
