@@ -8,7 +8,8 @@ import EnhancedDashboard from "@/components/EnhancedDashboard";
 import EnhancedSalesAnalytics from "@/components/EnhancedSalesAnalytics";
 import InsightsTab from "@/components/InsightsTab";
 import TokenSpend from "@/components/TokenSpend";
-import { BarChart3, Calendar, Search, Activity, TrendingUp, Lightbulb, Zap } from "lucide-react";
+import { BarChart3, Calendar, Search, Activity, TrendingUp, Lightbulb, Zap, Coffee } from "lucide-react";
+import MorningBriefs from "@/components/MorningBriefs";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("stats");
@@ -55,6 +56,7 @@ export default function Home() {
             { id: "dashboard", label: "Dashboard", icon: BarChart3 },
             { id: "sales", label: "Sales", icon: TrendingUp },
             { id: "insights", label: "Insights", icon: Lightbulb },
+            { id: "briefs", label: "Morning Briefs", icon: Coffee },
             { id: "tokens", label: "Token Spend", icon: Zap },
             { id: "activity", label: "Activity", icon: Activity },
             { id: "calendar", label: "Calendar", icon: Calendar },
@@ -80,6 +82,7 @@ export default function Home() {
           {activeTab === "dashboard" && <EnhancedDashboard />}
           {activeTab === "sales" && <EnhancedSalesAnalytics />}
           {activeTab === "insights" && <InsightsTab />}
+          {activeTab === "briefs" && <MorningBriefs />}
           {activeTab === "tokens" && <TokenSpend />}
           {activeTab === "activity" && <ActivityFeed />}
           {activeTab === "calendar" && <CalendarView />}
