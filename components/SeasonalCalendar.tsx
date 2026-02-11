@@ -304,7 +304,9 @@ export default function SeasonalCalendar() {
                       {month.quarter}
                     </span>
                     {month.highlight && (
-                      <Target className="w-4 h-4 text-red-400" title="High-Impact Month" />
+                      <span title="High-Impact Month">
+                        <Target className="w-4 h-4 text-red-400" />
+                      </span>
                     )}
                   </div>
                   <p className="text-sm text-slate-400 mt-1">{month.theme}</p>

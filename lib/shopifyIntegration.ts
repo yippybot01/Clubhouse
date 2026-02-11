@@ -1,322 +1,195 @@
 /**
- * Shopify API Integration Utilities
- * 
- * This file provides interfaces and helper functions for integrating real Shopify data
- * Once the Shopify API is connected, replace demo data with actual API calls
+ * Shopify Admin API Integration
+ * Read-only access to orders, products, customers, inventory
  */
 
-export interface ShopifyProduct {
-  id: string;
-  title: string;
-  handle: string;
-  status: "active" | "archived" | "draft";
-  vendor: string;
-  price: number;
-  cost: number;
-}
+const SHOPIFY_API_TOKEN = process.env.SHOPIFY_API_TOKEN;
+const SHOPIFY_STORE_NAME = process.env.SHOPIFY_STORE_NAME || 'fvmga0-ka';
+const SHOPIFY_API_VERSION = '2024-01';
+const SHOPIFY_STORE_URL = `https://${SHOPIFY_STORE_NAME}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}`;
 
 export interface ShopifyOrder {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
+  order_number: number;
   created_at: string;
-  total_price: number;
-  subtotal_price: number;
-  total_tax: number;
-  currency: string;
-  financial_status: "authorized" | "pending" | "paid" | "refunded" | "voided";
-  fulfillment_status?: "fulfilled" | "partial" | "unfulled" | "voided" | "on-demand";
-  line_items: ShopifyLineItem[];
+  updated_at: string;
   customer: {
     id: string;
     email: string;
     first_name: string;
     last_name: string;
-    orders_count: number;
   };
-  shipping_address?: {
-    country: string;
-    country_code: string;
-    province?: string;
-  };
-  source_name: string;
+  line_items: Array<{
+    id: string;
+    title: string;
+    quantity: number;
+    price: string;
+  }>;
+  total_price: string;
+  currency: string;
+  fulfillment_status: string;
 }
 
-export interface ShopifyLineItem {
+export interface ShopifyProduct {
   id: string;
-  product_id: string;
-  variant_id: string;
   title: string;
-  quantity: number;
-  price: number;
-  sku?: string;
-  product_handle: string;
-}
-
-export interface ShopifyCustomer {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone?: string;
-  orders_count: number;
-  total_spent: number;
-  last_order_id?: string;
-  last_order_date?: string;
-  addresses: ShopifyAddress[];
-}
-
-export interface ShopifyAddress {
-  id: string;
-  country: string;
-  country_code: string;
-  province?: string;
-  city: string;
-  postal_code: string;
-  default?: boolean;
+  handle: string;
+  vendor: string;
+  product_type: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  published_at: string;
+  tags: string;
+  variants: Array<{
+    id: string;
+    title: string;
+    sku: string;
+    price: string;
+    inventory_quantity: number;
+  }>;
 }
 
 /**
- * API Client for Shopify
- * To be implemented with your actual Shopify API credentials
+ * Fetch recent orders from Shopify
  */
-export class ShopifyAPIClient {
-  private accessToken: string;
-  private shopDomain: string;
-
-  constructor(accessToken: string, shopDomain: string) {
-    this.accessToken = accessToken;
-    this.shopDomain = shopDomain;
+export async function fetchOrders(limit = 50, status = 'any'): Promise<ShopifyOrder[]> {
+  if (!SHOPIFY_API_TOKEN) {
+    console.error('❌ SHOPIFY_API_TOKEN not configured');
+    return [];
   }
 
-  private async makeRequest(endpoint: string, options?: RequestInit) {
-    const url = `https://${this.shopDomain}/admin/api/2024-01${endpoint}`;
-    const headers = {
-      "X-Shopify-Access-Token": this.accessToken,
-      "Content-Type": "application/json",
-      ...options?.headers,
-    };
-
-    return fetch(url, {
-      ...options,
-      headers,
-    }).then((res) => res.json());
-  }
-
-  async getOrders(
-    status?: "any" | "refunded" | "paid" | "unshipped" | "shipped" | "partial",
-    limit = 100
-  ) {
-    const params = new URLSearchParams({
+  try {
+    const query = new URLSearchParams({
       limit: limit.toString(),
-      status: status || "any",
+      status: status,
+      fields: 'id,order_number,created_at,customer,line_items,total_price,currency,fulfillment_status',
     });
-    return this.makeRequest(`/orders.json?${params}`);
+
+    const response = await fetch(`${SHOPIFY_STORE_URL}/orders.json?${query}`, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': SHOPIFY_API_TOKEN,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`❌ Shopify API error: ${response.status} ${response.statusText}`);
+      const error = await response.text();
+      console.error('Response:', error);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.orders || [];
+  } catch (error) {
+    console.error('❌ Error fetching Shopify orders:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all products
+ */
+export async function fetchProducts(limit = 250): Promise<ShopifyProduct[]> {
+  if (!SHOPIFY_API_TOKEN) {
+    console.error('❌ SHOPIFY_API_TOKEN not configured');
+    return [];
   }
 
-  async getOrdersInDateRange(startDate: Date, endDate: Date) {
-    const params = new URLSearchParams({
-      created_at_min: startDate.toISOString(),
-      created_at_max: endDate.toISOString(),
-      limit: "250",
-    });
-    return this.makeRequest(`/orders.json?${params}`);
-  }
-
-  async getCustomers(limit = 100) {
-    const params = new URLSearchParams({
+  try {
+    const query = new URLSearchParams({
       limit: limit.toString(),
+      fields: 'id,title,handle,vendor,product_type,created_at,status,published_at,tags,variants',
     });
-    return this.makeRequest(`/customers.json?${params}`);
+
+    const response = await fetch(`${SHOPIFY_STORE_URL}/products.json?${query}`, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': SHOPIFY_API_TOKEN,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`❌ Shopify API error: ${response.status} ${response.statusText}`);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.products || [];
+  } catch (error) {
+    console.error('❌ Error fetching Shopify products:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch customer data
+ */
+export async function fetchCustomers(limit = 250): Promise<any[]> {
+  if (!SHOPIFY_API_TOKEN) {
+    console.error('❌ SHOPIFY_API_TOKEN not configured');
+    return [];
   }
 
-  async getProducts(limit = 100) {
-    const params = new URLSearchParams({
+  try {
+    const query = new URLSearchParams({
       limit: limit.toString(),
+      fields: 'id,email,first_name,last_name,created_at,updated_at,total_spent,orders_count',
     });
-    return this.makeRequest(`/products.json?${params}`);
-  }
 
-  async getProductVariants(productId: string) {
-    return this.makeRequest(`/products/${productId}/variants.json`);
-  }
-
-  async getReports() {
-    return this.makeRequest(`/reports.json`);
-  }
-}
-
-/**
- * Data Transform Functions
- * Convert Shopify data to dashboard-ready format
- */
-
-export function calculateMetrics(orders: ShopifyOrder[]) {
-  const totalOrders = orders.length;
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total_price, 0);
-  const averageOrderValue = totalRevenue / totalOrders || 0;
-
-  // Customer segmentation
-  const customers = new Map<string, number>();
-  const repeatCustomers = new Set<string>();
-
-  orders.forEach((order) => {
-    if (order.customer) {
-      const customerId = order.customer.id;
-      customers.set(customerId, (customers.get(customerId) || 0) + 1);
-      if ((customers.get(customerId) || 0) > 1) {
-        repeatCustomers.add(customerId);
-      }
-    }
-  });
-
-  const repeatCustomerRate = (repeatCustomers.size / customers.size) * 100;
-
-  return {
-    totalOrders,
-    totalRevenue: Math.round(totalRevenue * 100) / 100,
-    averageOrderValue: Math.round(averageOrderValue * 100) / 100,
-    uniqueCustomers: customers.size,
-    repeatCustomerRate: Math.round(repeatCustomerRate * 10) / 10,
-  };
-}
-
-export function calculateProductMetrics(orders: ShopifyOrder[]) {
-  const productStats: Record<
-    string,
-    {
-      name: string;
-      revenue: number;
-      units: number;
-      orders: number;
-    }
-  > = {};
-
-  orders.forEach((order) => {
-    order.line_items.forEach((item) => {
-      if (!productStats[item.product_id]) {
-        productStats[item.product_id] = {
-          name: item.title,
-          revenue: 0,
-          units: 0,
-          orders: 0,
-        };
-      }
-      productStats[item.product_id].revenue += item.price * item.quantity;
-      productStats[item.product_id].units += item.quantity;
-      productStats[item.product_id].orders += 1;
+    const response = await fetch(`${SHOPIFY_STORE_URL}/customers.json?${query}`, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': SHOPIFY_API_TOKEN,
+        'Content-Type': 'application/json',
+      },
     });
-  });
 
-  return Object.entries(productStats)
-    .map(([id, stats]) => ({
-      id,
-      ...stats,
-      aov: stats.revenue / stats.orders,
-    }))
-    .sort((a, b) => b.revenue - a.revenue);
-}
-
-export function calculateGeographicMetrics(orders: ShopifyOrder[]) {
-  const geoStats: Record<
-    string,
-    {
-      country: string;
-      countryCode: string;
-      orders: number;
-      revenue: number;
-    }
-  > = {};
-
-  orders.forEach((order) => {
-    const country = order.shipping_address?.country || "Unknown";
-    const countryCode = order.shipping_address?.country_code || "UN";
-
-    if (!geoStats[countryCode]) {
-      geoStats[countryCode] = {
-        country,
-        countryCode,
-        orders: 0,
-        revenue: 0,
-      };
+    if (!response.ok) {
+      console.error(`❌ Shopify API error: ${response.status} ${response.statusText}`);
+      return [];
     }
 
-    geoStats[countryCode].orders += 1;
-    geoStats[countryCode].revenue += order.total_price;
-  });
-
-  return Object.values(geoStats).sort((a, b) => b.revenue - a.revenue);
-}
-
-export function calculateCACAndROAS(
-  orders: ShopifyOrder[],
-  marketingSpend: number
-) {
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total_price, 0);
-  const uniqueCustomers = new Set(orders.map((o) => o.customer?.id || o.email)).size;
-
-  const cac = uniqueCustomers > 0 ? marketingSpend / uniqueCustomers : 0;
-  const roas = marketingSpend > 0 ? totalRevenue / marketingSpend : 0;
-
-  return {
-    cac: Math.round(cac * 100) / 100,
-    roas: Math.round(roas * 100) / 100,
-    totalRevenue: Math.round(totalRevenue * 100) / 100,
-    totalCustomers: uniqueCustomers,
-  };
+    const data = await response.json();
+    return data.customers || [];
+  } catch (error) {
+    console.error('❌ Error fetching Shopify customers:', error);
+    return [];
+  }
 }
 
 /**
- * Cache utilities for demo data
- * When real API is integrated, cache will store Shopify data locally
+ * Test connection
  */
-export const demoDataCache = {
-  lastUpdated: null as Date | null,
-  data: null as any,
+export async function testConnection(): Promise<boolean> {
+  if (!SHOPIFY_API_TOKEN) {
+    console.error('❌ SHOPIFY_API_TOKEN not set');
+    return false;
+  }
 
-  set(data: any) {
-    this.data = data;
-    this.lastUpdated = new Date();
-    // In production, save to localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "yippy_dashboard_cache",
-        JSON.stringify({
-          data,
-          timestamp: this.lastUpdated,
-        })
-      );
+  try {
+    const response = await fetch(`${SHOPIFY_STORE_URL}/shop.json`, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': SHOPIFY_API_TOKEN,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`❌ Connection test failed: ${response.status} ${response.statusText}`);
+      console.error(`Store URL: ${SHOPIFY_STORE_URL}`);
+      return false;
     }
-  },
 
-  get() {
-    if (typeof window !== "undefined") {
-      const cached = localStorage.getItem("yippy_dashboard_cache");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        this.data = parsed.data;
-        this.lastUpdated = new Date(parsed.timestamp);
-        return parsed.data;
-      }
-    }
-    return this.data;
-  },
-
-  clear() {
-    this.data = null;
-    this.lastUpdated = null;
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("yippy_dashboard_cache");
-    }
-  },
-};
-
-/**
- * Placeholder for environment configuration
- * Add these to your .env.local when setting up Shopify integration
- */
-export const shopifyConfig = {
-  // NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN: process.env.NEXT_PUBLIC_SHOPIFY_ACCESS_TOKEN || "",
-  // NEXT_PUBLIC_SHOPIFY_SHOP_DOMAIN: process.env.NEXT_PUBLIC_SHOPIFY_SHOP_DOMAIN || "",
-};
+    const data = await response.json();
+    console.log('✅ Shopify connection successful. Store:', data.shop?.name);
+    return true;
+  } catch (error) {
+    console.error('❌ Connection test error:', error);
+    return false;
+  }
+}
