@@ -30,57 +30,60 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-club-cream text-club-navy">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A1628] via-[#0F1D32] to-[#1B4332]/80 text-gray-100 grid-overlay">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-2 border-club-gold/30 bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-5">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-club-green/10 border-2 border-club-gold flex items-center justify-center shadow-md">
-                <img src="/yippy-logo.png" alt="Yippy" className="h-8 w-auto" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <img src="/yippy-logo.png" alt="Yippy" className="h-8 w-auto drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
               </div>
               <div>
-                <h1 className="text-3xl font-serif font-bold tracking-tight text-club-navy">
+                <h1 className="text-2xl font-sans font-bold tracking-tight text-white drop-shadow-lg">
                   The Clubhouse
                 </h1>
-                <p className="text-xs text-gray-500 mt-0.5 tracking-widest uppercase">
+                <p className="text-xs text-gray-400 mt-0.5 tracking-widest uppercase">
                   Yippy Pouches • Performance Hub
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-club-green/10 border border-club-green/30 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-club-green text-xs font-semibold tracking-wider">LIVE</p>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
+                <p className="text-emerald-400 text-xs font-semibold tracking-wider">LIVE</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 pt-8 pb-16">
+      <main className="max-w-7xl mx-auto px-6 pt-8 pb-16 relative z-10">
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex gap-1 p-1 bg-white border-2 border-club-gold/20 rounded-xl shadow-sm overflow-x-auto">
+          <div className="flex gap-1 p-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-x-auto">
             {tabs.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
+                className={`relative flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
                   activeTab === id
-                    ? "bg-club-green text-white border border-club-gold shadow-md"
-                    : "text-club-navy/60 hover:text-club-green hover:bg-club-cream"
+                    ? "bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                    : "text-gray-400 hover:text-emerald-400 hover:bg-white/5"
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
+                {activeTab === id && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-emerald-400 rounded-full" />
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Gold divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-club-gold/40 to-transparent mb-8" />
+        {/* Emerald divider */}
+        <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent mb-8" />
 
         {/* Content */}
         <div className="animate-fadeIn">
@@ -98,9 +101,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-2 border-club-gold/20 bg-white">
+      <footer className="border-t border-white/5 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-6 text-center">
-          <p className="text-gray-400 text-xs tracking-widest uppercase">
+          <p className="text-gray-500 text-xs tracking-widest uppercase">
             The Clubhouse • Est. 2026 • Yippy Pouches Performance Hub
           </p>
         </div>

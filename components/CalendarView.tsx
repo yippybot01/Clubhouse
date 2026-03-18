@@ -19,11 +19,11 @@ export default function CalendarView() {
 
   const getTaskColor = (index: number) => {
     const colors = [
-      { bg: "bg-club-burgundy/5", border: "border-club-burgundy/30", text: "text-club-burgundy-light" },
-      { bg: "bg-club-gold/5", border: "border-club-gold/25", text: "text-club-gold" },
-      { bg: "bg-club-green/5", border: "border-club-forest-light/30", text: "text-emerald-600" },
-      { bg: "bg-blue-900/20", border: "border-blue-300", text: "text-blue-600" },
-      { bg: "bg-club-burgundy/5", border: "border-club-burgundy/25", text: "text-club-burgundy-light" },
+      { bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-purple-400" },
+      { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-400" },
+      { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400" },
+      { bg: "bg-sky-500/10", border: "border-sky-500/20", text: "text-sky-400" },
+      { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-400" },
     ];
     return colors[index % colors.length];
   };
@@ -44,15 +44,15 @@ export default function CalendarView() {
   return (
     <div className="space-y-10">
       {thisWeekTasks.length > 0 && (
-        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center gap-2 mb-4">
-            <Zap className="w-5 h-5 text-club-gold" />
-            <h2 className="text-lg font-serif font-semibold text-club-navy">Always Running</h2>
+            <Zap className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-sans font-semibold text-white">Always Running</h2>
           </div>
           <p className="text-sm text-gray-400 mb-4">Yippybot's automated routines</p>
           <div className="flex flex-wrap gap-2">
             {thisWeekTasks.slice(0, 3).map((task) => (
-              <div key={task._id} className="px-4 py-2 rounded-lg bg-club-green/5 border border-club-gold/20 text-club-gold text-sm font-medium">
+              <div key={task._id} className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium">
                 {task.name} • Daily @ 7:30am
               </div>
             ))}
@@ -66,20 +66,22 @@ export default function CalendarView() {
             const dayTasks = getTasksForDay(day);
             const todayFlag = isToday(day);
             return (
-              <div key={day.toISOString()} className={`rounded-xl p-4 min-h-96 transition-all shadow-sm ${
-                todayFlag ? "bg-white border-2 border-club-gold/40 shadow-lg shadow-md" : "bg-white/80 border border-club-gold/25 hover:border-club-gold/20"
+              <div key={day.toISOString()} className={`rounded-2xl p-4 min-h-96 transition-all duration-300 backdrop-blur-xl ${
+                todayFlag
+                  ? "bg-white/[0.07] border-2 border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)]"
+                  : "bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:border-white/20"
               }`}>
-                <h3 className={`text-sm font-serif font-semibold mb-4 ${todayFlag ? "text-club-gold" : "text-gray-400"}`}>
+                <h3 className={`text-sm font-sans font-semibold mb-4 ${todayFlag ? "text-emerald-400" : "text-gray-500"}`}>
                   {format(day, "EEE")}
                 </h3>
                 <div className="space-y-2">
                   {dayTasks.length === 0 ? (
-                    <p className="text-xs text-gray-200">No tasks</p>
+                    <p className="text-xs text-gray-600">No tasks</p>
                   ) : (
                     dayTasks.map((task, taskIndex) => {
                       const colors = getTaskColor(taskIndex);
                       return (
-                        <div key={task._id} className={`${colors.bg} border ${colors.border} rounded-lg p-3 text-xs transition-all hover:border-opacity-100`}>
+                        <div key={task._id} className={`${colors.bg} border ${colors.border} rounded-xl p-3 text-xs transition-all hover:border-opacity-100`}>
                           <p className={`font-medium truncate ${colors.text}`}>{task.name}</p>
                           <p className={`text-xs mt-1 opacity-70 ${colors.text}`}>{getTimeString(task.next_run)}</p>
                         </div>
@@ -94,24 +96,24 @@ export default function CalendarView() {
       </div>
 
       {upcomingTasks.length > 0 && (
-        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center gap-2 mb-6">
-            <Clock className="w-5 h-5 text-club-gold" />
-            <h2 className="text-lg font-serif font-semibold text-club-navy">Next Up</h2>
+            <Clock className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-sans font-semibold text-white">Next Up</h2>
           </div>
           <div className="space-y-3">
             {upcomingTasks.map((task, index) => {
               const colors = getTaskColor(index);
               return (
-                <div key={task._id} className="flex items-center justify-between py-3 border-b border-club-gold/20 last:border-0">
+                <div key={task._id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className={`w-1 h-6 rounded ${colors.bg}`} />
                     <div>
                       <p className={`text-sm font-medium ${colors.text}`}>{task.name}</p>
-                      {task.description && <p className="text-xs text-gray-400 mt-0.5">{task.description}</p>}
+                      {task.description && <p className="text-xs text-gray-500 mt-0.5">{task.description}</p>}
                     </div>
                   </div>
-                  <p className="text-xs text-club-gold/50 font-mono">In {formatDistanceToNow(new Date(task.next_run))}</p>
+                  <p className="text-xs text-gray-500 font-mono">In {formatDistanceToNow(new Date(task.next_run))}</p>
                 </div>
               );
             })}
@@ -120,25 +122,25 @@ export default function CalendarView() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-club-gold/30 rounded-xl p-4 text-center">
-          <p className="text-gray-400 text-xs mb-1">This Week</p>
-          <p className="text-2xl font-serif font-bold text-club-navy">{thisWeekTasks.length}</p>
-          <p className="text-xs text-gray-300 mt-1">scheduled tasks</p>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center">
+          <p className="text-gray-500 text-xs mb-1">This Week</p>
+          <p className="text-2xl font-mono font-bold text-white">{thisWeekTasks.length}</p>
+          <p className="text-xs text-gray-600 mt-1">scheduled tasks</p>
         </div>
-        <div className="bg-white border border-club-gold/30 rounded-xl p-4 text-center">
-          <p className="text-gray-400 text-xs mb-1">Next Task</p>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center">
+          <p className="text-gray-500 text-xs mb-1">Next Task</p>
           {futureTasksThisWeek.length > 0 ? (
             <>
-              <p className="text-2xl font-serif font-bold text-club-gold">{formatDistanceToNow(new Date(futureTasksThisWeek[0].next_run)).split(" ")[0]}</p>
-              <p className="text-xs text-gray-300 mt-1">{formatDistanceToNow(new Date(futureTasksThisWeek[0].next_run)).split(" ").slice(1).join(" ")}</p>
+              <p className="text-2xl font-mono font-bold text-amber-400">{formatDistanceToNow(new Date(futureTasksThisWeek[0].next_run)).split(" ")[0]}</p>
+              <p className="text-xs text-gray-600 mt-1">{formatDistanceToNow(new Date(futureTasksThisWeek[0].next_run)).split(" ").slice(1).join(" ")}</p>
             </>
-          ) : <p className="text-gray-300 mt-1">None</p>}
+          ) : <p className="text-gray-600 mt-1">None</p>}
         </div>
-        <div className="bg-white border border-club-gold/30 rounded-xl p-4 text-center md:col-span-1">
-          <p className="text-gray-400 text-xs mb-1">Status</p>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center md:col-span-1">
+          <p className="text-gray-500 text-xs mb-1">Status</p>
           <div className="flex items-center justify-center gap-1 mt-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <p className="text-sm font-semibold text-emerald-600">LIVE</p>
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+            <p className="text-sm font-semibold text-emerald-400">LIVE</p>
           </div>
         </div>
       </div>
