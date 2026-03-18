@@ -16,7 +16,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #1a1f2e 0%, #1f2937 50%, #16202f 100%);
+  background: #F5F3EE;
   min-height: 100vh;
 }
 
@@ -27,16 +27,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1f2e;
+  background: #F5F3EE;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #b45309;
+  background: #D4AF37;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+  background: #B8942E;
 }
 
 /* Animations */
@@ -51,10 +51,10 @@ body {
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
   }
   50% {
-    box-shadow: 0 0 30px rgba(217, 119, 6, 0.6);
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
   }
 }
 
@@ -64,7 +64,7 @@ body {
 
 /* Premium gold gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #1B4332 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -73,13 +73,13 @@ body {
 /* Card hover effect */
 .card-hover {
   transition: all 0.3s ease;
-  border-color: rgba(217, 119, 6, 0.3);
+  border-color: rgba(212, 175, 55, 0.3);
 }
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15);
-  border-color: rgba(217, 119, 6, 0.6);
+  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.5);
 }
 
 /* Premium accent line */
@@ -95,7 +95,7 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #d97706, transparent);
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
 }
 
 /* Flag pin indicator */
@@ -104,8 +104,8 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  background: #D4AF37;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 /* Fade in animation for tab content */

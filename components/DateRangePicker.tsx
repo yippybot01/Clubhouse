@@ -60,9 +60,9 @@ export default function DateRangePicker({
   };
 
   return (
-    <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white border border-club-gold/25 rounded-xl p-4 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-white">
+        <div className="flex items-center gap-2 text-club-navy">
           <Calendar className="w-5 h-5" />
           <span className="font-semibold">Date Range</span>
         </div>
@@ -75,8 +75,8 @@ export default function DateRangePicker({
             onClick={() => handlePresetClick(preset.days)}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedPreset === preset.days.toString()
-                ? "bg-amber-600 text-white"
-                : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"
+                ? "bg-club-green text-club-navy"
+                : "bg-gray-200 text-gray-600 hover:bg-slate-700"
             }`}
           >
             {preset.label}
@@ -85,30 +85,30 @@ export default function DateRangePicker({
       </div>
 
       {showCustom && (
-        <div className="bg-slate-700/30 rounded-lg p-4 space-y-4 border border-slate-600/50">
+        <div className="bg-club-cream rounded-lg p-4 space-y-4 border border-club-gold/20">
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">Start Date</label>
+            <label className="text-sm text-gray-600">Start Date</label>
             <input
               type="date"
               value={startDate.toISOString().split("T")[0]}
               onChange={(e) => setStartDate(new Date(e.target.value))}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm"
+              className="w-full px-3 py-2 bg-white border border-club-gold/20 rounded text-club-navy text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">End Date</label>
+            <label className="text-sm text-gray-600">End Date</label>
             <input
               type="date"
               value={endDate.toISOString().split("T")[0]}
               onChange={(e) => setEndDate(new Date(e.target.value))}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm"
+              className="w-full px-3 py-2 bg-white border border-club-gold/20 rounded text-club-navy text-sm"
             />
           </div>
 
           <button
             onClick={handleCustomApply}
-            className="w-full px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded text-sm font-medium transition-colors"
+            className="w-full px-3 py-2 bg-club-green hover:bg-club-green/90 text-club-navy rounded text-sm font-medium transition-colors"
           >
             Apply
           </button>
@@ -117,13 +117,13 @@ export default function DateRangePicker({
 
       <button
         onClick={() => setShowCustom(!showCustom)}
-        className="w-full px-3 py-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors text-center"
+        className="w-full px-3 py-2 text-sm font-medium text-club-gold hover:text-club-gold transition-colors text-center"
       >
         {showCustom ? "Close Custom Range" : "Custom Range"}
       </button>
 
-      <div className="mt-4 pt-4 border-t border-slate-600/50">
-        <p className="text-xs text-slate-400">
+      <div className="mt-4 pt-4 border-t border-club-gold/20">
+        <p className="text-xs text-gray-500">
           {formatDate(startDate)} to {formatDate(endDate)}
         </p>
       </div>

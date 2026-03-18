@@ -29,11 +29,11 @@ interface Agent {
 }
 
 const statusConfig: Record<AgentStatus, { emoji: string; label: string; color: string; bg: string; border: string }> = {
-  idle: { emoji: "🟢", label: "Idle", color: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/30" },
-  working: { emoji: "🔵", label: "Working", color: "text-blue-400", bg: "bg-blue-500/15", border: "border-blue-500/30" },
-  collaborating: { emoji: "🟣", label: "Collaborating", color: "text-purple-400", bg: "bg-purple-500/15", border: "border-purple-500/30" },
-  review: { emoji: "🟠", label: "Review", color: "text-amber-400", bg: "bg-amber-500/15", border: "border-amber-500/30" },
-  offline: { emoji: "⚫", label: "Offline", color: "text-slate-500", bg: "bg-slate-500/15", border: "border-slate-500/30" },
+  idle: { emoji: "🟢", label: "Idle", color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-300" },
+  working: { emoji: "🔵", label: "Working", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-300" },
+  collaborating: { emoji: "🟣", label: "Collaborating", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-300" },
+  review: { emoji: "🟠", label: "Review", color: "text-club-gold", bg: "bg-amber-50", border: "border-amber-300" },
+  offline: { emoji: "⚫", label: "Offline", color: "text-gray-400", bg: "bg-slate-500/15", border: "border-slate-500/30" },
 };
 
 const mockAgents: Agent[] = [
@@ -173,19 +173,19 @@ export default function AgentsTab() {
       {/* Header with Refresh */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-club-cream">Agent Command Center</h2>
+          <h2 className="text-2xl font-serif font-bold text-club-navy">Agent Command Center</h2>
           <p className="text-club-gold/60 text-sm mt-1">
             Autonomous team performance & coordination
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-club-cream/40">
+          <span className="text-xs text-gray-400">
             Last refresh: {lastRefresh.toLocaleTimeString()}
           </span>
           <button
             onClick={refresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-club-forest/60 border border-club-gold/30 rounded-lg text-club-gold text-sm font-semibold hover:bg-club-forest/80 hover:border-club-gold/50 transition-all duration-300"
+            className="flex items-center gap-2 px-4 py-2 bg-club-green/10 border border-club-gold/30 rounded-lg text-club-gold text-sm font-semibold hover:bg-club-green/20 hover:border-club-gold/200 transition-all duration-300"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -196,17 +196,17 @@ export default function AgentsTab() {
       {/* Team Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: "Active Agents", value: `${activeAgents}/${agents.length}`, icon: Users, accent: "text-emerald-400" },
+          { label: "Active Agents", value: `${activeAgents}/${agents.length}`, icon: Users, accent: "text-emerald-600" },
           { label: "Total Tasks", value: totalTasks.toLocaleString(), icon: Zap, accent: "text-club-gold" },
-          { label: "Avg Quality", value: `${avgQuality}%`, icon: Star, accent: "text-purple-400" },
-          { label: "Team Uptime", value: "99.2%", icon: Activity, accent: "text-blue-400" },
+          { label: "Avg Quality", value: `${avgQuality}%`, icon: Star, accent: "text-purple-600" },
+          { label: "Team Uptime", value: "99.2%", icon: Activity, accent: "text-blue-600" },
         ].map((metric) => (
           <div
             key={metric.label}
-            className="bg-club-navy-light/60 border border-club-gold/15 rounded-xl p-5 backdrop-blur-sm hover:border-club-gold/30 transition-all duration-300"
+            className="bg-white border border-club-gold/30 rounded-xl p-5 shadow-sm hover:border-club-gold/30 transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-club-cream/50 text-xs font-semibold uppercase tracking-wider">{metric.label}</p>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{metric.label}</p>
               <metric.icon className={`w-5 h-5 ${metric.accent}`} />
             </div>
             <p className={`text-3xl font-bold font-serif ${metric.accent}`}>{metric.value}</p>
@@ -216,7 +216,7 @@ export default function AgentsTab() {
 
       {/* Agent Cards Grid */}
       <div>
-        <h3 className="text-lg font-serif font-bold text-club-cream mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-serif font-bold text-club-navy mb-4 flex items-center gap-2">
           <Users className="w-5 h-5 text-club-gold" />
           Agent Roster
         </h3>
@@ -226,10 +226,10 @@ export default function AgentsTab() {
             return (
               <div
                 key={agent.id}
-                className={`relative bg-club-navy-light/60 border rounded-xl p-5 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-club-gold/5 ${
+                className={`relative bg-white border rounded-xl p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-md ${
                   agent.status === "offline"
-                    ? "border-slate-700/30 opacity-70"
-                    : "border-club-gold/15 hover:border-club-gold/30"
+                    ? "border-club-gold/25/30 opacity-70"
+                    : "border-club-gold/30 hover:border-club-gold/30"
                 }`}
               >
                 {/* Status indicator dot */}
@@ -239,12 +239,12 @@ export default function AgentsTab() {
 
                 {/* Avatar & Name */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-club-forest/40 border border-club-gold/20 flex items-center justify-center text-2xl">
+                  <div className="w-12 h-12 rounded-full bg-club-green/10 border border-club-gold/20 flex items-center justify-center text-2xl">
                     {agent.avatar}
                   </div>
                   <div>
-                    <h4 className="font-serif font-bold text-club-cream">{agent.name}</h4>
-                    <p className="text-xs text-club-cream/40">{agent.role}</p>
+                    <h4 className="font-serif font-bold text-club-navy">{agent.name}</h4>
+                    <p className="text-xs text-gray-400">{agent.role}</p>
                   </div>
                 </div>
 
@@ -254,13 +254,13 @@ export default function AgentsTab() {
                 </div>
 
                 {/* Current Task */}
-                <p className="text-sm text-club-cream/60 mb-4 line-clamp-2 leading-relaxed">
+                <p className="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">
                   {agent.currentTask}
                 </p>
 
                 {/* Collaborating With */}
                 {agent.collaboratingWith && agent.collaboratingWith.length > 0 && (
-                  <div className="flex items-center gap-1 mb-4 text-xs text-purple-300/70">
+                  <div className="flex items-center gap-1 mb-4 text-xs text-purple-600">
                     <span>↔</span>
                     <span>
                       with {agent.collaboratingWith.map((id) => {
@@ -272,27 +272,27 @@ export default function AgentsTab() {
                 )}
 
                 {/* Metrics */}
-                <div className="border-t border-club-gold/10 pt-3 space-y-2">
+                <div className="border-t border-club-gold/25 pt-3 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-club-cream/40">Tasks</span>
-                    <span className="text-club-cream/70 font-semibold">{agent.tasksCompleted}</span>
+                    <span className="text-gray-400">Tasks</span>
+                    <span className="text-gray-600 font-semibold">{agent.tasksCompleted}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-club-cream/40">Revenue Impact</span>
+                    <span className="text-gray-400">Revenue Impact</span>
                     <span className="text-club-gold font-semibold">{agent.revenueImpact}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-club-cream/40">Quality</span>
-                    <span className="text-emerald-400 font-semibold">{agent.qualityScore}%</span>
+                    <span className="text-gray-400">Quality</span>
+                    <span className="text-emerald-600 font-semibold">{agent.qualityScore}%</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-club-cream/40">Avg Runtime</span>
-                    <span className="text-club-cream/70 font-semibold">{agent.avgRuntime}</span>
+                    <span className="text-gray-400">Avg Runtime</span>
+                    <span className="text-gray-600 font-semibold">{agent.avgRuntime}</span>
                   </div>
                 </div>
 
                 {/* Last Active */}
-                <div className="mt-3 pt-2 border-t border-club-gold/5 flex items-center gap-1 text-xs text-club-cream/30">
+                <div className="mt-3 pt-2 border-t border-club-gold/20 flex items-center gap-1 text-xs text-gray-300">
                   <Clock className="w-3 h-3" />
                   {agent.lastActive}
                 </div>
@@ -305,8 +305,8 @@ export default function AgentsTab() {
       {/* Two-column: Activity Feed + Collaboration Map */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live Activity Feed */}
-        <div className="bg-club-navy-light/60 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-4 flex items-center gap-2">
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-4 flex items-center gap-2">
             <Activity className="w-5 h-5 text-club-gold" />
             Live Activity Feed
           </h3>
@@ -314,14 +314,14 @@ export default function AgentsTab() {
             {activityFeed.map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 py-2.5 border-b border-club-gold/5 last:border-0"
+                className="flex items-start gap-3 py-2.5 border-b border-club-gold/20 last:border-0"
               >
                 <span className="text-xs text-club-gold/50 font-mono whitespace-nowrap mt-0.5">
                   {item.time}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-club-cream/80">{item.agent}</span>
-                  <p className="text-xs text-club-cream/50 mt-0.5">{item.action}</p>
+                  <span className="text-sm font-semibold text-gray-700">{item.agent}</span>
+                  <p className="text-xs text-gray-400 mt-0.5">{item.action}</p>
                 </div>
                 <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
                   item.type === "success" ? "bg-emerald-400" : "bg-blue-400"
@@ -332,8 +332,8 @@ export default function AgentsTab() {
         </div>
 
         {/* Collaboration Visualization */}
-        <div className="bg-club-navy-light/60 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-4 flex items-center gap-2">
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-club-gold" />
             Active Collaborations
           </h3>
@@ -343,37 +343,37 @@ export default function AgentsTab() {
               .map((agent) => (
                 <div
                   key={agent.id}
-                  className="bg-club-forest/20 border border-purple-500/20 rounded-lg p-4"
+                  className="bg-club-green/5 border border-purple-300 rounded-lg p-4"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-xl">{agent.avatar}</span>
-                    <span className="text-sm font-bold text-club-cream">{agent.name}</span>
-                    <span className="text-purple-400 text-xs">↔</span>
+                    <span className="text-sm font-bold text-club-navy">{agent.name}</span>
+                    <span className="text-purple-600 text-xs">↔</span>
                     {agent.collaboratingWith?.map((id) => {
                       const collab = agents.find((a) => a.id === id);
                       return (
                         <span key={id} className="flex items-center gap-1">
                           <span className="text-xl">{collab?.avatar}</span>
-                          <span className="text-sm font-bold text-club-cream">{collab?.name}</span>
+                          <span className="text-sm font-bold text-club-navy">{collab?.name}</span>
                         </span>
                       );
                     })}
                   </div>
-                  <p className="text-xs text-club-cream/50 pl-8">{agent.currentTask}</p>
+                  <p className="text-xs text-gray-400 pl-8">{agent.currentTask}</p>
                 </div>
               ))}
 
             {/* Team Performance Summary */}
-            <div className="mt-6 pt-4 border-t border-club-gold/10">
-              <h4 className="text-sm font-semibold text-club-cream/70 mb-3">Team Performance</h4>
+            <div className="mt-6 pt-4 border-t border-club-gold/25">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3">Team Performance</h4>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-club-navy/40 rounded-lg p-3 text-center">
+                <div className="bg-club-cream rounded-lg p-3 text-center">
                   <p className="text-2xl font-serif font-bold text-club-gold">{totalTasks.toLocaleString()}</p>
-                  <p className="text-xs text-club-cream/40 mt-1">Total Tasks Done</p>
+                  <p className="text-xs text-gray-400 mt-1">Total Tasks Done</p>
                 </div>
-                <div className="bg-club-navy/40 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-serif font-bold text-emerald-400">$73,950</p>
-                  <p className="text-xs text-club-cream/40 mt-1">Total Revenue Impact</p>
+                <div className="bg-club-cream rounded-lg p-3 text-center">
+                  <p className="text-2xl font-serif font-bold text-emerald-600">$73,950</p>
+                  <p className="text-xs text-gray-400 mt-1">Total Revenue Impact</p>
                 </div>
               </div>
             </div>

@@ -54,21 +54,21 @@ const MetricCard = ({
 }) => {
   const colorClasses: Record<string, string> = {
     green: "from-club-forest/30 to-club-forest-dark/30 border-club-forest-light/40",
-    burgundy: "from-club-burgundy/20 to-club-burgundy-dark/20 border-club-burgundy/30",
-    gold: "from-club-gold/10 to-club-gold-dark/10 border-club-gold/30",
+    burgundy: "from-club-burgundy/5 to-club-burgundy-dark/20 border-club-burgundy/30",
+    gold: "from-club-gold/5 to-club-gold-dark/10 border-club-gold/30",
     navy: "from-club-navy-mid/40 to-club-navy/40 border-blue-500/20",
   };
 
   const iconColors: Record<string, string> = {
-    green: "text-emerald-400",
+    green: "text-emerald-600",
     burgundy: "text-club-burgundy-light",
     gold: "text-club-gold",
-    navy: "text-blue-400",
+    navy: "text-blue-600",
   };
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${colorClasses[color]} border shadow-lg shadow-black/10 transition-all duration-300 hover:shadow-xl hover:shadow-club-gold/5 hover:border-club-gold/30`}
+      className={`relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${colorClasses[color]} border shadow-lg shadow-md transition-all duration-300 hover:shadow-xl hover:shadow-md hover:border-club-gold/30`}
     >
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-4">
@@ -76,12 +76,12 @@ const MetricCard = ({
             <p className={`text-xs font-semibold mb-1 uppercase tracking-wider ${iconColors[color]}`}>
               {title}
             </p>
-            <p className="text-3xl font-serif font-bold text-club-cream">{value}</p>
+            <p className="text-3xl font-serif font-bold text-club-navy">{value}</p>
             {subtitle && (
-              <p className="text-xs text-club-cream/40 mt-2">{subtitle}</p>
+              <p className="text-xs text-gray-400 mt-2">{subtitle}</p>
             )}
           </div>
-          <div className="p-2 bg-club-navy/30 rounded-lg border border-club-gold/10">
+          <div className="p-2 bg-club-cream-dark/50 rounded-lg border border-club-gold/25">
             <Icon className={`w-5 h-5 ${iconColors[color]}`} />
           </div>
         </div>
@@ -89,17 +89,17 @@ const MetricCard = ({
         {trend && trendValue !== undefined && (
           <div className="flex items-center gap-1 mt-2">
             {trend === "up" ? (
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
             ) : trend === "down" ? (
-              <TrendingDown className="w-4 h-4 text-red-400" />
+              <TrendingDown className="w-4 h-4 text-red-500" />
             ) : null}
             <span
               className={`text-xs font-semibold ${
                 trend === "up"
-                  ? "text-emerald-400"
+                  ? "text-emerald-600"
                   : trend === "down"
-                  ? "text-red-400"
-                  : "text-club-cream/40"
+                  ? "text-red-500"
+                  : "text-gray-400"
               }`}
             >
               {trend === "up" ? "+" : ""}{trendValue}%
@@ -112,8 +112,8 @@ const MetricCard = ({
 };
 
 const chartTooltipStyle = {
-  backgroundColor: "#0A1628",
-  border: "1px solid rgba(212,175,55,0.3)",
+  backgroundColor: "#FFFFFF",
+  border: "1px solid #D4AF37",
   borderRadius: "8px",
 };
 
@@ -122,7 +122,7 @@ export default function EnhancedDashboard() {
     <div className="space-y-8">
       {/* Primary KPIs */}
       <div>
-        <h2 className="text-2xl font-serif font-bold text-club-cream mb-4">Key Performance Indicators</h2>
+        <h2 className="text-2xl font-serif font-bold text-club-navy mb-4">Key Performance Indicators</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard title="Total Revenue" value={`$${coreMetrics.totalRevenue.toLocaleString()}`} subtitle="All time" icon={DollarSign} color="green" trend="up" trendValue={32} />
           <MetricCard title="Conversion Rate" value={`${coreMetrics.conversionRate}%`} subtitle={`Goal: ${coreMetrics.conversionGoal}%`} icon={Target} color="burgundy" trend="down" trendValue={12} />
@@ -133,7 +133,7 @@ export default function EnhancedDashboard() {
 
       {/* Secondary KPIs */}
       <div>
-        <h2 className="text-lg font-serif font-semibold text-club-cream mb-4">Customer Metrics</h2>
+        <h2 className="text-lg font-serif font-semibold text-club-navy mb-4">Customer Metrics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <MetricCard title="Average Order Value" value={`$${coreMetrics.aov.toFixed(2)}`} subtitle={`${coreMetrics.totalOrders} total orders`} icon={ShoppingCart} color="navy" />
           <MetricCard title="Repeat Customer Rate" value={`${coreMetrics.repeatCustomerRate}%`} subtitle={`Goal: ${coreMetrics.repeatCustomerGoal}%`} icon={Users} color="green" trend="up" trendValue={7} />
@@ -143,9 +143,9 @@ export default function EnhancedDashboard() {
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm hover:border-club-gold/25 transition-colors">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-2">7-Day Revenue Forecast</h3>
-          <p className="text-xs text-club-cream/40 mb-4">Actual vs Projected (in $)</p>
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm hover:border-club-gold/25 transition-colors">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-2">7-Day Revenue Forecast</h3>
+          <p className="text-xs text-gray-400 mb-4">Actual vs Projected (in $)</p>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={revenueForecastData}>
               <defs>
@@ -161,7 +161,7 @@ export default function EnhancedDashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(212,175,55,0.1)" />
               <XAxis dataKey="day" stroke="#D4AF37" opacity={0.5} />
               <YAxis stroke="#D4AF37" opacity={0.5} />
-              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#F5F3EE" }} formatter={(value) => `$${value}`} />
+              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#0A1628" }} formatter={(value) => `$${value}`} />
               <Legend />
               <Area type="monotone" dataKey="actual" stroke="#2D6A4F" strokeWidth={2} fillOpacity={1} fill="url(#colorActual)" />
               <Area type="monotone" dataKey="forecast" stroke="#D4AF37" strokeWidth={2} fillOpacity={1} fill="url(#colorForecast)" />
@@ -169,9 +169,9 @@ export default function EnhancedDashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm hover:border-club-gold/25 transition-colors">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-2">Customer Segmentation</h3>
-          <p className="text-xs text-club-cream/40 mb-4">Repeat vs First-Time Customers</p>
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm hover:border-club-gold/25 transition-colors">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-2">Customer Segmentation</h3>
+          <p className="text-xs text-gray-400 mb-4">Repeat vs First-Time Customers</p>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={customerSegmentation} cx="50%" cy="50%" labelLine={false} label={(entry) => `${entry.name}: ${entry.percentage}%`} outerRadius={80} fill="#8884d8" dataKey="value">
@@ -183,7 +183,7 @@ export default function EnhancedDashboard() {
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-4 space-y-2 text-xs">
-            <p className="text-club-cream/60">
+            <p className="text-gray-500">
               💡 <strong className="text-club-gold">Opportunity:</strong> Only 3% repeat customers. Implementing a loyalty program could 3x this rate.
             </p>
           </div>
@@ -192,23 +192,23 @@ export default function EnhancedDashboard() {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm hover:border-club-gold/25 transition-colors">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-2">Top Products</h3>
-          <p className="text-xs text-club-cream/40 mb-4">Revenue by Product</p>
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm hover:border-club-gold/25 transition-colors">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-2">Top Products</h3>
+          <p className="text-xs text-gray-400 mb-4">Revenue by Product</p>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={topProductsData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(212,175,55,0.1)" />
               <XAxis dataKey="name" stroke="#D4AF37" opacity={0.5} />
               <YAxis stroke="#D4AF37" opacity={0.5} />
-              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#F5F3EE" }} formatter={(value) => `$${value}`} />
+              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#0A1628" }} formatter={(value) => `$${value}`} />
               <Bar dataKey="revenue" radius={[8, 8, 0, 0]} fill="#1B4332" stroke="#D4AF37" strokeWidth={1} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm hover:border-club-gold/25 transition-colors">
-          <h3 className="text-lg font-serif font-bold text-club-cream mb-2">30-Day Revenue Projection</h3>
-          <p className="text-xs text-club-cream/40 mb-4">Weekly Forecast (in $)</p>
+        <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm hover:border-club-gold/25 transition-colors">
+          <h3 className="text-lg font-serif font-bold text-club-navy mb-2">30-Day Revenue Projection</h3>
+          <p className="text-xs text-gray-400 mb-4">Weekly Forecast (in $)</p>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={revenue30DayForecast}>
               <defs>
@@ -220,7 +220,7 @@ export default function EnhancedDashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(212,175,55,0.1)" />
               <XAxis dataKey="week" stroke="#D4AF37" opacity={0.5} />
               <YAxis stroke="#D4AF37" opacity={0.5} />
-              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#F5F3EE" }} formatter={(value) => `$${value}`} />
+              <Tooltip contentStyle={chartTooltipStyle} labelStyle={{ color: "#0A1628" }} formatter={(value) => `$${value}`} />
               <Area type="monotone" dataKey="forecast" stroke="#6A1B38" strokeWidth={2} fillOpacity={1} fill="url(#colorProjection)" />
             </AreaChart>
           </ResponsiveContainer>
@@ -228,31 +228,31 @@ export default function EnhancedDashboard() {
       </div>
 
       {/* Product Performance Scorecard */}
-      <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm">
-        <h3 className="text-lg font-serif font-bold text-club-cream mb-4">Product Performance Scorecard</h3>
+      <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+        <h3 className="text-lg font-serif font-bold text-club-navy mb-4">Product Performance Scorecard</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {productPerformance.map((product, idx) => (
-            <div key={idx} className="bg-club-navy/40 border border-club-gold/10 rounded-lg p-4 hover:border-club-gold/25 transition-colors">
+            <div key={idx} className="bg-club-cream border border-club-gold/25 rounded-lg p-4 hover:border-club-gold/25 transition-colors">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-serif font-semibold text-club-cream text-sm">{product.name}</h4>
+                <h4 className="font-serif font-semibold text-club-navy text-sm">{product.name}</h4>
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: product.color }} />
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-club-cream/40">Revenue:</span>
-                  <span className="text-club-cream font-semibold">${product.revenue.toLocaleString()}</span>
+                  <span className="text-gray-400">Revenue:</span>
+                  <span className="text-club-navy font-semibold">${product.revenue.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-club-cream/40">Units Sold:</span>
-                  <span className="text-club-cream font-semibold">{product.units}</span>
+                  <span className="text-gray-400">Units Sold:</span>
+                  <span className="text-club-navy font-semibold">{product.units}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-club-cream/40">% of Total:</span>
+                  <span className="text-gray-400">% of Total:</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 bg-club-navy rounded-full h-2">
+                    <div className="w-16 bg-gray-200 rounded-full h-2">
                       <div className="h-2 rounded-full bg-club-gold" style={{ width: `${product.percentage}%` }} />
                     </div>
-                    <span className="text-club-cream font-semibold text-xs">{product.percentage}%</span>
+                    <span className="text-club-navy font-semibold text-xs">{product.percentage}%</span>
                   </div>
                 </div>
               </div>
@@ -262,27 +262,27 @@ export default function EnhancedDashboard() {
       </div>
 
       {/* Insights */}
-      <div className="bg-gradient-to-br from-club-forest/20 to-club-navy-light/40 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm">
-        <h3 className="text-lg font-serif font-bold text-club-cream mb-4 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-club-green/5 to-club-cream border border-club-gold/30 rounded-xl p-6 shadow-sm">
+        <h3 className="text-lg font-serif font-bold text-club-navy mb-4 flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-club-gold" />
           Quick Insights
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="bg-club-navy/30 rounded-lg p-4 border-l-4 border-emerald-500">
-            <p className="text-emerald-300 font-semibold mb-1">✅ Golf dominates</p>
-            <p className="text-club-cream/60">64% of revenue from Golf product. Clear product-market fit.</p>
+          <div className="bg-club-cream-dark/50 rounded-lg p-4 border-l-4 border-emerald-500">
+            <p className="text-emerald-600 font-semibold mb-1">✅ Golf dominates</p>
+            <p className="text-gray-500">64% of revenue from Golf product. Clear product-market fit.</p>
           </div>
-          <div className="bg-club-navy/30 rounded-lg p-4 border-l-4 border-club-burgundy">
-            <p className="text-red-300 font-semibold mb-1">⚠️ Low repeat rate</p>
-            <p className="text-club-cream/60">3% repeat rate vs 10% goal. Need retention strategy.</p>
+          <div className="bg-club-cream-dark/50 rounded-lg p-4 border-l-4 border-club-burgundy">
+            <p className="text-red-600 font-semibold mb-1">⚠️ Low repeat rate</p>
+            <p className="text-gray-500">3% repeat rate vs 10% goal. Need retention strategy.</p>
           </div>
-          <div className="bg-club-navy/30 rounded-lg p-4 border-l-4 border-blue-500">
-            <p className="text-blue-300 font-semibold mb-1">📈 Conversion gap</p>
-            <p className="text-club-cream/60">2.8% actual vs 4.5% target. Optimize checkout flow.</p>
+          <div className="bg-club-cream-dark/50 rounded-lg p-4 border-l-4 border-blue-500">
+            <p className="text-blue-600 font-semibold mb-1">📈 Conversion gap</p>
+            <p className="text-gray-500">2.8% actual vs 4.5% target. Optimize checkout flow.</p>
           </div>
-          <div className="bg-club-navy/30 rounded-lg p-4 border-l-4 border-club-gold">
+          <div className="bg-club-cream-dark/50 rounded-lg p-4 border-l-4 border-club-gold">
             <p className="text-club-gold font-semibold mb-1">💰 CAC too high</p>
-            <p className="text-club-cream/60">$12.50 actual vs $8 goal. Focus on organic channels.</p>
+            <p className="text-gray-500">$12.50 actual vs $8 goal. Focus on organic channels.</p>
           </div>
         </div>
       </div>

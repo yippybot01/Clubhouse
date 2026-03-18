@@ -31,51 +31,51 @@ export default function MorningBriefs() {
   return (
     <div className="space-y-8">
       {/* Next Brief */}
-      <div className="bg-gradient-to-br from-club-gold/10 to-club-navy-light/40 border border-club-gold/20 rounded-xl p-6">
+      <div className="bg-gradient-to-br from-club-gold/5 to-club-cream border border-club-gold/20 rounded-xl p-6">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-club-forest/30 rounded-lg border border-club-gold/20">
+          <div className="p-2 bg-club-green/10 rounded-lg border border-club-gold/20">
             <Clock className="w-5 h-5 text-club-gold" />
           </div>
           <div className="flex-1">
-            <h3 className="font-serif font-bold text-club-cream text-lg mb-1">Next Morning Brief</h3>
+            <h3 className="font-serif font-bold text-club-navy text-lg mb-1">Next Morning Brief</h3>
             <p className="text-club-gold/80">{formatDate(nextBrief)} at 7:30 AM EST</p>
-            <p className="text-club-cream/40 text-sm mt-2">Automated daily briefing with global news, tech updates, business trends, and Yippy-specific opportunities.</p>
+            <p className="text-gray-400 text-sm mt-2">Automated daily briefing with global news, tech updates, business trends, and Yippy-specific opportunities.</p>
           </div>
         </div>
       </div>
 
       {/* Archive */}
       <div>
-        <h2 className="text-2xl font-serif font-bold text-club-cream mb-6 flex items-center gap-2">
+        <h2 className="text-2xl font-serif font-bold text-club-navy mb-6 flex items-center gap-2">
           <Coffee className="w-6 h-6 text-club-gold" />Morning Briefs Archive
         </h2>
         <div className="space-y-6">
           {briefs.map((brief, idx) => (
-            <div key={idx} className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 space-y-6 backdrop-blur-sm">
-              <div className="border-b border-club-gold/10 pb-4">
-                <h3 className="text-xl font-serif font-bold text-club-cream mb-2">{brief.headline}</h3>
-                <p className="text-sm text-club-cream/40">{brief.date} • {brief.time}</p>
+            <div key={idx} className="bg-white border border-club-gold/30 rounded-xl p-6 space-y-6 shadow-sm">
+              <div className="border-b border-club-gold/25 pb-4">
+                <h3 className="text-xl font-serif font-bold text-club-navy mb-2">{brief.headline}</h3>
+                <p className="text-sm text-gray-400">{brief.date} • {brief.time}</p>
               </div>
 
               <div>
-                <h4 className="text-lg font-serif font-semibold text-club-cream mb-3 flex items-center gap-2">
+                <h4 className="text-lg font-serif font-semibold text-club-navy mb-3 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-club-forest-light" />Global Headlines
                 </h4>
                 <ul className="space-y-2">
                   {brief.news.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-club-cream/60"><span className="text-club-forest-light font-bold mt-0.5">•</span><span>{item}</span></li>
+                    <li key={i} className="flex gap-3 text-gray-500"><span className="text-club-forest-light font-bold mt-0.5">•</span><span>{item}</span></li>
                   ))}
                 </ul>
               </div>
 
               {brief.tech.length > 0 && (
                 <div>
-                  <h4 className="text-lg font-serif font-semibold text-club-cream mb-3 flex items-center gap-2">
+                  <h4 className="text-lg font-serif font-semibold text-club-navy mb-3 flex items-center gap-2">
                     <Lightbulb className="w-5 h-5 text-club-burgundy-light" />Tech & AI
                   </h4>
                   <ul className="space-y-2">
                     {brief.tech.map((item, i) => (
-                      <li key={i} className="flex gap-3 text-club-cream/60"><span className="text-club-burgundy-light font-bold mt-0.5">•</span><span>{item}</span></li>
+                      <li key={i} className="flex gap-3 text-gray-500"><span className="text-club-burgundy-light font-bold mt-0.5">•</span><span>{item}</span></li>
                     ))}
                   </ul>
                 </div>
@@ -83,24 +83,24 @@ export default function MorningBriefs() {
 
               {brief.business.length > 0 && (
                 <div>
-                  <h4 className="text-lg font-serif font-semibold text-club-cream mb-3 flex items-center gap-2">
+                  <h4 className="text-lg font-serif font-semibold text-club-navy mb-3 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-club-gold" />Business & Markets
                   </h4>
                   <ul className="space-y-2">
                     {brief.business.map((item, i) => (
-                      <li key={i} className="flex gap-3 text-club-cream/60"><span className="text-club-gold font-bold mt-0.5">•</span><span>{item}</span></li>
+                      <li key={i} className="flex gap-3 text-gray-500"><span className="text-club-gold font-bold mt-0.5">•</span><span>{item}</span></li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              <div className="bg-club-forest/15 border border-club-gold/15 rounded-lg p-4">
+              <div className="bg-club-green/5 border border-club-gold/30 rounded-lg p-4">
                 <h4 className="text-lg font-serif font-semibold text-club-gold mb-3 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5" />Yippy Action Items
                 </h4>
                 <ul className="space-y-2">
                   {brief.yippy.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-club-cream/80"><span className="text-club-gold font-bold mt-0.5">→</span><span>{item}</span></li>
+                    <li key={i} className="flex gap-3 text-gray-700"><span className="text-club-gold font-bold mt-0.5">→</span><span>{item}</span></li>
                   ))}
                 </ul>
               </div>
@@ -110,16 +110,16 @@ export default function MorningBriefs() {
       </div>
 
       {/* About */}
-      <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 backdrop-blur-sm">
-        <h3 className="text-lg font-serif font-bold text-club-cream mb-3">About Morning Briefs</h3>
-        <p className="text-club-cream/60 text-sm leading-relaxed">Every morning at 7:30 AM EST, Yippybot delivers an automated briefing with:</p>
-        <ul className="list-disc list-inside text-club-cream/60 text-sm mt-3 space-y-1">
+      <div className="bg-white border border-club-gold/30 rounded-xl p-6 shadow-sm">
+        <h3 className="text-lg font-serif font-bold text-club-navy mb-3">About Morning Briefs</h3>
+        <p className="text-gray-500 text-sm leading-relaxed">Every morning at 7:30 AM EST, Yippybot delivers an automated briefing with:</p>
+        <ul className="list-disc list-inside text-gray-500 text-sm mt-3 space-y-1">
           <li>🌍 Global trending stories and market news</li>
           <li>🤖 Tech & AI updates relevant to business</li>
           <li>💼 Business & market trends affecting DTC</li>
           <li>🏌️ Yippy-specific opportunities and action items</li>
         </ul>
-        <p className="text-club-cream/30 text-xs mt-4">Archives are kept for reference. Each brief is tailored to Yippy Pouches' market positioning and strategic goals.</p>
+        <p className="text-gray-300 text-xs mt-4">Archives are kept for reference. Each brief is tailored to Yippy Pouches' market positioning and strategic goals.</p>
       </div>
     </div>
   );

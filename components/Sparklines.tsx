@@ -70,10 +70,10 @@ export const MiniTrendChart = ({
   trendValue,
 }: MiniChartProps) => {
   const colorClasses: Record<string, string> = {
-    blue: "bg-blue-600/20 border-blue-500/30 text-blue-300",
-    green: "bg-green-600/20 border-green-500/30 text-green-300",
-    amber: "bg-amber-600/20 border-amber-500/30 text-amber-300",
-    purple: "bg-purple-600/20 border-purple-500/30 text-purple-300",
+    blue: "bg-blue-600/20 border-blue-300 text-blue-600",
+    green: "bg-green-600/20 border-green-500/30 text-green-600",
+    amber: "bg-club-green/20 border-amber-300 text-club-gold",
+    purple: "bg-purple-600/20 border-purple-300 text-purple-600",
   };
 
   return (
@@ -81,7 +81,7 @@ export const MiniTrendChart = ({
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-opacity-80">{title}</span>
         {trend && trendValue && (
-          <span className={`text-xs font-bold ${trend === "up" ? "text-green-400" : "text-red-400"}`}>
+          <span className={`text-xs font-bold ${trend === "up" ? "text-green-600" : "text-red-500"}`}>
             {trend === "up" ? "↑" : "↓"} {trendValue}%
           </span>
         )}
@@ -115,7 +115,7 @@ export const MiniBar = ({
   const colorClasses: Record<string, string> = {
     blue: "bg-blue-500",
     green: "bg-green-500",
-    amber: "bg-amber-500",
+    amber: "bg-club-gold",
     purple: "bg-purple-500",
   };
 
@@ -123,14 +123,14 @@ export const MiniBar = ({
 
   return (
     <div className="space-y-1">
-      {label && <p className="text-xs text-slate-400">{label}</p>}
-      <div className="w-full bg-slate-700/50 rounded-full h-2 overflow-hidden">
+      {label && <p className="text-xs text-gray-500">{label}</p>}
+      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
         <div
           className={`h-full ${colorClasses[color]} transition-all duration-300`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         ></div>
       </div>
-      {showValue && <p className="text-xs text-slate-300 font-semibold">{Math.round(percentage)}%</p>}
+      {showValue && <p className="text-xs text-gray-600 font-semibold">{Math.round(percentage)}%</p>}
     </div>
   );
 };
@@ -179,11 +179,11 @@ export const GaugeChart = ({
         />
       </svg>
       <div className="text-center">
-        <p className="text-2xl font-bold text-white">
+        <p className="text-2xl font-bold text-club-navy">
           {value}{unit}
         </p>
-        <p className="text-xs text-slate-400">{label}</p>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-gray-500">{label}</p>
+        <p className="text-xs text-gray-400 mt-1">
           Goal: {max}{unit}
         </p>
       </div>

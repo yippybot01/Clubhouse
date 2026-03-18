@@ -60,14 +60,14 @@ export default function SeasonalCalendar() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-br from-club-gold/10 to-club-navy-light/40 border border-club-gold/20 rounded-xl p-6">
+      <div className="bg-gradient-to-br from-club-gold/5 to-club-cream border border-club-gold/20 rounded-xl p-6">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-club-forest/30 rounded-lg border border-club-gold/20">
+          <div className="p-2 bg-club-green/10 rounded-lg border border-club-gold/20">
             <CalendarIcon className="w-5 h-5 text-club-gold" />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-serif font-bold text-club-cream mb-2">Golf Seasonal Marketing Calendar 2026</h2>
-            <p className="text-club-cream/50">Strategic content, campaigns, and budget allocation by season. Click any month to expand details.</p>
+            <h2 className="text-2xl font-serif font-bold text-club-navy mb-2">Golf Seasonal Marketing Calendar 2026</h2>
+            <p className="text-gray-400">Strategic content, campaigns, and budget allocation by season. Click any month to expand details.</p>
           </div>
         </div>
       </div>
@@ -77,10 +77,10 @@ export default function SeasonalCalendar() {
         {["Q1", "Q2", "Q3", "Q4"].map((quarter) => {
           const qm = months.filter((m) => m.quarter === quarter);
           return (
-            <div key={quarter} className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-4 hover:border-club-gold/25 transition-colors">
+            <div key={quarter} className="bg-white border border-club-gold/30 rounded-xl p-4 hover:border-club-gold/25 transition-colors">
               <p className="text-club-gold font-serif font-bold text-lg">{quarter}</p>
-              <p className="text-club-cream/60 text-sm mt-2">{qm.length} Months</p>
-              <p className="text-club-cream/30 text-xs mt-1">{qm.reduce((s, m) => s + m.campaigns.length, 0)} Campaigns</p>
+              <p className="text-gray-500 text-sm mt-2">{qm.length} Months</p>
+              <p className="text-gray-300 text-xs mt-1">{qm.reduce((s, m) => s + m.campaigns.length, 0)} Campaigns</p>
             </div>
           );
         })}
@@ -91,53 +91,53 @@ export default function SeasonalCalendar() {
         {months.map((month) => (
           <div key={month.id} className={`border rounded-xl transition-all ${
             expandedMonth === month.id
-              ? "bg-club-navy-light/60 border-club-gold/30 shadow-lg shadow-club-gold/5"
-              : "bg-club-navy-light/30 border-club-gold/10 hover:border-club-gold/20"
+              ? "bg-white border-club-gold/30 shadow-lg shadow-md"
+              : "bg-white/80 border-club-gold/25 hover:border-club-gold/20"
           }`}>
             <button onClick={() => setExpandedMonth(expandedMonth === month.id ? "" : month.id)}
               className="w-full px-6 py-4 text-left flex items-center justify-between">
               <div className="flex items-center gap-4 flex-1">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-serif font-bold text-club-cream">{month.name}</h3>
-                    <span className="text-xs px-2 py-1 bg-club-navy/40 rounded text-club-cream/50 border border-club-gold/10">{month.quarter}</span>
+                    <h3 className="text-lg font-serif font-bold text-club-navy">{month.name}</h3>
+                    <span className="text-xs px-2 py-1 bg-club-cream rounded text-gray-400 border border-club-gold/25">{month.quarter}</span>
                     {month.highlight && <Target className="w-4 h-4 text-club-burgundy-light" />}
                   </div>
-                  <p className="text-sm text-club-cream/40 mt-1">{month.theme}</p>
+                  <p className="text-sm text-gray-400 mt-1">{month.theme}</p>
                 </div>
               </div>
               <div className="text-club-gold font-serif font-semibold text-sm">{month.headline}</div>
             </button>
 
             {expandedMonth === month.id && (
-              <div className="px-6 pb-6 border-t border-club-gold/10 space-y-4">
+              <div className="px-6 pb-6 border-t border-club-gold/25 space-y-4">
                 <div>
-                  <h4 className="text-sm font-semibold text-club-cream mb-2 flex items-center gap-2 mt-4">
+                  <h4 className="text-sm font-semibold text-club-navy mb-2 flex items-center gap-2 mt-4">
                     <CalendarIcon className="w-4 h-4 text-club-forest-light" />Key Events
                   </h4>
                   <ul className="space-y-1">
                     {month.keyEvents.map((e, i) => (
-                      <li key={i} className="text-sm text-club-cream/60 flex gap-2"><span className="text-club-forest-light">•</span><span>{e}</span></li>
+                      <li key={i} className="text-sm text-gray-500 flex gap-2"><span className="text-club-forest-light">•</span><span>{e}</span></li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-club-cream mb-2 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-club-navy mb-2 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-club-gold" />Campaigns
                   </h4>
                   <ul className="space-y-1">
                     {month.campaigns.map((c, i) => (
-                      <li key={i} className="text-sm text-club-cream/60 flex gap-2"><span className="text-club-gold">→</span><span>{c}</span></li>
+                      <li key={i} className="text-sm text-gray-500 flex gap-2"><span className="text-club-gold">→</span><span>{c}</span></li>
                     ))}
                   </ul>
                 </div>
-                <div className="bg-club-navy/30 rounded-lg p-3 border-l-4 border-club-gold">
-                  <p className="text-xs text-club-cream/40 mb-1">Core Messaging</p>
+                <div className="bg-club-cream-dark/50 rounded-lg p-3 border-l-4 border-club-gold">
+                  <p className="text-xs text-gray-400 mb-1">Core Messaging</p>
                   <p className="text-sm text-club-gold font-serif font-semibold">{month.messaging}</p>
                 </div>
-                <div className="bg-club-navy/30 rounded-lg p-3 border border-club-gold/5">
-                  <p className="text-xs text-club-cream/40 mb-2">Budget Allocation</p>
-                  <p className="text-sm text-club-cream/60">{month.budget}</p>
+                <div className="bg-club-cream-dark/50 rounded-lg p-3 border border-club-gold/20">
+                  <p className="text-xs text-gray-400 mb-2">Budget Allocation</p>
+                  <p className="text-sm text-gray-500">{month.budget}</p>
                 </div>
               </div>
             )}
@@ -146,8 +146,8 @@ export default function SeasonalCalendar() {
       </div>
 
       {/* Strategy Points */}
-      <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-6 space-y-4 backdrop-blur-sm">
-        <h3 className="text-lg font-serif font-bold text-club-cream flex items-center gap-2">
+      <div className="bg-white border border-club-gold/30 rounded-xl p-6 space-y-4 shadow-sm">
+        <h3 className="text-lg font-serif font-bold text-club-navy flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-club-gold" />Key Strategy Points
         </h3>
         <ul className="space-y-3 text-sm">
@@ -160,13 +160,13 @@ export default function SeasonalCalendar() {
           ].map((item, idx) => (
             <li key={idx} className="flex gap-3">
               <span className="text-club-gold font-bold">{item.icon}</span>
-              <span className="text-club-cream/60" dangerouslySetInnerHTML={{ __html: item.text }} />
+              <span className="text-gray-500" dangerouslySetInnerHTML={{ __html: item.text }} />
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="bg-club-navy-light/50 border border-club-gold/15 rounded-xl p-4 text-sm text-club-cream/40">
+      <div className="bg-white border border-club-gold/30 rounded-xl p-4 text-sm text-gray-400">
         <p>📄 Full calendar with detailed budgets and metrics available in workspace:<br />
           <code className="text-club-gold">GOLF-SEASONAL-MARKETING-CALENDAR-2026.md</code>
         </p>

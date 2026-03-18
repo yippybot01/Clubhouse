@@ -88,15 +88,15 @@ export function ShopifyRealtimeData() {
 
   if (loading) {
     return (
-      <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 text-center">
-        <p className="text-slate-400">Syncing Shopify data...</p>
+      <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-6 text-center">
+        <p className="text-gray-500">Syncing Shopify data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-900/20 border border-red-800 rounded-lg p-6 text-red-400">
+      <div className="bg-red-900/20 border border-red-800 rounded-lg p-6 text-red-500">
         <p>⚠️ Error: {error}</p>
       </div>
     );
@@ -106,70 +106,70 @@ export function ShopifyRealtimeData() {
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-          <p className="text-slate-400 text-sm">Total Orders (Live)</p>
-          <p className="text-3xl font-bold text-amber-400">{orderData?.totalOrders || 0}</p>
+        <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-4">
+          <p className="text-gray-500 text-sm">Total Orders (Live)</p>
+          <p className="text-3xl font-bold text-club-gold">{orderData?.totalOrders || 0}</p>
         </div>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-          <p className="text-slate-400 text-sm">Total Revenue (Live)</p>
-          <p className="text-3xl font-bold text-green-400">${orderData?.totalRevenue.toFixed(0) || '0'}</p>
+        <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-4">
+          <p className="text-gray-500 text-sm">Total Revenue (Live)</p>
+          <p className="text-3xl font-bold text-green-600">${orderData?.totalRevenue.toFixed(0) || '0'}</p>
         </div>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-          <p className="text-slate-400 text-sm">Average Order Value</p>
-          <p className="text-3xl font-bold text-blue-400">${orderData?.avgOrderValue.toFixed(2) || '0'}</p>
+        <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-4">
+          <p className="text-gray-500 text-sm">Average Order Value</p>
+          <p className="text-3xl font-bold text-blue-600">${orderData?.avgOrderValue.toFixed(2) || '0'}</p>
         </div>
       </div>
 
       {/* Product Performance */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-        <h3 className="text-amber-400 font-semibold mb-3">📊 Product Performance (Top to Bottom)</h3>
+      <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-4">
+        <h3 className="text-club-gold font-semibold mb-3">📊 Product Performance (Top to Bottom)</h3>
         <div className="space-y-2">
           {products.length > 0 ? (
             products.map((product, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 bg-slate-900/50 rounded">
+              <div key={idx} className="flex items-center justify-between p-2 bg-club-cream rounded">
                 <div className="flex-1">
-                  <p className="text-slate-300 font-medium">{product.name}</p>
-                  <p className="text-slate-500 text-xs">{product.units} units • ${product.revenue.toFixed(2)} revenue</p>
+                  <p className="text-gray-600 font-medium">{product.name}</p>
+                  <p className="text-gray-400 text-xs">{product.units} units • ${product.revenue.toFixed(2)} revenue</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-amber-400 font-semibold">${product.price.toFixed(2)}</p>
+                  <p className="text-club-gold font-semibold">${product.price.toFixed(2)}</p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-slate-500">No product data available</p>
+            <p className="text-gray-400">No product data available</p>
           )}
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-        <h3 className="text-amber-400 font-semibold mb-3">🛒 Recent Orders</h3>
+      <div className="bg-white border-club-gold/30 border border-club-gold/25 rounded-lg p-4">
+        <h3 className="text-club-gold font-semibold mb-3">🛒 Recent Orders</h3>
         <div className="space-y-2">
           {orderData?.recentOrders && orderData.recentOrders.length > 0 ? (
             orderData.recentOrders.map((order, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 bg-slate-900/50 rounded">
+              <div key={idx} className="flex items-center justify-between p-2 bg-club-cream rounded">
                 <div className="flex-1">
-                  <p className="text-slate-300 font-medium">Order #{order.order_number}</p>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-gray-600 font-medium">Order #{order.order_number}</p>
+                  <p className="text-gray-400 text-xs">
                     {order.customer?.first_name} • {order.line_items?.length || 0} items
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-green-400 font-semibold">${order.total_price}</p>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-green-600 font-semibold">${order.total_price}</p>
+                  <p className="text-gray-400 text-xs">
                     {new Date(order.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-slate-500">No recent orders</p>
+            <p className="text-gray-400">No recent orders</p>
           )}
         </div>
       </div>
 
-      <p className="text-slate-500 text-xs text-right">
+      <p className="text-gray-400 text-xs text-right">
         Last updated: {orderData?.lastUpdated} • Refreshing every 30s
       </p>
     </div>

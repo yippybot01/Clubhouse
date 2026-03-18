@@ -19,6 +19,7 @@ const config: Config = {
           cream: '#F5F3EE',
           'cream-dark': '#E8E4DB',
           'cream-light': '#FAFAF8',
+          offwhite: '#FAFAF9',
           gold: '#D4AF37',
           'gold-light': '#E8CC6E',
           'gold-dark': '#B8942E',
