@@ -11,3 +11,6 @@ npm-debug.log*
 .idea/
 .convex/
 out/
+
+# Mission Control data
+/data/
