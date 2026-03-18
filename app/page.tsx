@@ -8,79 +8,98 @@ import EnhancedDashboard from "@/components/EnhancedDashboard";
 import EnhancedSalesAnalytics from "@/components/EnhancedSalesAnalytics";
 import InsightsTab from "@/components/InsightsTab";
 import TokenSpend from "@/components/TokenSpend";
-import { BarChart3, Calendar, Search, Activity, TrendingUp, Lightbulb, Zap, Coffee, MapPin } from "lucide-react";
+import AgentsTab from "@/components/AgentsTab";
+import { BarChart3, Calendar, Search, Activity, TrendingUp, Lightbulb, Zap, Coffee, MapPin, Users } from "lucide-react";
 import MorningBriefs from "@/components/MorningBriefs";
 import SeasonalCalendar from "@/components/SeasonalCalendar";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("stats");
+  const [activeTab, setActiveTab] = useState("agents");
+
+  const tabs = [
+    { id: "agents", label: "Agents", icon: Users },
+    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+    { id: "sales", label: "Sales", icon: TrendingUp },
+    { id: "insights", label: "Insights", icon: Lightbulb },
+    { id: "briefs", label: "Morning Briefs", icon: Coffee },
+    { id: "seasonal", label: "Seasonal", icon: MapPin },
+    { id: "tokens", label: "Token Spend", icon: Zap },
+    { id: "activity", label: "Activity", icon: Activity },
+    { id: "calendar", label: "Calendar", icon: Calendar },
+    { id: "search", label: "Search", icon: Search },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white">
-      {/* Animated premium background */}
-      <div className="fixed inset-0 -z-10 opacity-15">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-amber-600 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "8s" }}></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "6s", animationDelay: "2s" }}></div>
-        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDuration: "7s", animationDelay: "1s" }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-club-navy via-club-navy-light to-club-forest-dark text-club-cream">
+      {/* Subtle background texture */}
+      <div className="fixed inset-0 -z-10 opacity-[0.03]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(212,175,55,0.1) 50px, rgba(212,175,55,0.1) 51px),
+            repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(212,175,55,0.1) 50px, rgba(212,175,55,0.1) 51px)`
+        }} />
+      </div>
+      <div className="fixed inset-0 -z-10 opacity-10">
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-club-forest rounded-full mix-blend-multiply filter blur-[120px] animate-pulse" style={{ animationDuration: "10s" }} />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-club-burgundy rounded-full mix-blend-multiply filter blur-[120px] animate-pulse" style={{ animationDuration: "8s", animationDelay: "3s" }} />
+        <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] bg-club-gold/20 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse" style={{ animationDuration: "12s", animationDelay: "1s" }} />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-amber-600/20 bg-slate-950/90 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-club-gold/20 bg-club-navy/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-4 mb-3">
-                <img src="/yippy-logo.png" alt="Yippy" className="h-12 w-auto drop-shadow-lg" />
-                <div>
-                  <h1 className="text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
-                    Clubhouse
-                  </h1>
-                  <p className="text-xs text-amber-300/70 mt-1">🏌️ Yippybot Performance Hub</p>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-club-forest/40 border-2 border-club-gold/40 flex items-center justify-center shadow-lg shadow-club-gold/10">
+                <img src="/yippy-logo.png" alt="Yippy" className="h-8 w-auto drop-shadow-lg" />
               </div>
-              <p className="text-slate-400 text-sm ml-16">Real-time visibility into every action, token, and dollar spent</p>
+              <div>
+                <h1 className="text-3xl font-serif font-bold tracking-tight">
+                  <span className="bg-gradient-to-r from-club-gold via-club-gold-light to-club-gold bg-clip-text text-transparent">
+                    The Clubhouse
+                  </span>
+                </h1>
+                <p className="text-xs text-club-cream/40 mt-0.5 tracking-widest uppercase">
+                  Yippy Pouches • Performance Hub
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="flex items-center gap-2 justify-end mb-2">
-                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
-                <p className="text-amber-300 font-bold text-sm">LIVE</p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-club-forest/30 border border-club-gold/20 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <p className="text-club-gold text-xs font-semibold tracking-wider">LIVE</p>
               </div>
-              <p className="text-xs text-slate-400">Always Running</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 pt-20 pb-16">
-        {/* Custom Tab Navigation */}
-        <div className="flex gap-2 mb-8 justify-center flex-wrap">
-          {[
-            { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-            { id: "sales", label: "Sales", icon: TrendingUp },
-            { id: "insights", label: "Insights", icon: Lightbulb },
-            { id: "briefs", label: "Morning Briefs", icon: Coffee },
-            { id: "seasonal", label: "Seasonal Marketing", icon: MapPin },
-            { id: "tokens", label: "Token Spend", icon: Zap },
-            { id: "activity", label: "Activity", icon: Activity },
-            { id: "calendar", label: "Calendar", icon: Calendar },
-            { id: "search", label: "Search", icon: Search },
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex flex-col items-center gap-2 px-10 py-4 rounded-lg font-bold text-sm transition-all duration-300 ${
-                activeTab === id
-                  ? "bg-gradient-to-br from-amber-600 via-amber-500 to-amber-600 text-slate-900 border border-amber-400 shadow-2xl shadow-amber-500/40"
-                  : "bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/60 hover:border-amber-500/30"
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{label}</span>
-            </button>
-          ))}
+      <main className="max-w-7xl mx-auto px-6 pt-8 pb-16">
+        {/* Tab Navigation — elegant horizontal bar */}
+        <div className="mb-8">
+          <div className="flex gap-1 p-1 bg-club-navy-light/50 border border-club-gold/10 rounded-xl backdrop-blur-sm overflow-x-auto">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
+                  activeTab === id
+                    ? "bg-gradient-to-br from-club-forest to-club-forest-dark text-club-gold border border-club-gold/30 shadow-lg shadow-club-gold/10"
+                    : "text-club-cream/50 hover:text-club-cream/80 hover:bg-club-navy-light/60"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Gold divider */}
+        <div className="h-px bg-gradient-to-r from-transparent via-club-gold/30 to-transparent mb-8" />
+
         {/* Content */}
-        <div className="mt-12 animate-fadeIn">
+        <div className="animate-fadeIn">
+          {activeTab === "agents" && <AgentsTab />}
           {activeTab === "dashboard" && <EnhancedDashboard />}
           {activeTab === "sales" && <EnhancedSalesAnalytics />}
           {activeTab === "insights" && <InsightsTab />}
@@ -94,10 +113,12 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-amber-600/20 bg-slate-950/50 backdrop-blur-sm mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8 text-center">
-          <p className="text-slate-400 text-xs mb-2">🏌️ Clubhouse • Powered by Yippybot</p>
-          <p className="text-slate-500 text-xs">Real-time activity monitoring with token & cost transparency • Yippy Pouches Performance Hub</p>
+      <footer className="border-t border-club-gold/10 bg-club-navy/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6 text-center">
+          <div className="h-px bg-gradient-to-r from-transparent via-club-gold/20 to-transparent mb-4" />
+          <p className="text-club-cream/30 text-xs tracking-widest uppercase">
+            The Clubhouse • Est. 2026 • Yippy Pouches Performance Hub
+          </p>
         </div>
       </footer>
     </div>
