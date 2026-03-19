@@ -1936,6 +1936,11 @@
                     <span id="weatherTemp">--°F</span>
                     <span id="weatherCondition" style="font-size: 0.75rem; opacity: 0.7;">--</span>
                 </div>
+                <!-- Last Synced -->
+                <div class="status-indicator" id="lastSyncedDisplay" style="display: none;">
+                    <span style="font-size: 0.75rem; opacity: 0.7;">Synced: </span>
+                    <span id="lastSyncedTime" style="font-size: 0.75rem;">--</span>
+                </div>
                 <!-- Server Status Indicator -->
                 <div class="status-indicator" id="serverStatus">
                     <div class="status-dot" id="serverStatusDot"></div>
@@ -2090,6 +2095,21 @@
 
         <!-- REVENUE TAB -->
         <div class="tab-content" id="revenue-tab">
+            <!-- 0. Last Sale Snapshot -->
+            <div class="glass-card" id="lastSaleCard" style="margin-bottom: 1.5rem; padding: 1.25rem; border-left: 4px solid #4ade80;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Last Sale</div>
+                        <div id="lastSaleInfo" style="font-size: 1.1rem; color: var(--text-primary); margin-top: 0.25rem;">Loading...</div>
+                        <div id="lastSaleItems" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">--</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div id="lastSaleAmount" style="font-size: 1.6rem; font-weight: 700; color: #4ade80;">--</div>
+                        <div id="lastSaleTime" style="font-size: 0.75rem; color: var(--text-muted);">--</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- KPI Cards Row -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
                 <div class="glass-card" style="padding: 1.25rem; text-align: center;">
@@ -2114,12 +2134,53 @@
                 </div>
             </div>
 
-            <!-- Revenue Chart -->
-            <div class="glass-card" style="margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 class="section-title" style="margin: 0;">Monthly Revenue</h3>
-                    <button class="add-client-btn" onclick="syncShopifyData()" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🔄 Sync Shopify</button>
+            <!-- Repeat Purchase Rate KPI -->
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="glass-card" style="padding: 1.5rem; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Repeat Purchase Rate</div>
+                    <div id="revRepeatRate" style="font-size: 2.8rem; font-weight: 700; color: #f87171;">0%</div>
+                    <div id="revRepeatDelta" style="font-size: 0.85rem; margin-top: 0.25rem; color: var(--text-muted);">--</div>
+                    <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                            <span style="color: var(--text-muted);">Unique customers</span>
+                            <span id="revUniqueCustomers" style="color: var(--text-primary);">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.25rem;">
+                            <span style="color: var(--text-muted);">Returning</span>
+                            <span id="revReturningCustomers" style="color: var(--text-primary);">--</span>
+                        </div>
+                    </div>
                 </div>
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <h3 class="section-title" style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Repeat Rate Trend</h3>
+                    <canvas id="repeatRateChart" style="width: 100%; height: 160px;"></canvas>
+                    <div id="revRepeatInsight" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.5; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                        Loading retention analysis...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales by Day (Line Chart) -->
+            <div class="glass-card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h3 class="section-title" style="margin: 0;">Sales by Day</h3>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button id="dailyRange30" onclick="setDailyRange(30)" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: rgba(74, 222, 128, 0.2); color: #4ade80; border: none; border-radius: 6px; cursor: pointer;">30D</button>
+                        <button id="dailyRange60" onclick="setDailyRange(60)" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: rgba(255,255,255,0.05); color: var(--text-muted); border: none; border-radius: 6px; cursor: pointer;">60D</button>
+                        <button id="dailyRange90" onclick="setDailyRange(90)" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: rgba(255,255,255,0.05); color: var(--text-muted); border: none; border-radius: 6px; cursor: pointer;">90D</button>
+                        <button id="dailyRangeAll" onclick="setDailyRange(0)" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: rgba(255,255,255,0.05); color: var(--text-muted); border: none; border-radius: 6px; cursor: pointer;">All</button>
+                        <button class="add-client-btn" onclick="syncShopifyData()" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; margin-left: 0.5rem;">🔄 Sync Shopify</button>
+                    </div>
+                </div>
+                <canvas id="dailySalesChart" style="width: 100%; height: 280px;"></canvas>
+                <div id="dailySalesInsight" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.5; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                    Loading sales analysis...
+                </div>
+            </div>
+
+            <!-- Monthly Revenue Bar Chart -->
+            <div class="glass-card" style="margin-bottom: 1.5rem;">
+                <h3 class="section-title">Monthly Revenue</h3>
                 <canvas id="revenueChart"></canvas>
             </div>
 
@@ -2642,12 +2703,8 @@
                 // Refresh revenue chart if switching to revenue tab
                 if (tabName === 'revenue') {
                     setTimeout(() => {
-                        drawRevenueChart();
-                        // Auto-sync if no data loaded yet
-                        const cached = localStorage.getItem('revenueHistory');
-                        if (!cached || cached === 'null') {
-                            syncShopifyData();
-                        }
+                        // Always sync fresh data when switching to revenue tab
+                        syncShopifyData();
                     }, 100);
                 }
             });
@@ -3543,8 +3600,15 @@
             
             console.log(`✅ Synced ${orders.length} total orders (${paidOrders.length} paid)`);
             
-            // Draw chart
+            // Store for chart re-renders
+            _syncedOrders = paidOrders;
+            
+            // Render all analytics
+            renderLastSale(paidOrders);
+            renderDailySalesChart(paidOrders);
+            renderRepeatPurchaseRate(paidOrders);
             drawRevenueChart();
+            updateLastSynced();
             
             addActivity(`Synced ${paidOrders.length} orders from Shopify`);
         }
@@ -3558,6 +3622,409 @@
             if (hours < 24) return `${hours}h ago`;
             const days = Math.floor(hours / 24);
             return `${days}d ago`;
+        }
+        
+        // Global store for synced orders (used by all analytics)
+        let _syncedOrders = [];
+        let _dailyRangeDays = 30;
+        
+        function setDailyRange(days) {
+            _dailyRangeDays = days;
+            // Update button styles
+            ['30','60','90','All'].forEach(label => {
+                const id = label === 'All' ? 'dailyRangeAll' : `dailyRange${label}`;
+                const btn = document.getElementById(id);
+                if (btn) {
+                    const isActive = (days === 0 && label === 'All') || (days === parseInt(label));
+                    btn.style.background = isActive ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255,255,255,0.05)';
+                    btn.style.color = isActive ? '#4ade80' : 'var(--text-muted)';
+                }
+            });
+            renderDailySalesChart(_syncedOrders);
+        }
+        
+        function updateLastSynced() {
+            const el = document.getElementById('lastSyncedDisplay');
+            const timeEl = document.getElementById('lastSyncedTime');
+            if (el && timeEl) {
+                el.style.display = 'flex';
+                timeEl.textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
+        }
+        
+        function renderLastSale(paidOrders) {
+            const sorted = [...paidOrders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const last = sorted[0];
+            if (!last) return;
+            
+            const items = (last.line_items || []).map(i => `${i.title} x${i.quantity}`).join(', ');
+            const date = new Date(last.created_at);
+            
+            document.getElementById('lastSaleInfo').textContent = `Order #${last.order_number}`;
+            document.getElementById('lastSaleItems').textContent = items;
+            document.getElementById('lastSaleAmount').textContent = `$${parseFloat(last.total_price).toFixed(2)}`;
+            document.getElementById('lastSaleTime').textContent = getTimeAgo(date);
+        }
+        
+        function renderDailySalesChart(paidOrders) {
+            const canvas = document.getElementById('dailySalesChart');
+            if (!canvas || !canvas.getContext) return;
+            
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = 280 * dpr;
+            ctx.scale(dpr, dpr);
+            const width = rect.width;
+            const height = 280;
+            
+            // Build daily sales map
+            const dailySales = {};
+            paidOrders.forEach(order => {
+                const d = new Date(order.created_at);
+                const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                dailySales[key] = (dailySales[key] || 0) + parseFloat(order.total_price);
+            });
+            
+            // Generate date range
+            const allDates = Object.keys(dailySales).sort();
+            if (allDates.length === 0) return;
+            
+            const startDate = new Date(allDates[0]);
+            const endDate = new Date();
+            const allDays = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                allDays.push({ date: key, value: dailySales[key] || 0 });
+            }
+            
+            // Apply range filter
+            let days = allDays;
+            if (_dailyRangeDays > 0 && allDays.length > _dailyRangeDays) {
+                days = allDays.slice(-_dailyRangeDays);
+            }
+            
+            if (days.length === 0) return;
+            
+            // Calculate 7-day rolling average
+            const rollingAvg = days.map((day, i) => {
+                const start = Math.max(0, i - 6);
+                const window = days.slice(start, i + 1);
+                return window.reduce((s, d) => s + d.value, 0) / window.length;
+            });
+            
+            // Detect anomalies for annotations
+            const anomalies = [];
+            days.forEach((day, i) => {
+                if (i < 7) return;
+                const avg = rollingAvg[i];
+                if (avg > 0 && day.value > avg * 1.4) {
+                    anomalies.push({ index: i, type: 'spike', date: day.date, value: day.value, avg });
+                } else if (avg > 0 && day.value < avg * 0.6 && day.value < 50) {
+                    anomalies.push({ index: i, type: 'dip', date: day.date, value: day.value, avg });
+                }
+            });
+            
+            const maxVal = Math.max(...days.map(d => d.value), ...rollingAvg) * 1.15;
+            const padding = { top: 20, right: 20, bottom: 35, left: 55 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Y-axis gridlines
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+                
+                const val = maxVal - (maxVal / 4) * i;
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '11px Inter';
+                ctx.textAlign = 'right';
+                ctx.fillText(`$${Math.round(val)}`, padding.left - 8, y + 4);
+            }
+            
+            const xStep = chartW / (days.length - 1 || 1);
+            
+            // Daily sales line (thin, with area fill)
+            ctx.beginPath();
+            days.forEach((day, i) => {
+                const x = padding.left + i * xStep;
+                const y = padding.top + chartH - (day.value / maxVal) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // Area fill
+            const lastX = padding.left + (days.length - 1) * xStep;
+            ctx.lineTo(lastX, padding.top + chartH);
+            ctx.lineTo(padding.left, padding.top + chartH);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartH);
+            grad.addColorStop(0, 'rgba(74, 222, 128, 0.15)');
+            grad.addColorStop(1, 'rgba(74, 222, 128, 0.01)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            
+            // 7-day rolling average line (bold)
+            ctx.beginPath();
+            rollingAvg.forEach((val, i) => {
+                const x = padding.left + i * xStep;
+                const y = padding.top + chartH - (val / maxVal) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            
+            // Anomaly dots
+            anomalies.forEach(a => {
+                const x = padding.left + a.index * xStep;
+                const y = padding.top + chartH - (days[a.index].value / maxVal) * chartH;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = a.type === 'spike' ? '#4ade80' : '#f87171';
+                ctx.fill();
+            });
+            
+            // X-axis labels (show ~8 labels evenly spaced)
+            const labelInterval = Math.max(1, Math.floor(days.length / 8));
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'center';
+            days.forEach((day, i) => {
+                if (i % labelInterval === 0 || i === days.length - 1) {
+                    const x = padding.left + i * xStep;
+                    const parts = day.date.split('-');
+                    ctx.fillText(`${parseInt(parts[1])}/${parseInt(parts[2])}`, x, height - 8);
+                }
+            });
+            
+            // Legend
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.6)';
+            ctx.fillText('● Daily Sales', width - 200, 14);
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText('● 7-Day Avg', width - 100, 14);
+            
+            // Generate insight
+            generateDailySalesInsight(days, rollingAvg, anomalies);
+        }
+        
+        function generateDailySalesInsight(days, rollingAvg, anomalies) {
+            const el = document.getElementById('dailySalesInsight');
+            if (!el || days.length < 3) return;
+            
+            const recent7 = days.slice(-7);
+            const prior7 = days.slice(-14, -7);
+            const recent7Total = recent7.reduce((s, d) => s + d.value, 0);
+            const prior7Total = prior7.length > 0 ? prior7.reduce((s, d) => s + d.value, 0) : 0;
+            const recent7Avg = recent7Total / recent7.length;
+            const prior7Avg = prior7.length > 0 ? prior7Total / prior7.length : 0;
+            
+            let trend = 'flat';
+            let trendPct = 0;
+            if (prior7Avg > 0) {
+                trendPct = ((recent7Avg - prior7Avg) / prior7Avg * 100).toFixed(0);
+                if (trendPct > 10) trend = 'up';
+                else if (trendPct < -10) trend = 'down';
+            }
+            
+            // Check for consecutive trend (3+ days same direction)
+            let consecutive = 0;
+            let lastDir = 0;
+            for (let i = days.length - 1; i >= Math.max(0, days.length - 7); i--) {
+                const avg = rollingAvg[i] || 0;
+                const prevAvg = rollingAvg[i - 1] || 0;
+                const dir = avg > prevAvg ? 1 : (avg < prevAvg ? -1 : 0);
+                if (dir === lastDir && dir !== 0) consecutive++;
+                else { consecutive = 1; lastDir = dir; }
+            }
+            
+            // Zero sales days
+            const zeroDays = days.filter(d => d.value === 0).length;
+            
+            let insight = '';
+            
+            if (trend === 'up') {
+                insight += `Sales are trending up ${trendPct}% over the last 7 days compared to the prior week, with a daily average of $${Math.round(recent7Avg)}. `;
+            } else if (trend === 'down') {
+                insight += `Sales have dipped ${Math.abs(trendPct)}% over the last 7 days vs. the prior week, averaging $${Math.round(recent7Avg)}/day. Worth monitoring but not alarming if it reverses within a few days. `;
+            } else {
+                insight += `Sales are holding steady at roughly $${Math.round(recent7Avg)}/day over the last week. `;
+            }
+            
+            if (consecutive >= 3) {
+                insight += `There's a ${lastDir > 0 ? 'positive' : 'negative'} streak of ${consecutive} consecutive days of ${lastDir > 0 ? 'growth' : 'decline'} in the rolling average. `;
+            }
+            
+            if (anomalies.length > 0) {
+                const spikes = anomalies.filter(a => a.type === 'spike').length;
+                const dips = anomalies.filter(a => a.type === 'dip').length;
+                if (spikes > 0) insight += `${spikes} notable spike${spikes > 1 ? 's' : ''} detected (40%+ above rolling avg). `;
+                if (dips > 0) insight += `${dips} low-sales day${dips > 1 ? 's' : ''} flagged. `;
+            }
+            
+            if (zeroDays > 0 && zeroDays <= 5) {
+                insight += `${zeroDays} day${zeroDays > 1 ? 's' : ''} with zero sales in this period.`;
+            }
+            
+            el.textContent = insight || 'Not enough data to generate insights yet.';
+        }
+        
+        function renderRepeatPurchaseRate(paidOrders) {
+            // Group orders by customer email (fallback to customer ID)
+            const customerOrders = {};
+            paidOrders.forEach(order => {
+                const customerId = (order.customer && order.customer.email) || 
+                                   (order.customer && order.customer.id) || 
+                                   order.email || 'unknown';
+                if (customerId === 'unknown') return;
+                if (!customerOrders[customerId]) customerOrders[customerId] = [];
+                customerOrders[customerId].push(order);
+            });
+            
+            const uniqueCustomers = Object.keys(customerOrders).length;
+            const returningCustomers = Object.values(customerOrders).filter(orders => orders.length >= 2).length;
+            const repeatRate = uniqueCustomers > 0 ? (returningCustomers / uniqueCustomers * 100) : 0;
+            
+            // Color based on rate
+            const rateColor = repeatRate >= 15 ? '#4ade80' : repeatRate >= 8 ? '#fbbf24' : '#f87171';
+            
+            document.getElementById('revRepeatRate').textContent = `${repeatRate.toFixed(1)}%`;
+            document.getElementById('revRepeatRate').style.color = rateColor;
+            document.getElementById('revUniqueCustomers').textContent = uniqueCustomers;
+            document.getElementById('revReturningCustomers').textContent = returningCustomers;
+            
+            // Calculate monthly repeat rate trend
+            const now = new Date();
+            const monthlyRates = [];
+            for (let i = 3; i >= 0; i--) {
+                const targetMonth = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const endOfMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+                const cutoff = i === 0 ? now : endOfMonth;
+                
+                // All orders up to end of this month
+                const ordersUpTo = paidOrders.filter(o => new Date(o.created_at) <= cutoff);
+                const custMap = {};
+                ordersUpTo.forEach(o => {
+                    const cid = (o.customer && o.customer.email) || (o.customer && o.customer.id) || o.email || 'unknown';
+                    if (cid === 'unknown') return;
+                    if (!custMap[cid]) custMap[cid] = 0;
+                    custMap[cid]++;
+                });
+                const total = Object.keys(custMap).length;
+                const returning = Object.values(custMap).filter(c => c >= 2).length;
+                const rate = total > 0 ? (returning / total * 100) : 0;
+                
+                monthlyRates.push({
+                    label: targetMonth.toLocaleDateString('en-US', { month: 'short' }),
+                    rate: rate
+                });
+            }
+            
+            // Render trend chart
+            renderRepeatRateChart(monthlyRates);
+            
+            // Delta vs last month
+            if (monthlyRates.length >= 2) {
+                const current = monthlyRates[monthlyRates.length - 1].rate;
+                const prior = monthlyRates[monthlyRates.length - 2].rate;
+                const delta = current - prior;
+                const deltaDir = delta >= 0 ? '↑' : '↓';
+                const deltaColor = delta >= 0 ? '#4ade80' : '#f87171';
+                document.getElementById('revRepeatDelta').innerHTML = `<span style="color:${deltaColor}">${deltaDir} ${Math.abs(delta).toFixed(1)}pp vs last month</span>`;
+            }
+            
+            // Generate insight
+            let insight = '';
+            if (repeatRate < 8) {
+                insight = `Repeat purchase rate is ${repeatRate.toFixed(1)}%, which is below the 15% benchmark for healthy DTC retention. With ${returningCustomers} out of ${uniqueCustomers} customers coming back, there's a clear opportunity to improve post-purchase engagement. Prioritize launching email nurture flows, SMS follow-ups, or subscription offers to convert one-time buyers into repeat customers.`;
+            } else if (repeatRate < 15) {
+                insight = `Repeat rate at ${repeatRate.toFixed(1)}% is improving but still below the 15% target. ${returningCustomers} customers have ordered more than once. Continue investing in retention: email nurture sequences, loyalty incentives, and bundle offers are the highest-ROI levers to push this number higher.`;
+            } else {
+                insight = `Repeat rate at ${repeatRate.toFixed(1)}% is solid. ${returningCustomers} returning customers out of ${uniqueCustomers} total. Retention is healthy. Focus on scaling acquisition while maintaining this rate through consistent post-purchase engagement.`;
+            }
+            document.getElementById('revRepeatInsight').textContent = insight;
+        }
+        
+        function renderRepeatRateChart(monthlyRates) {
+            const canvas = document.getElementById('repeatRateChart');
+            if (!canvas || !canvas.getContext) return;
+            
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = 160 * dpr;
+            ctx.scale(dpr, dpr);
+            const width = rect.width;
+            const height = 160;
+            
+            const padding = { top: 15, right: 20, bottom: 30, left: 40 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+            const maxRate = Math.max(20, ...monthlyRates.map(r => r.rate)) * 1.2;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 15% target line
+            const targetY = padding.top + chartH - (15 / maxRate) * chartH;
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.3)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(padding.left, targetY);
+            ctx.lineTo(width - padding.right, targetY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.5)';
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('15% target', padding.left + 4, targetY - 4);
+            
+            if (monthlyRates.length < 2) return;
+            
+            const xStep = chartW / (monthlyRates.length - 1);
+            
+            // Line
+            ctx.beginPath();
+            monthlyRates.forEach((item, i) => {
+                const x = padding.left + i * xStep;
+                const y = padding.top + chartH - (item.rate / maxRate) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            
+            // Dots + labels
+            monthlyRates.forEach((item, i) => {
+                const x = padding.left + i * xStep;
+                const y = padding.top + chartH - (item.rate / maxRate) * chartH;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#c084fc';
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = 'bold 11px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${item.rate.toFixed(1)}%`, x, y - 10);
+                
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = '10px Inter';
+                ctx.fillText(item.label, x, height - 8);
+            });
         }
         
         // Override calculateMRR to use Shopify data if available
