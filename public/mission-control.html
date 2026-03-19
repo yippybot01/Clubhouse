@@ -2090,84 +2090,51 @@
 
         <!-- REVENUE TAB -->
         <div class="tab-content" id="revenue-tab">
-            <!-- Revenue Goal Gauge + Chart -->
-            <div class="revenue-grid">
-                <!-- Circular Gauge -->
-                <div class="glass-card revenue-gauge-container">
-                    <div class="revenue-gauge">
-                        <svg class="gauge-svg" width="200" height="200">
-                            <circle class="gauge-bg" cx="100" cy="100" r="90"/>
-                            <circle class="gauge-fill" id="gaugeCircle" cx="100" cy="100" r="90"/>
-                        </svg>
-                        <div class="gauge-center">
-                            <div class="gauge-value" id="gaugeValue">$0</div>
-                            <div class="gauge-label">MRR</div>
-                        </div>
-                    </div>
-                    <div class="gauge-subtext">
-                        <span id="gaugeGoal">Goal: $25,000/mo</span>
-                    </div>
+            <!-- KPI Cards Row -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="glass-card" style="padding: 1.25rem; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Total Revenue</div>
+                    <div id="revTotalRevenue" style="font-size: 1.8rem; font-weight: 700; color: #4ade80;">$0</div>
+                    <div id="revTotalOrders" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">0 orders</div>
                 </div>
-                
-                <!-- Revenue Chart -->
-                <div class="glass-card revenue-chart-container">
-                    <h3 class="section-title">Revenue Last 6 Months</h3>
-                    <canvas id="revenueChart"></canvas>
+                <div class="glass-card" style="padding: 1.25rem; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">This Month</div>
+                    <div id="revThisMonth" style="font-size: 1.8rem; font-weight: 700; color: #60a5fa;">$0</div>
+                    <div id="revThisMonthOrders" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">0 orders</div>
+                </div>
+                <div class="glass-card" style="padding: 1.25rem; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Avg Order Value</div>
+                    <div id="revAOV" style="font-size: 1.8rem; font-weight: 700; color: #fbbf24;">$0</div>
+                    <div id="revAOVChange" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">--</div>
+                </div>
+                <div class="glass-card" style="padding: 1.25rem; text-align: center;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Orders/Day (This Month)</div>
+                    <div id="revOrdersPerDay" style="font-size: 1.8rem; font-weight: 700; color: #c084fc;">0</div>
+                    <div id="revOrdersPerDayChange" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">--</div>
                 </div>
             </div>
-            
-            <!-- Client List -->
-            <div class="glass-card clients-section">
-                <div class="clients-header">
-                    <h2 class="section-title" style="margin: 0;">Revenue Data</h2>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="add-client-btn" onclick="syncShopifyData()" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🔄 Sync Shopify</button>
-                        <button class="add-client-btn" onclick="addClient()">+ Add Client</button>
+
+            <!-- Revenue Chart -->
+            <div class="glass-card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="section-title" style="margin: 0;">Monthly Revenue</h3>
+                    <button class="add-client-btn" onclick="syncShopifyData()" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🔄 Sync Shopify</button>
+                </div>
+                <canvas id="revenueChart"></canvas>
+            </div>
+
+            <!-- Product Breakdown + Recent Orders -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="glass-card">
+                    <h3 class="section-title">Product Breakdown (This Month)</h3>
+                    <div id="revProductBreakdown" style="padding: 0.5rem 0;">
+                        <div style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading...</div>
                     </div>
                 </div>
-                
-                <table class="client-table" id="clientTable">
-                    <thead>
-                        <tr>
-                            <th>Client Name</th>
-                            <th>Monthly Value</th>
-                            <th>Status</th>
-                            <th>Start Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clientTableBody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Revenue Projections -->
-            <div class="glass-card">
-                <h2 class="section-title">Revenue Projections</h2>
-                <div class="projections-grid">
-                    <div class="projection-card">
-                        <div class="projection-label">Current MRR</div>
-                        <div class="projection-value" id="currentMRR">$0</div>
-                        <div class="projection-subtext">Monthly Recurring Revenue</div>
-                    </div>
-                    
-                    <div class="projection-card">
-                        <div class="projection-label">Annual Projection</div>
-                        <div class="projection-value" id="annualProjection">$0</div>
-                        <div class="projection-subtext">If current MRR continues</div>
-                    </div>
-                    
-                    <div class="projection-card">
-                        <div class="projection-label">Monthly Growth Needed</div>
-                        <div class="projection-value" id="monthlyGrowth">+$0</div>
-                        <div class="projection-subtext">To hit $300K by Jan 1, 2027</div>
-                    </div>
-                    
-                    <div class="projection-card">
-                        <div class="projection-label">Active Clients</div>
-                        <div class="projection-value" id="activeClients">0</div>
-                        <div class="projection-subtext">Currently generating revenue</div>
+                <div class="glass-card">
+                    <h3 class="section-title">Recent Orders</h3>
+                    <div id="revRecentOrders" style="max-height: 300px; overflow-y: auto;">
+                        <div style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -2674,7 +2641,14 @@
                 
                 // Refresh revenue chart if switching to revenue tab
                 if (tabName === 'revenue') {
-                    setTimeout(drawRevenueChart, 100);
+                    setTimeout(() => {
+                        drawRevenueChart();
+                        // Auto-sync if no data loaded yet
+                        const cached = localStorage.getItem('revenueHistory');
+                        if (!cached || cached === 'null') {
+                            syncShopifyData();
+                        }
+                    }, 100);
                 }
             });
         });
@@ -2851,62 +2825,64 @@
         // Draw Revenue Chart (Canvas)
         function drawRevenueChart() {
             const canvas = document.getElementById('revenueChart');
-            if (!canvas.getContext) return;
+            if (!canvas || !canvas.getContext) return;
             
             const ctx = canvas.getContext('2d');
             const width = canvas.width = canvas.offsetWidth * 2; // Retina
             const height = canvas.height = 440;
             
-            // Get revenue history from localStorage (or use sample data)
             let revenueHistory = JSON.parse(localStorage.getItem('revenueHistory') || 'null');
-            if (!revenueHistory) {
-                // Sample data for last 6 months
-                revenueHistory = [
-                    { month: 'Oct', value: 12000 },
-                    { month: 'Nov', value: 15000 },
-                    { month: 'Dec', value: 18000 },
-                    { month: 'Jan', value: 21000 },
-                    { month: 'Feb', value: 19000 },
-                    { month: 'Mar', value: calculateMRR() }
-                ];
-                localStorage.setItem('revenueHistory', JSON.stringify(revenueHistory));
+            if (!revenueHistory || revenueHistory.length === 0) {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.font = '32px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Click "Sync Shopify" to load data', width / 2, height / 2);
+                return;
             }
             
-            // Update latest month with current MRR
-            revenueHistory[revenueHistory.length - 1].value = calculateMRR();
-            localStorage.setItem('revenueHistory', JSON.stringify(revenueHistory));
-            
             const maxValue = Math.max(...revenueHistory.map(r => r.value)) * 1.2;
-            const barWidth = width / revenueHistory.length * 0.6;
-            const gap = width / revenueHistory.length * 0.4;
+            const totalWidth = width - 40;
+            const barWidth = totalWidth / revenueHistory.length * 0.65;
+            const gap = totalWidth / revenueHistory.length * 0.35;
+            const startX = 20;
             
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
             
             // Draw bars
             revenueHistory.forEach((item, i) => {
-                const barHeight = (item.value / maxValue) * (height - 80);
-                const x = i * (barWidth + gap) + gap;
-                const y = height - barHeight - 40;
+                const barHeight = maxValue > 0 ? (item.value / maxValue) * (height - 100) : 0;
+                const x = startX + i * (barWidth + gap) + gap / 2;
+                const y = height - barHeight - 50;
                 
                 // Bar gradient
-                const gradient = ctx.createLinearGradient(0, y, 0, height - 40);
+                const gradient = ctx.createLinearGradient(0, y, 0, height - 50);
                 gradient.addColorStop(0, '#0A4B2C');
                 gradient.addColorStop(1, 'rgba(10, 75, 44, 0.3)');
                 
                 ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth, barHeight);
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barHeight, [6, 6, 0, 0]);
+                ctx.fill();
                 
                 // Month label
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.font = '28px Inter';
+                ctx.font = '24px Inter';
                 ctx.textAlign = 'center';
-                ctx.fillText(item.month, x + barWidth / 2, height - 10);
+                ctx.fillText(item.month, x + barWidth / 2, height - 15);
                 
                 // Value label
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.font = 'bold 32px Inter';
-                ctx.fillText(`$${(item.value / 1000).toFixed(1)}K`, x + barWidth / 2, y - 10);
+                ctx.font = 'bold 28px Inter';
+                ctx.fillText(`$${(item.value / 1000).toFixed(1)}K`, x + barWidth / 2, y - 15);
+                
+                // Order count
+                if (item.orders) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.font = '20px Inter';
+                    ctx.fillText(`${item.orders} orders`, x + barWidth / 2, y - 42);
+                }
             });
         }
         
@@ -3415,60 +3391,173 @@
                 return;
             }
             
-            // Calculate monthly revenue for last 6 months
+            // Only count paid/partially_paid orders (exclude cancelled/refunded)
+            const paidOrders = orders.filter(o => 
+                o.financial_status === 'paid' || o.financial_status === 'partially_paid'
+            );
+            
             const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // Calculate monthly revenue for ALL months with data
             const revenueByMonth = {};
+            const ordersByMonth = {};
             
-            // Initialize last 6 months
-            for (let i = 5; i >= 0; i--) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const key = d.toLocaleDateString('en-US', { month: 'short' });
-                revenueByMonth[key] = 0;
-            }
-            
-            // Sum up orders by month
-            orders.forEach(order => {
+            paidOrders.forEach(order => {
                 const orderDate = new Date(order.created_at);
-                const monthKey = orderDate.toLocaleDateString('en-US', { month: 'short' });
+                const key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+                const label = orderDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
                 
-                if (revenueByMonth.hasOwnProperty(monthKey)) {
-                    revenueByMonth[monthKey] += parseFloat(order.total_price);
+                if (!revenueByMonth[key]) {
+                    revenueByMonth[key] = { label, revenue: 0, orders: 0 };
                 }
+                revenueByMonth[key].revenue += parseFloat(order.total_price);
+                revenueByMonth[key].orders += 1;
             });
             
-            // Convert to array format
-            const revenueHistory = Object.keys(revenueByMonth).map(month => ({
-                month,
-                value: Math.round(revenueByMonth[month])
+            // Sort by date key and convert to array
+            const sortedMonths = Object.keys(revenueByMonth).sort();
+            const revenueHistory = sortedMonths.map(key => ({
+                month: revenueByMonth[key].label,
+                value: Math.round(revenueByMonth[key].revenue),
+                orders: revenueByMonth[key].orders
             }));
             
             localStorage.setItem('revenueHistory', JSON.stringify(revenueHistory));
             
-            // Update current month's revenue
-            const currentMonthKey = now.toLocaleDateString('en-US', { month: 'short' });
-            const currentMonthRevenue = revenueByMonth[currentMonthKey] || 0;
+            // Total revenue
+            const totalRevenue = paidOrders.reduce((sum, o) => sum + parseFloat(o.total_price), 0);
+            const totalOrders = paidOrders.length;
+            const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
             
-            // Estimate MRR (you can adjust this calculation)
-            const avgMonthlyRevenue = revenueHistory.reduce((sum, m) => sum + m.value, 0) / revenueHistory.length;
+            // This month's data
+            const thisMonthOrders = paidOrders.filter(o => {
+                const d = new Date(o.created_at);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+            const thisMonthRevenue = thisMonthOrders.reduce((sum, o) => sum + parseFloat(o.total_price), 0);
+            const dayOfMonth = now.getDate();
+            const ordersPerDay = dayOfMonth > 0 ? thisMonthOrders.length / dayOfMonth : 0;
             
-            // Store MRR estimate
-            localStorage.setItem('estimatedMRR', JSON.stringify(Math.round(avgMonthlyRevenue)));
+            // Last month for comparison
+            const lastMonthOrders = paidOrders.filter(o => {
+                const d = new Date(o.created_at);
+                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear;
+            });
+            const lastMonthRevenue = lastMonthOrders.reduce((sum, o) => sum + parseFloat(o.total_price), 0);
+            const lastMonthAOV = lastMonthOrders.length > 0 ? lastMonthRevenue / lastMonthOrders.length : 0;
+            const lastMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+            const lastMonthOPD = lastMonthDays > 0 ? lastMonthOrders.length / lastMonthDays : 0;
             
-            console.log(`✅ Synced ${orders.length} orders`);
-            console.log('Revenue by month:', revenueByMonth);
+            // Update KPI cards
+            document.getElementById('revTotalRevenue').textContent = `$${totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+            document.getElementById('revTotalOrders').textContent = `${totalOrders} orders`;
+            document.getElementById('revThisMonth').textContent = `$${thisMonthRevenue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+            document.getElementById('revThisMonthOrders').textContent = `${thisMonthOrders.length} orders`;
+            document.getElementById('revAOV').textContent = `$${aov.toFixed(2)}`;
             
-            // Update UI
-            loadClients();
-            updateRevenueGauge();
-            drawRevenueChart();
-            updateRevenueProjections();
-            
-            addActivity(`Synced ${orders.length} orders from Shopify`);
-            
-            // Sync to server
-            if (serverOnline) {
-                await syncToServer();
+            // AOV change vs last month
+            if (lastMonthAOV > 0) {
+                const aovChange = ((aov - lastMonthAOV) / lastMonthAOV * 100).toFixed(1);
+                const aovDir = aovChange >= 0 ? '↑' : '↓';
+                const aovColor = aovChange >= 0 ? '#4ade80' : '#f87171';
+                document.getElementById('revAOVChange').innerHTML = `<span style="color:${aovColor}">${aovDir} ${Math.abs(aovChange)}% vs last month</span>`;
             }
+            
+            document.getElementById('revOrdersPerDay').textContent = ordersPerDay.toFixed(1);
+            if (lastMonthOPD > 0) {
+                const opdChange = ((ordersPerDay - lastMonthOPD) / lastMonthOPD * 100).toFixed(1);
+                const opdDir = opdChange >= 0 ? '↑' : '↓';
+                const opdColor = opdChange >= 0 ? '#4ade80' : '#f87171';
+                document.getElementById('revOrdersPerDayChange').innerHTML = `<span style="color:${opdColor}">${opdDir} ${Math.abs(opdChange)}% vs last month</span>`;
+            }
+            
+            // Product breakdown this month
+            const productRevenue = {};
+            thisMonthOrders.forEach(order => {
+                (order.line_items || []).forEach(item => {
+                    const name = item.title || 'Unknown';
+                    if (!productRevenue[name]) productRevenue[name] = { revenue: 0, units: 0 };
+                    productRevenue[name].revenue += parseFloat(item.price) * item.quantity;
+                    productRevenue[name].units += item.quantity;
+                });
+            });
+            
+            const productColors = {
+                'For the Course (5 Pack)': '#0A4B2C',
+                'For the Desk (5 Pack)': '#2563eb',
+                'Yippy Value Pack (10 Pack)': '#d4af37'
+            };
+            
+            const productHTML = Object.entries(productRevenue)
+                .sort((a, b) => b[1].revenue - a[1].revenue)
+                .map(([name, data]) => {
+                    const pct = thisMonthRevenue > 0 ? (data.revenue / thisMonthRevenue * 100).toFixed(0) : 0;
+                    const color = productColors[name] || '#6b7280';
+                    return `
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                <span style="font-size: 0.85rem; color: var(--text-primary);">${name}</span>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">${data.units} units</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: ${pct}%; height: 100%; background: ${color}; border-radius: 4px;"></div>
+                                </div>
+                                <span style="font-size: 0.85rem; font-weight: 600; color: #4ade80; min-width: 80px; text-align: right;">$${data.revenue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})} (${pct}%)</span>
+                            </div>
+                        </div>`;
+                }).join('');
+            
+            document.getElementById('revProductBreakdown').innerHTML = productHTML || '<div style="color: var(--text-muted); text-align: center;">No product data</div>';
+            
+            // Recent orders (last 10)
+            const recentOrders = paidOrders
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 10);
+            
+            const recentHTML = recentOrders.map(order => {
+                const date = new Date(order.created_at);
+                const timeAgo = getTimeAgo(date);
+                const items = (order.line_items || []).map(i => i.title).join(', ');
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--text-primary);">#${order.order_number}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${items}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #4ade80;">$${parseFloat(order.total_price).toFixed(2)}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted);">${timeAgo}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+            
+            document.getElementById('revRecentOrders').innerHTML = recentHTML || '<div style="color: var(--text-muted); text-align: center;">No recent orders</div>';
+            
+            // Store MRR estimate (this month's revenue)
+            localStorage.setItem('estimatedMRR', JSON.stringify(Math.round(thisMonthRevenue)));
+            
+            console.log(`✅ Synced ${orders.length} total orders (${paidOrders.length} paid)`);
+            
+            // Draw chart
+            drawRevenueChart();
+            
+            addActivity(`Synced ${paidOrders.length} orders from Shopify`);
+        }
+        
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
         }
         
         // Override calculateMRR to use Shopify data if available
