@@ -2240,7 +2240,8 @@
                         <button class="category-chip" data-category="analysis">📊 Analysis</button>
                         <button class="category-chip" data-category="content">✍️ Content</button>
                         <button class="category-chip" data-category="development">💻 Development</button>
-                        <button class="category-chip" data-category="system">🔧 System</button>
+                        <button class="category-chip" data-category="engineering">🔧 Engineering</button>
+                        <button class="category-chip" data-category="system">🏥 System</button>
                     </div>
                 </div>
                 
@@ -3897,6 +3898,726 @@
                 path: '/usr/lib/node_modules/openclaw/skills/video-frames/SKILL.md',
                 dateAdded: '2025-01-28',
                 lastUsed: '2026-02-15'
+            },
+            {
+                name: 'humanizer',
+                displayName: 'Humanizer',
+                category: 'content',
+                icon: '🧠',
+                status: 'active',
+                description: 'Remove 24 AI writing patterns and inject personality. Based on Wikipedia\'s "Signs of AI writing" guide.',
+                fullDescription: 'Two-part audit system: first removes AI tells (significance inflation, AI vocabulary, copula avoidance, em dash overuse), then adds soul (opinions, varied rhythm, first-person voice, specific feelings). Essential for making content feel human.',
+                triggers: 'Humanize text, remove AI patterns, make writing natural, add personality',
+                useCases: [
+                    'Email campaigns and nurture sequences',
+                    'Social media posts (Twitter/X, Instagram)',
+                    'Product descriptions and landing page copy',
+                    'Influencer outreach messages',
+                    'Blog posts and brand content'
+                ],
+                path: '~/.openclaw/skills/humanizer/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-brainstorm',
+                displayName: 'CE: Brainstorm',
+                category: 'engineering',
+                icon: '💡',
+                status: 'active',
+                description: 'Explore requirements and approaches through collaborative dialogue before writing requirements and planning implementation.',
+                fullDescription: 'Part of Compound Engineering. Use for feature ideas, problem framing, when the user says "let\'s brainstorm", or when they want to think through options before deciding what to build. Produces a right-sized requirements document.',
+                triggers: 'Brainstorm features, explore requirements, think through options, problem framing',
+                useCases: [
+                    'Feature ideation and scoping',
+                    'Problem framing with multiple solutions',
+                    'Requirements discovery',
+                    'Collaborative design exploration',
+                    'Vague feature request clarification'
+                ],
+                path: '~/.openclaw/skills/ce-brainstorm/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-compound',
+                displayName: 'CE: Compound',
+                category: 'engineering',
+                icon: '📚',
+                status: 'active',
+                description: 'Document a recently solved problem to compound your team\'s knowledge for future reuse.',
+                fullDescription: 'Part of Compound Engineering. After solving a problem, this skill helps you document the solution, context, and learnings so future work benefits. Each unit of work makes the next easier.',
+                triggers: 'Document solution, compound knowledge, save learnings, post-mortem',
+                useCases: [
+                    'Post-implementation documentation',
+                    'Bug fix documentation',
+                    'Architecture decision records',
+                    'Team knowledge base building',
+                    'Reusable pattern extraction'
+                ],
+                path: '~/.openclaw/skills/ce-compound/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-ideate',
+                displayName: 'CE: Ideate',
+                category: 'engineering',
+                icon: '🎯',
+                status: 'active',
+                description: 'Generate and critically evaluate grounded improvement ideas for the current project.',
+                fullDescription: 'Part of Compound Engineering. Discovers high-impact improvements by analyzing the current project. Use when asking "what should I improve?" or wanting AI-generated suggestions before brainstorming one in depth.',
+                triggers: 'What to improve, generate ideas, ideate, suggest improvements, surprise me',
+                useCases: [
+                    'Discovering project improvement opportunities',
+                    'Evaluating feature priorities',
+                    'Finding surprising optimization targets',
+                    'Strategic direction exploration',
+                    'AI-driven project analysis'
+                ],
+                path: '~/.openclaw/skills/ce-ideate/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-plan',
+                displayName: 'CE: Plan',
+                category: 'engineering',
+                icon: '📋',
+                status: 'active',
+                description: 'Transform feature descriptions into well-structured project plans following conventions.',
+                fullDescription: 'Part of Compound Engineering. Takes feature specs or requirements and produces detailed, actionable implementation plans with task breakdowns, dependencies, and time estimates.',
+                triggers: 'Create plan, implementation plan, project plan, break down feature',
+                useCases: [
+                    'Feature implementation planning',
+                    'Sprint planning and task breakdown',
+                    'Dependency analysis',
+                    'Time estimation for features',
+                    'Structured project execution'
+                ],
+                path: '~/.openclaw/skills/ce-plan/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-work',
+                displayName: 'CE: Work',
+                category: 'engineering',
+                icon: '⚙️',
+                status: 'active',
+                description: 'Execute work plans efficiently while maintaining quality and finishing features.',
+                fullDescription: 'Part of Compound Engineering. The execution engine — takes a plan and works through it with worktrees, task tracking, and quality gates. Focuses on finishing features completely.',
+                triggers: 'Execute plan, start work, implement feature, work on tasks',
+                useCases: [
+                    'Executing implementation plans',
+                    'Feature development with quality gates',
+                    'Task-by-task implementation',
+                    'Worktree-based isolated development',
+                    'Finishing features to completion'
+                ],
+                path: '~/.openclaw/skills/ce-work/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'ce-review',
+                displayName: 'CE: Review',
+                category: 'engineering',
+                icon: '🔬',
+                status: 'active',
+                description: 'Perform exhaustive code reviews using multi-agent analysis, ultra-thinking, and worktrees.',
+                fullDescription: 'Part of Compound Engineering. Runs deep code reviews with multiple analysis passes. Uses parallel agents to check different aspects (logic, security, performance, style) simultaneously.',
+                triggers: 'Code review, review PR, analyze code, check quality',
+                useCases: [
+                    'Pre-merge code reviews',
+                    'Security vulnerability scanning',
+                    'Performance analysis of changes',
+                    'Code style and pattern consistency',
+                    'Multi-perspective code evaluation'
+                ],
+                path: '~/.openclaw/skills/ce-review/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'deepen-plan',
+                displayName: 'Deepen Plan',
+                category: 'engineering',
+                icon: '🔎',
+                status: 'active',
+                description: 'Enhance a plan with parallel research agents for each section to add depth, best practices, and implementation details.',
+                fullDescription: 'Takes an existing plan and spawns parallel research agents to independently enrich each section. Adds best practices, edge cases, implementation patterns, and depth that a single pass would miss.',
+                triggers: 'Deepen plan, enhance plan, research plan sections, add depth',
+                useCases: [
+                    'Enriching implementation plans with research',
+                    'Adding best practices to architecture docs',
+                    'Parallel section-level deep dives',
+                    'Edge case discovery',
+                    'Implementation pattern research'
+                ],
+                path: '~/.openclaw/skills/deepen-plan/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'every-style-editor',
+                displayName: 'Every Style Editor',
+                category: 'content',
+                icon: '✏️',
+                status: 'active',
+                description: 'Review and edit copy for adherence to Every\'s style guide. Line-by-line review for grammar, punctuation, and style compliance.',
+                fullDescription: 'Systematic line-by-line review process that checks grammar, punctuation, mechanics, and style guide compliance. Based on Every\'s editorial standards.',
+                triggers: 'Edit copy, style guide check, grammar review, editorial review',
+                useCases: [
+                    'Blog post editing and polishing',
+                    'Marketing copy style compliance',
+                    'Email campaign copy review',
+                    'Brand voice consistency checks',
+                    'Publication-ready content preparation'
+                ],
+                path: '~/.openclaw/skills/every-style-editor/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'document-review',
+                displayName: 'Document Review',
+                category: 'engineering',
+                icon: '📝',
+                status: 'active',
+                description: 'Refine requirements or plan documents before proceeding to the next workflow step.',
+                fullDescription: 'Applies when a requirements document or plan document exists and needs improvement. Checks for completeness, clarity, actionability, and consistency before moving to implementation.',
+                triggers: 'Review document, refine requirements, improve plan, check docs',
+                useCases: [
+                    'Requirements document refinement',
+                    'Plan document quality checks',
+                    'Pre-implementation doc review',
+                    'Spec completeness verification',
+                    'Documentation improvement'
+                ],
+                path: '~/.openclaw/skills/document-review/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'brainstorming',
+                displayName: 'Brainstorming',
+                category: 'design',
+                icon: '🧩',
+                status: 'active',
+                description: 'Mandatory pre-creative skill. Explores user intent, requirements, and design before any implementation.',
+                fullDescription: 'Must be used before any creative work — creating features, building components, adding functionality, or modifying behavior. Ensures proper exploration of intent and design before writing code.',
+                triggers: 'Before creative work, new features, build components, add functionality',
+                useCases: [
+                    'Pre-implementation design exploration',
+                    'Feature requirement gathering',
+                    'Creative direction setting',
+                    'User intent clarification',
+                    'Design-before-code workflow'
+                ],
+                path: '~/.openclaw/skills/brainstorming/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'arrange',
+                displayName: 'Layout Arranger',
+                category: 'design',
+                icon: '📐',
+                status: 'active',
+                description: 'Improve layout, spacing, and visual rhythm. Fixes monotonous grids, inconsistent spacing, and weak visual hierarchy.',
+                fullDescription: 'Analyzes and improves layout composition. Fixes monotonous grids, inconsistent spacing, and weak visual hierarchy to create intentional, polished compositions.',
+                triggers: 'Fix layout, improve spacing, visual rhythm, arrange elements',
+                useCases: [
+                    'Grid layout optimization',
+                    'Spacing consistency fixes',
+                    'Visual hierarchy improvement',
+                    'Composition refinement',
+                    'Layout rhythm correction'
+                ],
+                path: '~/.openclaw/skills/arrange/SKILL.md',
+                dateAdded: '2025-02-01',
+                lastUsed: '2026-03-15'
+            },
+            {
+                name: 'bolder',
+                displayName: 'Design Amplifier',
+                category: 'design',
+                icon: '🔥',
+                status: 'active',
+                description: 'Amplify safe or boring designs to be more visually interesting and stimulating while maintaining usability.',
+                fullDescription: 'Takes safe, conventional designs and pushes them to be more visually impactful. Increases contrast, adds visual tension, and makes interfaces stand out — without sacrificing usability.',
+                triggers: 'Make bolder, amplify design, more visual impact, less boring',
+                useCases: [
+                    'Amplifying landing page visual impact',
+                    'Making dashboards more engaging',
+                    'Increasing visual contrast and tension',
+                    'Transforming generic designs into distinctive ones',
+                    'Brand differentiation through bold design'
+                ],
+                path: '~/.openclaw/skills/bolder/SKILL.md',
+                dateAdded: '2025-02-08',
+                lastUsed: '2026-03-12'
+            },
+            {
+                name: 'clarify',
+                displayName: 'UX Copy Clarifier',
+                category: 'content',
+                icon: '💬',
+                status: 'active',
+                description: 'Improve unclear UX copy, error messages, microcopy, labels, and instructions for better usability.',
+                fullDescription: 'Makes interfaces easier to understand by improving unclear copy, confusing error messages, vague labels, and ambiguous instructions. Focuses on clarity and user comprehension.',
+                triggers: 'Improve copy, clarify labels, fix error messages, better microcopy',
+                useCases: [
+                    'Error message improvement',
+                    'Form label clarity',
+                    'Onboarding copy refinement',
+                    'Button and CTA text optimization',
+                    'Tooltip and help text writing'
+                ],
+                path: '~/.openclaw/skills/clarify/SKILL.md',
+                dateAdded: '2025-02-14',
+                lastUsed: '2026-03-10'
+            },
+            {
+                name: 'delight',
+                displayName: 'Delight Designer',
+                category: 'design',
+                icon: '🎉',
+                status: 'active',
+                description: 'Add moments of joy, personality, and unexpected touches that make interfaces memorable and enjoyable.',
+                fullDescription: 'Elevates functional interfaces to delightful ones by adding personality, surprise, and joy. Focuses on moments that make users smile without compromising usability.',
+                triggers: 'Add delight, make fun, add personality, surprise users, joyful design',
+                useCases: [
+                    'Empty state illustrations and copy',
+                    'Success celebration animations',
+                    'Easter eggs and hidden features',
+                    'Playful loading states',
+                    'Personality-driven microcopy'
+                ],
+                path: '~/.openclaw/skills/delight/SKILL.md',
+                dateAdded: '2025-02-18',
+                lastUsed: '2026-03-14'
+            },
+            {
+                name: 'distill',
+                displayName: 'Design Distiller',
+                category: 'design',
+                icon: '💎',
+                status: 'active',
+                description: 'Strip designs to their essence by removing unnecessary complexity. Great design is simple, powerful, and clean.',
+                fullDescription: 'Removes visual and functional clutter to reveal the essential design. Simplifies without losing meaning, creating interfaces that are powerful in their clarity.',
+                triggers: 'Simplify design, remove clutter, distill interface, minimize complexity',
+                useCases: [
+                    'Simplifying overloaded dashboards',
+                    'Reducing form complexity',
+                    'Cleaning up cluttered navigation',
+                    'Streamlining user flows',
+                    'Removing unnecessary design elements'
+                ],
+                path: '~/.openclaw/skills/distill/SKILL.md',
+                dateAdded: '2025-02-22',
+                lastUsed: '2026-03-08'
+            },
+            {
+                name: 'extract',
+                displayName: 'Component Extractor',
+                category: 'development',
+                icon: '🧱',
+                status: 'active',
+                description: 'Extract and consolidate reusable components, design tokens, and patterns into your design system.',
+                fullDescription: 'Identifies opportunities for systematic reuse across your codebase. Extracts components, design tokens, and patterns into a consistent design system.',
+                triggers: 'Extract components, create design system, consolidate patterns, reusable components',
+                useCases: [
+                    'Building component libraries',
+                    'Design token extraction',
+                    'Pattern consolidation',
+                    'Design system enrichment',
+                    'Reusable code identification'
+                ],
+                path: '~/.openclaw/skills/extract/SKILL.md',
+                dateAdded: '2025-02-25',
+                lastUsed: '2026-03-16'
+            },
+            {
+                name: 'harden',
+                displayName: 'Interface Hardener',
+                category: 'development',
+                icon: '🛡️',
+                status: 'active',
+                description: 'Improve interface resilience through better error handling, i18n support, text overflow handling, and edge case management.',
+                fullDescription: 'Makes interfaces production-ready by handling edge cases, improving error states, adding i18n support, managing text overflow, and ensuring robustness under real-world conditions.',
+                triggers: 'Harden interface, handle edge cases, error handling, production-ready',
+                useCases: [
+                    'Error boundary implementation',
+                    'Text overflow and truncation handling',
+                    'Internationalization support',
+                    'Edge case management',
+                    'Production hardening'
+                ],
+                path: '~/.openclaw/skills/harden/SKILL.md',
+                dateAdded: '2025-03-01',
+                lastUsed: '2026-03-12'
+            },
+            {
+                name: 'normalize',
+                displayName: 'Design Normalizer',
+                category: 'design',
+                icon: '📏',
+                status: 'active',
+                description: 'Normalize design to match your design system and ensure consistency across all components.',
+                fullDescription: 'Ensures all UI elements conform to the established design system. Fixes inconsistencies in spacing, typography, colors, and component usage.',
+                triggers: 'Normalize design, ensure consistency, match design system, fix inconsistencies',
+                useCases: [
+                    'Design system compliance',
+                    'Component consistency audits',
+                    'Typography normalization',
+                    'Color palette alignment',
+                    'Spacing standardization'
+                ],
+                path: '~/.openclaw/skills/normalize/SKILL.md',
+                dateAdded: '2025-03-05',
+                lastUsed: '2026-03-10'
+            },
+            {
+                name: 'onboard',
+                displayName: 'Onboarding Designer',
+                category: 'design',
+                icon: '👋',
+                status: 'active',
+                description: 'Design or improve onboarding flows, empty states, and first-time user experiences.',
+                fullDescription: 'Helps users get started successfully and understand value quickly. Designs welcome flows, empty states, progressive disclosure, and first-time experience guidance.',
+                triggers: 'Design onboarding, empty states, first-time experience, welcome flow',
+                useCases: [
+                    'Welcome flow design',
+                    'Empty state illustrations and CTAs',
+                    'Progressive disclosure implementation',
+                    'Feature discovery design',
+                    'First-run experience optimization'
+                ],
+                path: '~/.openclaw/skills/onboard/SKILL.md',
+                dateAdded: '2025-03-08',
+                lastUsed: '2026-03-06'
+            },
+            {
+                name: 'optimize',
+                displayName: 'Performance Optimizer',
+                category: 'development',
+                icon: '🚀',
+                status: 'active',
+                description: 'Improve interface performance across loading speed, rendering, animations, images, and bundle size.',
+                fullDescription: 'Makes experiences faster and smoother by optimizing loading, rendering, animation performance, image delivery, and bundle sizes.',
+                triggers: 'Optimize performance, improve speed, reduce bundle, faster loading',
+                useCases: [
+                    'Loading speed optimization',
+                    'Render performance improvement',
+                    'Animation frame rate fixes',
+                    'Image optimization and lazy loading',
+                    'Bundle size reduction'
+                ],
+                path: '~/.openclaw/skills/optimize/SKILL.md',
+                dateAdded: '2025-03-10',
+                lastUsed: '2026-03-16'
+            },
+            {
+                name: 'polish',
+                displayName: 'Final Polish',
+                category: 'design',
+                icon: '✅',
+                status: 'active',
+                description: 'Final quality pass before shipping. Fixes alignment, spacing, consistency, and detail issues.',
+                fullDescription: 'The last pass before shipping. Catches and fixes the small details that separate good from great: alignment issues, spacing inconsistencies, color mismatches, and visual polish.',
+                triggers: 'Final polish, pre-ship review, fix details, quality pass',
+                useCases: [
+                    'Pre-launch quality checks',
+                    'Alignment and spacing fixes',
+                    'Visual consistency verification',
+                    'Detail-level improvements',
+                    'Ship-readiness assessment'
+                ],
+                path: '~/.openclaw/skills/polish/SKILL.md',
+                dateAdded: '2025-03-12',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'quieter',
+                displayName: 'Design Quieter',
+                category: 'design',
+                icon: '🤫',
+                status: 'active',
+                description: 'Tone down overly bold or visually aggressive designs. Reduces intensity while maintaining quality.',
+                fullDescription: 'The opposite of bolder. Reduces visual intensity, tones down contrast, and creates a calmer, more refined aesthetic without losing design quality.',
+                triggers: 'Tone down, reduce intensity, quieter design, less aggressive, calmer',
+                useCases: [
+                    'Toning down aggressive landing pages',
+                    'Creating calmer dashboard aesthetics',
+                    'Reducing visual noise',
+                    'Refining overly bold typography',
+                    'Softening color palettes'
+                ],
+                path: '~/.openclaw/skills/quieter/SKILL.md',
+                dateAdded: '2025-03-14',
+                lastUsed: '2026-03-08'
+            },
+            {
+                name: 'typeset',
+                displayName: 'Typography Master',
+                category: 'design',
+                icon: '🔤',
+                status: 'active',
+                description: 'Improve typography: font choices, hierarchy, sizing, weight consistency, and readability.',
+                fullDescription: 'Makes text feel intentional and polished by fixing font choices, hierarchy problems, sizing inconsistencies, weight mismatches, and readability issues.',
+                triggers: 'Fix typography, improve fonts, text hierarchy, font sizing, readability',
+                useCases: [
+                    'Font selection and pairing',
+                    'Typographic hierarchy establishment',
+                    'Size and weight consistency',
+                    'Line height and spacing optimization',
+                    'Readability improvement'
+                ],
+                path: '~/.openclaw/skills/typeset/SKILL.md',
+                dateAdded: '2025-03-16',
+                lastUsed: '2026-03-14'
+            },
+            {
+                name: 'writing-plans',
+                displayName: 'Plan Writer',
+                category: 'engineering',
+                icon: '📝',
+                status: 'active',
+                description: 'Write structured multi-step implementation plans before touching code.',
+                fullDescription: 'Takes specs or requirements and produces structured implementation plans. Use when you have a multi-step task and need a clear plan before writing code.',
+                triggers: 'Write plan, implementation plan, multi-step task, plan before code',
+                useCases: [
+                    'Multi-step feature planning',
+                    'Pre-code implementation strategy',
+                    'Task sequencing and dependencies',
+                    'Sprint planning artifacts',
+                    'Technical roadmap creation'
+                ],
+                path: '~/.openclaw/skills/writing-plans/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'writing-skills',
+                displayName: 'Skill Writer',
+                category: 'engineering',
+                icon: '🛠️',
+                status: 'active',
+                description: 'Create, edit, or verify skills before deployment.',
+                fullDescription: 'Meta-skill for creating and maintaining OpenClaw skills. Handles SKILL.md structure, script packaging, reference docs, and deployment verification.',
+                triggers: 'Create skill, edit skill, verify skill, new skill, skill deployment',
+                useCases: [
+                    'New skill creation and structuring',
+                    'Existing skill updates',
+                    'Pre-deployment skill verification',
+                    'Skill template generation',
+                    'Skill documentation writing'
+                ],
+                path: '~/.openclaw/skills/writing-skills/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'systematic-debugging',
+                displayName: 'Systematic Debugger',
+                category: 'engineering',
+                icon: '🐛',
+                status: 'active',
+                description: 'Systematic approach to any bug, test failure, or unexpected behavior before proposing fixes.',
+                fullDescription: 'Enforces a disciplined debugging methodology: reproduce, isolate, hypothesize, verify. Prevents premature fix attempts and ensures root cause identification.',
+                triggers: 'Debug, fix bug, test failure, unexpected behavior, troubleshoot',
+                useCases: [
+                    'Bug investigation and root cause analysis',
+                    'Test failure diagnosis',
+                    'Unexpected behavior debugging',
+                    'Performance issue investigation',
+                    'Integration problem troubleshooting'
+                ],
+                path: '~/.openclaw/skills/systematic-debugging/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'dispatching-parallel-agents',
+                displayName: 'Parallel Dispatcher',
+                category: 'automation',
+                icon: '🔀',
+                status: 'active',
+                description: 'Dispatch 2+ independent tasks to parallel agents for simultaneous execution.',
+                fullDescription: 'When facing multiple independent tasks without shared state or sequential dependencies, this skill dispatches them to parallel sub-agents for 2x+ speed improvement.',
+                triggers: 'Parallel tasks, independent work, multiple agents, simultaneous execution',
+                useCases: [
+                    'Running independent analyses simultaneously',
+                    'Parallel content generation',
+                    'Multi-agent research tasks',
+                    'Simultaneous code reviews',
+                    'Batch processing with agents'
+                ],
+                path: '~/.openclaw/skills/dispatching-parallel-agents/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'test-driven-development',
+                displayName: 'TDD Workflow',
+                category: 'engineering',
+                icon: '🧪',
+                status: 'active',
+                description: 'Write tests before implementation code for any feature or bugfix.',
+                fullDescription: 'Enforces test-driven development: write failing tests first, then implement to make them pass. Ensures quality and prevents regressions.',
+                triggers: 'TDD, write tests first, test-driven, before implementation',
+                useCases: [
+                    'Feature development with TDD',
+                    'Bug fix with regression tests',
+                    'API endpoint testing',
+                    'Component unit testing',
+                    'Integration test creation'
+                ],
+                path: '~/.openclaw/skills/test-driven-development/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'verification-before-completion',
+                displayName: 'Verification Gate',
+                category: 'engineering',
+                icon: '✔️',
+                status: 'active',
+                description: 'Run verification commands and confirm output before claiming work is complete or fixed.',
+                fullDescription: 'Prevents premature success claims. Requires running actual verification commands and confirming their output before asserting work is done. Evidence before assertions, always.',
+                triggers: 'Before claiming done, verify work, confirm fix, check completion',
+                useCases: [
+                    'Pre-commit verification',
+                    'Build success confirmation',
+                    'Test suite pass verification',
+                    'Deploy readiness checks',
+                    'Fix validation before closing issues'
+                ],
+                path: '~/.openclaw/skills/verification-before-completion/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'using-git-worktrees',
+                displayName: 'Git Worktrees',
+                category: 'development',
+                icon: '🌲',
+                status: 'active',
+                description: 'Create isolated git worktrees for feature work with smart directory selection.',
+                fullDescription: 'Creates isolated development environments using git worktrees. Keeps main branch clean while working on features in parallel directories with safety verification.',
+                triggers: 'Git worktree, isolated development, feature branch, parallel work',
+                useCases: [
+                    'Feature branch isolation',
+                    'Parallel development workflows',
+                    'Safe experimentation without main branch risk',
+                    'Multiple feature development',
+                    'Pre-implementation workspace setup'
+                ],
+                path: '~/.openclaw/skills/using-git-worktrees/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'executing-plans',
+                displayName: 'Plan Executor',
+                category: 'engineering',
+                icon: '▶️',
+                status: 'active',
+                description: 'Execute written implementation plans in a separate session with review checkpoints.',
+                fullDescription: 'Takes a written plan and executes it step by step in an isolated session. Includes review checkpoints to catch issues early and maintain quality throughout execution.',
+                triggers: 'Execute plan, run plan, implement plan, start execution',
+                useCases: [
+                    'Plan execution with checkpoints',
+                    'Isolated session implementation',
+                    'Step-by-step feature building',
+                    'Quality-gated execution',
+                    'Review checkpoint management'
+                ],
+                path: '~/.openclaw/skills/executing-plans/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'finishing-a-development-branch',
+                displayName: 'Branch Finisher',
+                category: 'engineering',
+                icon: '🏁',
+                status: 'active',
+                description: 'Guide completion of development work by presenting structured options for merge, PR, or cleanup.',
+                fullDescription: 'Use when implementation is complete and all tests pass. Presents structured options for how to integrate the work — merge, create PR, or cleanup — with safety checks.',
+                triggers: 'Finish branch, merge work, create PR, complete feature, wrap up',
+                useCases: [
+                    'Feature branch completion',
+                    'Merge strategy selection',
+                    'PR creation and review prep',
+                    'Branch cleanup and integration',
+                    'Post-implementation wrap-up'
+                ],
+                path: '~/.openclaw/skills/finishing-a-development-branch/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'requesting-code-review',
+                displayName: 'Code Review Requester',
+                category: 'engineering',
+                icon: '📤',
+                status: 'active',
+                description: 'Verify work meets requirements before requesting a code review or merging.',
+                fullDescription: 'Use when completing tasks or implementing major features. Verifies that all requirements are met, tests pass, and code is ready for review.',
+                triggers: 'Request review, verify work, pre-merge check, ready for review',
+                useCases: [
+                    'Pre-review self-verification',
+                    'Requirements compliance check',
+                    'Code quality self-assessment',
+                    'PR readiness verification',
+                    'Feature completion confirmation'
+                ],
+                path: '~/.openclaw/skills/requesting-code-review/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'receiving-code-review',
+                displayName: 'Code Review Receiver',
+                category: 'engineering',
+                icon: '📥',
+                status: 'active',
+                description: 'Process code review feedback with technical rigor — verify before implementing, never blindly agree.',
+                fullDescription: 'Use when receiving code review feedback. Requires technical verification of suggestions before implementing. Prevents performative agreement and ensures only correct changes are made.',
+                triggers: 'Received feedback, review comments, address review, implement suggestions',
+                useCases: [
+                    'Processing review feedback',
+                    'Verifying reviewer suggestions',
+                    'Implementing review changes',
+                    'Pushback on incorrect feedback',
+                    'Technical discussion with reviewers'
+                ],
+                path: '~/.openclaw/skills/receiving-code-review/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
+            },
+            {
+                name: 'subagent-driven-development',
+                displayName: 'Sub-Agent Dev',
+                category: 'automation',
+                icon: '🤖',
+                status: 'active',
+                description: 'Execute implementation plans with independent tasks using sub-agents in the current session.',
+                fullDescription: 'Dispatches independent implementation tasks to sub-agents within the current session. Best for when tasks are clearly defined and can be worked on without shared state.',
+                triggers: 'Use sub-agents, parallel implementation, delegate tasks, agent development',
+                useCases: [
+                    'Parallel feature implementation',
+                    'Independent task delegation',
+                    'Multi-component development',
+                    'Batch implementation with agents',
+                    'Scalable development workflows'
+                ],
+                path: '~/.openclaw/skills/subagent-driven-development/SKILL.md',
+                dateAdded: '2026-03-18',
+                lastUsed: '2026-03-18'
             }
         ];
         
