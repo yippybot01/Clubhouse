@@ -1919,7 +1919,7 @@
                 <button class="tab" data-tab="projects">📋 Projects</button>
                 <button class="tab" data-tab="skills">🎯 Skills</button>
                 <button class="tab" data-tab="timeline">📅 Timeline</button>
-                <button class="tab" data-tab="notes">📝 Notes</button>
+                <button class="tab" data-tab="trends">🌪️ Trends</button>
             </nav>
             
             <div class="header-right">
@@ -2339,21 +2339,36 @@
         </div>
 
         <!-- NOTES TAB -->
-        <div class="tab-content" id="notes-tab">
-            <div class="notes-container">
-                <div class="glass-card">
-                    <div class="notes-header">
-                        <h2 class="section-title">Notes</h2>
-                        <div class="notes-meta">
-                            <span id="charCount">0 characters</span>
-                            <span id="lastSaved">Auto-saved</span>
-                        </div>
-                    </div>
-                    <textarea 
-                        class="notes-textarea" 
-                        id="notesTextarea"
-                        placeholder="Start writing your notes here..."
-                    ></textarea>
+        <div class="tab-content" id="trends-tab">
+            <!-- Search & Filter Bar -->
+            <div class="glass-card" style="margin-bottom: 1rem; padding: 1rem;">
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="trendsSearch" placeholder="Search trends (e.g., Zyn, golf, nootropics)..." 
+                        style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 1rem; color: var(--text-primary); font-size: 0.85rem; font-family: Inter, sans-serif;">
+                    <select id="trendsTypeFilter" 
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 0.75rem; color: var(--text-primary); font-size: 0.85rem; font-family: Inter, sans-serif;">
+                        <option value="all">All Updates</option>
+                        <option value="morning">Morning Briefing</option>
+                        <option value="midday">Midday Pulse</option>
+                        <option value="evening">Evening Wrap</option>
+                    </select>
+                    <select id="trendsDaysFilter"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 0.75rem; color: var(--text-primary); font-size: 0.85rem; font-family: Inter, sans-serif;">
+                        <option value="7">Last 7 days</option>
+                        <option value="14" selected>Last 14 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="0">All time</option>
+                    </select>
+                    <div id="trendsCount" style="font-size: 0.75rem; color: var(--text-muted);">--</div>
+                </div>
+            </div>
+
+            <!-- Trends Feed -->
+            <div id="trendsFeed" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌪️</div>
+                    <div style="font-size: 1.1rem; margin-bottom: 0.25rem;">Twister is warming up</div>
+                    <div style="font-size: 0.85rem;">First trend updates will appear at the next scheduled time (7am, 12pm, or 8pm EST)</div>
                 </div>
             </div>
         </div>
@@ -2706,6 +2721,9 @@
                         // Always sync fresh data when switching to revenue tab
                         syncShopifyData();
                     }, 100);
+                }
+                if (tabName === 'trends') {
+                    setTimeout(loadTrends, 100);
                 }
             });
         });
@@ -5200,6 +5218,136 @@
         let currentSkillsFilter = 'all';
         let currentSkillsSearch = '';
         
+        // ============================================
+        // TRENDS TAB (Twister)
+        // ============================================
+        async function loadTrends() {
+            const searchEl = document.getElementById('trendsSearch');
+            const typeEl = document.getElementById('trendsTypeFilter');
+            const daysEl = document.getElementById('trendsDaysFilter');
+            
+            async function fetchAndRender() {
+                const search = searchEl ? searchEl.value : '';
+                const type = typeEl ? typeEl.value : 'all';
+                const days = daysEl ? parseInt(daysEl.value) || 0 : 14;
+                
+                try {
+                    const params = new URLSearchParams();
+                    if (days > 0) params.set('days', days.toString());
+                    if (search) params.set('search', search);
+                    
+                    const response = await fetch(`/api/mc/trends?${params}`);
+                    const data = await response.json();
+                    let trends = data.trends || [];
+                    
+                    // Client-side type filter
+                    if (type !== 'all') {
+                        trends = trends.filter(t => t.type === type);
+                    }
+                    
+                    renderTrendsFeed(trends);
+                    const countEl = document.getElementById('trendsCount');
+                    if (countEl) countEl.textContent = `${trends.length} update${trends.length !== 1 ? 's' : ''}`;
+                } catch (err) {
+                    console.error('Failed to load trends:', err);
+                    renderTrendsFeed([]);
+                }
+            }
+            
+            // Bind filters
+            if (searchEl) {
+                let debounce;
+                searchEl.addEventListener('input', () => {
+                    clearTimeout(debounce);
+                    debounce = setTimeout(fetchAndRender, 300);
+                });
+            }
+            if (typeEl) typeEl.addEventListener('change', fetchAndRender);
+            if (daysEl) daysEl.addEventListener('change', fetchAndRender);
+            
+            fetchAndRender();
+        }
+        
+        function renderTrendsFeed(trends) {
+            const feed = document.getElementById('trendsFeed');
+            if (!feed) return;
+            
+            if (trends.length === 0) {
+                feed.innerHTML = `
+                    <div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌪️</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 0.25rem;">No trend updates found</div>
+                        <div style="font-size: 0.85rem;">Twister posts at 7am, 12pm, and 8pm EST daily</div>
+                    </div>`;
+                return;
+            }
+            
+            const typeLabels = {
+                morning: '☀️ Morning Briefing',
+                midday: '🔆 Midday Pulse',
+                evening: '🌙 Evening Wrap'
+            };
+            
+            const typeColors = {
+                morning: 'rgba(251, 191, 36, 0.15)',
+                midday: 'rgba(96, 165, 250, 0.15)',
+                evening: 'rgba(192, 132, 252, 0.15)'
+            };
+            
+            const typeBorders = {
+                morning: '#fbbf24',
+                midday: '#60a5fa',
+                evening: '#c084fc'
+            };
+            
+            feed.innerHTML = trends.map(trend => {
+                const date = new Date(trend.timestamp);
+                const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                const label = typeLabels[trend.type] || trend.type;
+                const bgColor = typeColors[trend.type] || 'rgba(255,255,255,0.03)';
+                const borderColor = typeBorders[trend.type] || 'rgba(255,255,255,0.1)';
+                
+                // Process content: highlight Yippy Radar sections and Founder's Takeaway
+                let content = escapeHtml(trend.content);
+                
+                // Bold Founder's Takeaway
+                content = content.replace(
+                    /(Founder['']s Takeaway:?\s*)(.*?)(\n|$)/gi,
+                    '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">$1</strong><strong>$2</strong></div>'
+                );
+                
+                // Highlight Yippy Radar section
+                content = content.replace(
+                    /(Yippy Radar.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠])|\s*$)/gis,
+                    '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(10, 75, 44, 0.15); border: 1px solid rgba(10, 75, 44, 0.3); border-radius: 6px;">$1</div>'
+                );
+                
+                // Color relevance tags
+                content = content.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
+                content = content.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
+                content = content.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
+                
+                // Convert newlines to breaks
+                content = content.replace(/\n/g, '<br>');
+                
+                return `
+                    <div class="glass-card" style="padding: 1.25rem; border-left: 3px solid ${borderColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">${label} — ${dateStr}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); background: ${bgColor}; padding: 0.2rem 0.6rem; border-radius: 4px;">${timeStr}</div>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">${content}</div>
+                    </div>`;
+            }).join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function loadSkills() {
             renderSkillsGrid();
             
@@ -5302,6 +5450,112 @@
         function closeSkillsPanel() {
             document.getElementById('skillsPanelOverlay').classList.remove('active');
             document.getElementById('skillsPanel').classList.remove('active');
+        }
+
+        // ============================================
+        // TRENDS TAB (Twister)
+        // ============================================
+        async function loadTrends() {
+            const search = document.getElementById('trendsSearch')?.value || '';
+            const typeFilter = document.getElementById('trendsTypeFilter')?.value || 'all';
+            const days = document.getElementById('trendsDaysFilter')?.value || '14';
+            
+            try {
+                let url = `/api/mc/trends?days=${days}`;
+                if (search) url += `&q=${encodeURIComponent(search)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                let entries = data.entries || [];
+                
+                // Client-side type filter
+                if (typeFilter !== 'all') {
+                    entries = entries.filter(e => e.type === typeFilter);
+                }
+                
+                const feed = document.getElementById('trendsFeed');
+                const countEl = document.getElementById('trendsCount');
+                
+                if (entries.length === 0) {
+                    feed.innerHTML = `
+                        <div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌪️</div>
+                            <div style="font-size: 1.1rem; margin-bottom: 0.25rem;">${search ? 'No results for "' + search + '"' : 'Twister is warming up'}</div>
+                            <div style="font-size: 0.85rem;">${search ? 'Try a different search term' : 'First trend updates will appear at the next scheduled time (7am, 12pm, or 8pm EST)'}</div>
+                        </div>`;
+                    countEl.textContent = '0 updates';
+                    return;
+                }
+                
+                countEl.textContent = `${entries.length} update${entries.length !== 1 ? 's' : ''}`;
+                
+                const typeLabels = {
+                    morning: { label: 'Morning Briefing', icon: '☀️', color: '#fbbf24' },
+                    midday: { label: 'Midday Pulse', icon: '⚡', color: '#60a5fa' },
+                    evening: { label: 'Evening Wrap', icon: '🌙', color: '#c084fc' }
+                };
+                
+                feed.innerHTML = entries.map(entry => {
+                    const meta = typeLabels[entry.type] || { label: entry.type, icon: '📊', color: '#4ade80' };
+                    const date = new Date(entry.timestamp);
+                    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                    const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    
+                    // Convert markdown-ish content to HTML
+                    let html = (entry.content || '')
+                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/^### (.+)$/gm, '<h4 style="color: var(--text-primary); margin: 1rem 0 0.5rem; font-size: 0.95rem;">$1</h4>')
+                        .replace(/^## (.+)$/gm, '<h3 style="color: var(--text-primary); margin: 1rem 0 0.5rem; font-size: 1rem;">$1</h3>')
+                        .replace(/^- (.+)$/gm, '<div style="padding: 0.2rem 0 0.2rem 1rem; border-left: 2px solid rgba(255,255,255,0.1);">$1</div>')
+                        .replace(/\n\n/g, '<br><br>')
+                        .replace(/\n/g, '<br>');
+                    
+                    // Highlight Yippy Radar section
+                    html = html.replace(/(🎯 YIPPY RADAR.*?)(?=<h[34]|$)/gs, 
+                        '<div style="background: rgba(10, 75, 44, 0.15); border: 1px solid rgba(10, 75, 44, 0.3); border-radius: 8px; padding: 0.75rem; margin: 0.75rem 0;">$1</div>');
+                    
+                    // Highlight Founder's Takeaway
+                    html = html.replace(/(Founder.s Takeaway.*?)(?=<br><br>|$)/gs,
+                        '<div style="background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; padding: 0.5rem 0.75rem; margin: 0.75rem 0; font-weight: 600;">$1</div>');
+                    
+                    // Highlight search terms
+                    if (search) {
+                        const regex = new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        html = html.replace(regex, '<mark style="background: rgba(251, 191, 36, 0.3); color: var(--text-primary); padding: 0 2px; border-radius: 2px;">$1</mark>');
+                    }
+                    
+                    return `
+                        <div class="glass-card" style="padding: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">${meta.icon}</span>
+                                    <span style="font-weight: 600; color: ${meta.color};">${meta.label}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">— ${dateStr}</span>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${timeStr}</span>
+                            </div>
+                            <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);">
+                                ${html}
+                            </div>
+                        </div>`;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Failed to load trends:', error);
+            }
+        }
+        
+        // Setup trends tab event listeners
+        document.getElementById('trendsSearch')?.addEventListener('input', debounce(loadTrends, 300));
+        document.getElementById('trendsTypeFilter')?.addEventListener('change', loadTrends);
+        document.getElementById('trendsDaysFilter')?.addEventListener('change', loadTrends);
+        
+        function debounce(fn, ms) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), ms);
+            };
         }
 
         // ============================================
