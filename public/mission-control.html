@@ -5490,23 +5490,7 @@
                 console.error('Timeline error:', e);
             }
             
-            try {
-                loadClients();
-            } catch (e) {
-                console.error('Clients error:', e);
-            }
-            
-            try {
-                updateRevenueGauge();
-            } catch (e) {
-                console.error('Revenue gauge error:', e);
-            }
-            
-            try {
-                drawRevenueChart();
-            } catch (e) {
-                console.error('Revenue chart error:', e);
-            }
+            // loadClients, updateRevenueGauge, drawRevenueChart removed (old dashboard elements)
             
             // Initialize Command Center
             try {
@@ -5551,7 +5535,7 @@
         
         // Update metrics every 60 seconds
         setInterval(updateMetrics, 60000);
-        setInterval(updateRevenueGauge, 60000);
+        // setInterval(updateRevenueGauge, 60000); // removed (old dashboard element)
     </script>
 </body>
 </html>
