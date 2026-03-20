@@ -5492,6 +5492,9 @@
                 evening: '#c084fc'
             };
 
+            // Find the absolute latest trend (across all days)
+            const latestTrendId = trends.length > 0 ? trends[0].id : null;
+
             // Group trends by date (YYYY-MM-DD) using actual creation time
             const grouped = {};
             trends.forEach(t => {
@@ -5536,7 +5539,7 @@
 
                 // Today: latest report expanded, older ones collapsed
                 dayTrends.forEach((trend, idx) => {
-                    const isLatest = idx === 0;
+                    const isLatest = trend.id === latestTrendId;
                     if (isLatest) {
                         // Fully expanded — the main visible report
                         html += renderSingleTrend(trend, typeLabels, typeColors, typeBorders, false);
