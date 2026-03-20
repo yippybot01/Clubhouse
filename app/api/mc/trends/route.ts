@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     }
     
     // Sort reverse chronological by actual creation time
-    trends.sort((a: any, b: any) => new Date(b.createdAt || b.timestamp).getTime() - new Date(a.createdAt || a.timestamp).getTime());
+    trends.sort((a: any, b: any) => new Date(b.timestamp || b.createdAt).getTime() - new Date(a.timestamp || a.createdAt).getTime());
     
     return NextResponse.json({ trends, count: trends.length });
   } catch (error: any) {
