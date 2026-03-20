@@ -1920,6 +1920,7 @@
                 <button class="tab" data-tab="memory">🧠 Memory</button>
                 <button class="tab" data-tab="calendar">📅 Calendar</button>
                 <button class="tab" data-tab="trends">🌪️ Trends</button>
+                <button class="tab" data-tab="morning-news">📰 Morning News</button>
                 <button class="tab" data-tab="brand">🔍 Brand</button>
             </nav>
             
@@ -2326,6 +2327,30 @@
                     <button onclick="saveEvent()" style="flex: 1; padding: 0.7rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Add Event</button>
                 </div>
             </div>
+        </div>
+
+        <div class="tab-content" id="morning-news-tab">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin: 0;">Morning News</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.3rem 0 0;">Daily briefing at 7:30 AM EST</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <select id="newsViewFilter"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 0.75rem; color: var(--text-primary); font-size: 0.85rem;">
+                        <option value="today" selected>Today Only</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="month">Last 30 Days</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Today's Brief (Expanded) -->
+            <div id="todayBrief" style="margin-bottom: 1.5rem;"></div>
+
+            <!-- Previous Days (Minimized) -->
+            <div id="previousBriefs"></div>
         </div>
         <!-- SKILLS LIBRARY TAB -->
         <div class="tab-content" id="skills-tab">
@@ -2978,6 +3003,9 @@
                 }
                 if (tabName === 'calendar') {
                     setTimeout(loadCalendar, 100);
+                }
+                if (tabName == 'morning-news') {
+                    setTimeout(loadMorningNews, 100);
                 }
                 if (tabName === 'brand') {
                     setTimeout(loadBrand, 100);
@@ -6404,6 +6432,203 @@
         }
         // MEMORY TAB
         // ============================================
+        // MORNING NEWS TAB
+        let morningNewsBriefs = [];
+        let newsViewFilter = 'today';
+
+        async function loadMorningNews() {
+            try {
+                const res = await fetch('/api/mc/morning-news');
+                const data = await res.json();
+                morningNewsBriefs = data.briefs || [];
+                renderMorningNews();
+            } catch (err) {
+                console.error('Failed to load morning news:', err);
+                morningNewsBriefs = [];
+                renderMorningNews();
+            }
+        }
+
+        function renderMorningNews() {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const todayBriefs = morningNewsBriefs.filter(b => {
+                const briefDate = new Date(b.timestamp);
+                return briefDate >= todayStart;
+            });
+
+            const previousBriefs = morningNewsBriefs.filter(b => {
+                const briefDate = new Date(b.timestamp);
+                return briefDate < todayStart;
+            });
+
+            // Filter based on view selection
+            let filteredPrevious = previousBriefs;
+            if (newsViewFilter === 'week') {
+                const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                filteredPrevious = previousBriefs.filter(b => new Date(b.timestamp).getTime() > weekAgo);
+            } else if (newsViewFilter === 'today') {
+                filteredPrevious = []; // Only show today
+            }
+            // 'month' shows all (default from API)
+
+            // Render today's brief (expanded)
+            const todayEl = document.getElementById('todayBrief');
+            if (todayBriefs.length > 0) {
+                todayEl.innerHTML = renderBriefExpanded(todayBriefs[0]);
+            } else {
+                todayEl.innerHTML = `
+                    <div class="glass-card" style="padding: 2rem; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📰</div>
+                        <div style="color: var(--text-muted); font-size: 0.9rem;">No brief yet today</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Next update at 7:30 AM EST</div>
+                    </div>
+                `;
+            }
+
+            // Render previous briefs (minimized)
+            const prevEl = document.getElementById('previousBriefs');
+            if (filteredPrevious.length > 0 && newsViewFilter !== 'today') {
+                prevEl.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-muted); margin: 0 0 0.75rem;">Previous Briefs</h3>
+                    </div>
+                    ${filteredPrevious.map(renderBriefMinimized).join('')}
+                `;
+            } else {
+                prevEl.innerHTML = '';
+            }
+        }
+
+        function renderBriefExpanded(brief) {
+            const date = new Date(brief.timestamp);
+            const dateStr = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            return `
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">${dateStr}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${brief.market ? `
+                        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #10b981; margin-bottom: 0.5rem;">📈 MARKET UPDATE</div>
+                            <div style="color: var(--text-primary); font-size: 0.9rem; white-space: pre-wrap;">${brief.market}</div>
+                        </div>
+                    ` : ''}
+
+                    ${brief.weather ? `
+                        <div style="background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 0.8rem; font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">🌤️ WEATHER - McAdenville, NC</div>
+                                    <div style="color: var(--text-primary); font-size: 0.9rem; white-space: pre-wrap;">${brief.weather}</div>
+                                </div>
+                                <button onclick="toggleWeekWeather()" style="padding: 0.4rem 0.75rem; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">7-Day Forecast</button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div style="color: var(--text-primary); font-size: 0.9rem; line-height: 1.7; white-space: pre-wrap;">${brief.content}</div>
+                </div>
+            `;
+        }
+
+        function renderBriefMinimized(brief) {
+            const date = new Date(brief.timestamp);
+            const dateStr = date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            const preview = brief.content.substring(0, 120) + '...';
+
+            return `
+                <div class="glass-card" onclick="expandBrief('${brief.id}')" style="padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">${dateStr}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">
+                            ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">${preview}</div>
+                </div>
+            `;
+        }
+
+        function expandBrief(id) {
+            const brief = morningNewsBriefs.find(b => b.id === id);
+            if (!brief) return;
+
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+            modal.innerHTML = `
+                <div style="background: #0f1419; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 2rem; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                    ${renderBriefExpanded(brief)}
+                    <button onclick="this.closest('div[style*=\\'position: fixed\\']').remove()" style="margin-top: 1rem; width: 100%; padding: 0.7rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-size: 0.9rem;">Close</button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        async function toggleWeekWeather() {
+            // Fetch 7-day forecast using weather skill
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 2rem;';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+            modal.innerHTML = `
+                <div style="background: #0f1419; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 2rem; max-width: 600px; width: 100%;" onclick="event.stopPropagation()">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem;">7-Day Forecast - McAdenville, NC</h3>
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading forecast...</div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            try {
+                const res = await fetch('/api/mc/weather?city=McAdenville,NC&days=7');
+                const data = await res.json();
+                
+                modal.querySelector('div[onclick]').innerHTML = `
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem;">7-Day Forecast - McAdenville, NC</h3>
+                    <div style="color: var(--text-primary); font-size: 0.9rem; line-height: 1.7; white-space: pre-wrap;">${data.forecast || 'Forecast unavailable'}</div>
+                    <button onclick="this.closest('div[style*=\\'position: fixed\\']').remove()" style="margin-top: 1.5rem; width: 100%; padding: 0.7rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-size: 0.9rem;">Close</button>
+                `;
+            } catch (err) {
+                modal.querySelector('div[onclick]').innerHTML = `
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem;">7-Day Forecast - McAdenville, NC</h3>
+                    <div style="color: #f87171; font-size: 0.9rem; padding: 2rem; text-align: center;">Failed to load forecast</div>
+                    <button onclick="this.closest('div[style*=\\'position: fixed\\']').remove()" style="margin-top: 1.5rem; width: 100%; padding: 0.7rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-size: 0.9rem;">Close</button>
+                `;
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const newsFilter = document.getElementById('newsViewFilter');
+            if (newsFilter) {
+                newsFilter.addEventListener('change', (e) => {
+                    newsViewFilter = e.target.value;
+                    renderMorningNews();
+                });
+            }
+        });
         let memoryFiles = [];
         let activeMemoryFile = null;
 
