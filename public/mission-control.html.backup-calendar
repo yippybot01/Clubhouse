@@ -2250,74 +2250,44 @@
 
         <!-- TIMELINE TAB -->
         <div class="tab-content" id="calendar-tab">
-            <!-- Calendar Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                 <div>
-                    <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        📅 Calendar
-                    </h2>
-                    <p id="calCurrentLabel" style="font-size: 0.85rem; color: var(--text-muted); margin: 0.3rem 0 0;"></p>
+                    <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0;">Scheduled Tasks</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0;">Yippybot's automated routines</p>
                 </div>
-
-                <div style="display: flex; gap: 0.75rem; align-items: center;">
-                    <!-- View Toggle -->
-                    <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.25rem; border: 1px solid rgba(255,255,255,0.1);">
-                        <button id="viewWeek" onclick="setCalendarView('week')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Week</button>
-                        <button id="viewMonth" onclick="setCalendarView('month')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: rgba(16,185,129,0.15); color: #10b981; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Month</button>
-                        <button id="viewYear" onclick="setCalendarView('year')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Year</button>
-                    </div>
-
-                    <!-- Navigation -->
-                    <button onclick="navigateCalendar('prev')" style="padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer;">◀</button>
-                    <button onclick="navigateCalendar('today')" style="padding: 0.5rem 1rem; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">Today</button>
-                    <button onclick="navigateCalendar('next')" style="padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer;">▶</button>
-
-                    <!-- Add Event Button -->
-                    <button onclick="openAddEventModal()" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
-                        <span>+</span> Add Event
-                    </button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span id="calWeekLabel" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+                    <button onclick="calNavWeek(-1)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">◀</button>
+                    <button onclick="calNavWeek(0)" style="background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">Today</button>
+                    <button onclick="calNavWeek(1)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">▶</button>
                 </div>
             </div>
 
-            <!-- Calendar View Container -->
-            <div class="glass-card" style="padding: 1.5rem; min-height: 500px;">
-                <div id="calendarViewContainer"></div>
+            <!-- Always Running -->
+            <div id="calAlwaysRunning" class="glass-card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: none;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <span style="font-size: 0.9rem;">✨</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">Always Running</span>
+                </div>
+                <div id="calAlwaysRunningList" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
             </div>
-        </div>
 
-        <!-- Add Event Modal -->
-        <div id="addEventModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center;" onclick="closeAddEventModal()">
-            <div style="background: #1f2937; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px;" onclick="event.stopPropagation()">
-                <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.5rem;">Add Event</h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Date</label>
-                        <input type="date" id="eventDate" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Event Title</label>
-                        <input type="text" id="eventTitle" placeholder="Enter event title" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Time (optional)</label>
-                        <input type="time" id="eventTime" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Description (optional)</label>
-                        <textarea id="eventDesc" placeholder="Add details..." rows="3" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; resize: vertical;"></textarea>
-                    </div>
+            <!-- Week Grid -->
+            <div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 1.5rem;">
+                <div id="calWeekGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); min-height: 320px;"></div>
+            </div>
+
+            <!-- Next Up -->
+            <div class="glass-card" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem;">🕐</span>
+                    <span style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">Next Up</span>
                 </div>
-                
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button onclick="closeAddEventModal()" style="flex: 1; padding: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancel</button>
-                    <button onclick="saveEvent()" style="flex: 1; padding: 0.7rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Add Event</button>
-                </div>
+                <div id="calNextUp" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
             </div>
         </div>
+
         <!-- SKILLS LIBRARY TAB -->
         <div class="tab-content" id="skills-tab">
             <div class="skills-library">
@@ -6239,9 +6209,9 @@
 
         // ============================================
         // CALENDAR TAB
-        let calendarView = 'month'; // week, month, or year
-        let calendarDate = new Date();
+        // ============================================
         let calendarEvents = [];
+        let calWeekOffset = 0;
 
         async function loadCalendar() {
             try {
@@ -6251,291 +6221,207 @@
                 renderCalendar();
             } catch (err) {
                 console.error('Failed to load calendar:', err);
-                calendarEvents = [];
-                renderCalendar();
             }
         }
 
-        function setCalendarView(view) {
-            calendarView = view;
-            // Update button styles
-            ['viewWeek', 'viewMonth', 'viewYear'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (id === 'view' + view.charAt(0).toUpperCase() + view.slice(1)) {
-                    btn.style.background = 'rgba(16,185,129,0.15)';
-                    btn.style.color = '#10b981';
-                } else {
-                    btn.style.background = 'none';
-                    btn.style.color = 'var(--text-muted)';
-                }
-            });
+        function calNavWeek(dir) {
+            if (dir === 0) calWeekOffset = 0;
+            else calWeekOffset += dir;
             renderCalendar();
         }
 
-        function navigateCalendar(direction) {
-            if (direction === 'today') {
-                calendarDate = new Date();
-            } else if (direction === 'prev') {
-                if (calendarView === 'week') {
-                    calendarDate.setDate(calendarDate.getDate() - 7);
-                } else if (calendarView === 'month') {
-                    calendarDate.setMonth(calendarDate.getMonth() - 1);
-                } else {
-                    calendarDate.setFullYear(calendarDate.getFullYear() - 1);
-                }
-            } else if (direction === 'next') {
-                if (calendarView === 'week') {
-                    calendarDate.setDate(calendarDate.getDate() + 7);
-                } else if (calendarView === 'month') {
-                    calendarDate.setMonth(calendarDate.getMonth() + 1);
-                } else {
-                    calendarDate.setFullYear(calendarDate.getFullYear() + 1);
-                }
+        function getWeekDates(offset) {
+            const now = new Date();
+            const day = now.getDay(); // 0=Sun
+            const start = new Date(now);
+            start.setDate(now.getDate() - day + (offset * 7));
+            start.setHours(0, 0, 0, 0);
+            
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(start);
+                d.setDate(start.getDate() + i);
+                dates.push(d);
             }
-            renderCalendar();
+            return dates;
         }
 
         function renderCalendar() {
-            updateCalendarLabel();
-            const container = document.getElementById('calendarViewContainer');
-            if (!container) return;
-
-            if (calendarView === 'week') {
-                container.innerHTML = renderWeekView();
-            } else if (calendarView === 'month') {
-                container.innerHTML = renderMonthView();
-            } else {
-                container.innerHTML = renderYearView();
-            }
-        }
-
-        function updateCalendarLabel() {
-            const label = document.getElementById('calCurrentLabel');
-            if (!label) return;
-
-            if (calendarView === 'week') {
-                const weekStart = getWeekStart(calendarDate);
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                label.textContent = `Week of ${weekStart.toLocaleDateString()}`;
-            } else if (calendarView === 'month') {
-                label.textContent = calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            } else {
-                label.textContent = calendarDate.getFullYear();
-            }
-        }
-
-        function getWeekStart(date) {
-            const d = new Date(date);
-            const day = d.getDay();
-            d.setDate(d.getDate() - day);
-            d.setHours(0, 0, 0, 0);
-            return d;
-        }
-
-        function renderWeekView() {
-            const weekStart = getWeekStart(calendarDate);
-            const days = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(weekStart);
-                d.setDate(d.getDate() + i);
-                days.push(d);
-            }
-
+            const dates = getWeekDates(calWeekOffset);
+            const today = new Date();
+            const todayStr = today.toDateString();
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const today = new Date().toDateString();
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
-            
-            // Day headers
-            dayNames.forEach(name => {
-                html += `<div style="text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 0.5rem;">${name}</div>`;
-            });
+            // Week label
+            const weekStart = dates[0];
+            const weekEnd = dates[6];
+            const label = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            document.getElementById('calWeekLabel').textContent = label;
 
-            // Day cells
-            days.forEach(day => {
-                const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => e.date === dateStr);
-                const isToday = day.toDateString() === today;
-
-                html += `
-                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 120px; padding: 0.75rem; border-radius: 8px; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}'">
-                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">${day.getDate()}</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                            ${dayEvents.map(event => `
-                                <div style="font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(96,165,250,0.2); color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${event.title}${event.time ? ' at ' + event.time : ''}">
-                                    ${event.time ? event.time + ' ' : ''}${event.title}
-                                </div>
-                            `).join('')}
-                        </div>
+            // Always Running (interval jobs)
+            const intervalJobs = calendarEvents.filter(e => e.type === 'interval' && e.enabled);
+            const alwaysEl = document.getElementById('calAlwaysRunning');
+            const alwaysListEl = document.getElementById('calAlwaysRunningList');
+            if (intervalJobs.length > 0) {
+                alwaysEl.style.display = 'block';
+                alwaysListEl.innerHTML = intervalJobs.map(e => `
+                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; border-radius: 20px; border: 1px solid ${e.color}40; background: ${e.color}15; font-size: 0.78rem;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: ${e.color}; display: inline-block;"></span>
+                        <span style="color: ${e.color}; font-weight: 500;">${e.name}</span>
+                        <span style="color: var(--text-muted); font-size: 0.7rem;">• ${e.frequency}</span>
                     </div>
-                `;
-            });
-
-            html += '</div>';
-            return html;
-        }
-
-        function renderMonthView() {
-            const year = calendarDate.getFullYear();
-            const month = calendarDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            const days = [];
-            for (let i = 0; i < 42; i++) {
-                const dayNum = i - firstDay + 1;
-                if (dayNum < 1 || dayNum > daysInMonth) {
-                    days.push(null);
-                } else {
-                    days.push(new Date(year, month, dayNum));
-                }
+                `).join('');
+            } else {
+                alwaysEl.style.display = 'none';
             }
 
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const today = new Date().toDateString();
-
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+            // Week grid
+            const scheduledJobs = calendarEvents.filter(e => e.type !== 'interval' && e.enabled);
+            const grid = document.getElementById('calWeekGrid');
             
-            // Day headers
-            dayNames.forEach(name => {
-                html += `<div style="text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 0.5rem;">${name}</div>`;
-            });
+            grid.innerHTML = dates.map((date, i) => {
+                const isToday = date.toDateString() === todayStr;
+                const dayNum = date.getDate();
+                const dow = date.getDay();
 
-            // Day cells
-            days.forEach(day => {
-                if (!day) {
-                    html += '<div style="min-height: 100px;"></div>';
-                    return;
-                }
+                // Get events for this day
+                const dayEvents = scheduledJobs.filter(e => {
+                    if (e.daysOfWeek) return e.daysOfWeek.includes(dow);
+                    return true; // daily jobs show every day
+                }).sort((a, b) => a.hour * 60 + a.minute - (b.hour * 60 + b.minute));
 
-                const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => e.date === dateStr);
-                const isToday = day.toDateString() === today;
-
-                html += `
-                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 100px; padding: 0.5rem; border-radius: 8px; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}'">
-                        <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem;">${day.getDate()}</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-                            ${dayEvents.slice(0, 2).map(event => `
-                                <div style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 3px; background: rgba(96,165,250,0.2); color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${event.title}">
-                                    ${event.title}
-                                </div>
-                            `).join('')}
-                            ${dayEvents.length > 2 ? `<div style="font-size: 0.65rem; color: var(--text-muted);">+${dayEvents.length - 2} more</div>` : ''}
+                return `
+                    <div style="border-right: ${i < 6 ? '1px solid rgba(255,255,255,0.04)' : 'none'}; padding: 0;">
+                        <!-- Day Header -->
+                        <div style="padding: 0.75rem 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); text-align: center;">
+                            <div style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isToday ? '#60a5fa' : 'var(--text-muted)'};">${dayNames[dow]}</div>
+                            <div style="font-size: ${isToday ? '1.1rem' : '0.95rem'}; font-weight: ${isToday ? '700' : '500'}; color: ${isToday ? '#60a5fa' : 'var(--text-primary)'}; margin-top: 0.15rem; ${isToday ? 'background: rgba(96,165,250,0.15); border-radius: 50%; width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center;' : ''}">${dayNum}</div>
                         </div>
-                    </div>
-                `;
-            });
-
-            html += '</div>';
-            return html;
-        }
-
-        function renderYearView() {
-            const year = calendarDate.getFullYear();
-            const months = [];
-            for (let i = 0; i < 12; i++) {
-                months.push(new Date(year, i, 1));
-            }
-
-            let html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">';
-
-            months.forEach(month => {
-                const monthName = month.toLocaleString('en-US', { month: 'long' });
-                const monthStr = `${year}-${String(month.getMonth() + 1).padStart(2, '0')}`;
-                const monthEvents = calendarEvents.filter(e => e.date.startsWith(monthStr));
-
-                html += `
-                    <div onclick="jumpToMonth(${month.getMonth()})" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                        <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">${monthName}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                            ${monthEvents.length} event${monthEvents.length !== 1 ? 's' : ''}
+                        <!-- Events -->
+                        <div style="padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                            ${dayEvents.map(e => {
+                                const h = e.hour > 12 ? e.hour - 12 : (e.hour === 0 ? 12 : e.hour);
+                                const ampm = e.hour >= 12 ? 'PM' : 'AM';
+                                const timeLabel = `${h}:${e.minute.toString().padStart(2, '0')} ${ampm}`;
+                                return `
+                                    <div onclick="showCalEventDetail('${e.id}')" style="background: ${e.color}20; border-left: 3px solid ${e.color}; border-radius: 4px; padding: 0.4rem 0.5rem; cursor: pointer; transition: background 0.15s;" onmouseenter="this.style.background='${e.color}30'" onmouseleave="this.style.background='${e.color}20'">
+                                        <div style="font-size: 0.72rem; font-weight: 600; color: ${e.color}; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${e.name}</div>
+                                        <div style="font-size: 0.62rem; color: var(--text-muted); margin-top: 0.1rem;">${timeLabel}</div>
+                                    </div>`;
+                            }).join('')}
+                            ${dayEvents.length === 0 ? '<div style="font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 0.5rem; opacity: 0.4;">—</div>' : ''}
                         </div>
-                        ${monthEvents.length > 0 ? `
-                            <div style="display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.75rem;">
-                                ${monthEvents.slice(0, 3).map(event => `
-                                    <div style="font-size: 0.75rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        • ${event.title}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
+                    </div>`;
+            }).join('');
 
-            html += '</div>';
-            return html;
+            // Next Up
+            renderNextUp();
         }
 
-        function jumpToMonth(monthIndex) {
-            calendarDate.setMonth(monthIndex);
-            setCalendarView('month');
-        }
-
-        function selectDateForEvent(dateStr) {
-            document.getElementById('eventDate').value = dateStr;
-            openAddEventModal();
-        }
-
-        function openAddEventModal() {
-            const modal = document.getElementById('addEventModal');
-            modal.style.display = 'flex';
+        function renderNextUp() {
+            const nextUpEl = document.getElementById('calNextUp');
+            const now = new Date();
             
-            // Set date to today if not already set
-            const dateInput = document.getElementById('eventDate');
-            if (!dateInput.value) {
-                dateInput.value = new Date().toISOString().split('T')[0];
-            }
-        }
+            // Build list of upcoming events with next run times
+            const upcoming = calendarEvents
+                .filter(e => e.enabled && e.nextRun)
+                .map(e => ({
+                    ...e,
+                    nextRunDate: new Date(e.nextRun),
+                    relativeTime: getRelativeTime(new Date(e.nextRun))
+                }))
+                .filter(e => e.nextRunDate > now)
+                .sort((a, b) => a.nextRunDate - b.nextRunDate)
+                .slice(0, 8);
 
-        function closeAddEventModal() {
-            document.getElementById('addEventModal').style.display = 'none';
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventTime').value = '';
-            document.getElementById('eventDesc').value = '';
-        }
-
-        async function saveEvent() {
-            const date = document.getElementById('eventDate').value;
-            const title = document.getElementById('eventTitle').value;
-            const time = document.getElementById('eventTime').value;
-            const description = document.getElementById('eventDesc').value;
-
-            if (!date || !title) {
-                alert('Please enter a date and title');
+            if (upcoming.length === 0) {
+                nextUpEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">No upcoming tasks</div>';
                 return;
             }
 
-            const newEvent = {
-                id: `event_${Date.now()}`,
-                title,
-                date,
-                type: 'personal',
-                time: time || null,
-                description: description || null
-            };
-
-            try {
-                const res = await fetch('/api/mc/calendar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newEvent)
-                });
-
-                if (res.ok) {
-                    calendarEvents.push(newEvent);
-                    closeAddEventModal();
-                    renderCalendar();
-                } else {
-                    alert('Failed to save event');
-                }
-            } catch (err) {
-                console.error('Failed to save event:', err);
-                alert('Failed to save event');
-            }
+            nextUpEl.innerHTML = upcoming.map(e => `
+                <div onclick="showCalEventDetail('${e.id}')" style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255,255,255,0.02); transition: background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.05)'" onmouseleave="this.style.background='rgba(255,255,255,0.02)'">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${e.color}; flex-shrink: 0;"></span>
+                        <span style="font-size: 0.85rem; font-weight: 500; color: ${e.color};">${e.name}</span>
+                        ${e.model ? `<span style="font-size: 0.6rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 0.15rem 0.4rem; border-radius: 4px;">${e.model}</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap;">${e.relativeTime}</div>
+                </div>
+            `).join('');
         }
+
+        function getRelativeTime(date) {
+            const now = new Date();
+            const diffMs = date - now;
+            if (diffMs < 0) return 'overdue';
+            const mins = Math.floor(diffMs / 60000);
+            if (mins < 1) return 'now';
+            if (mins < 60) return `in ${mins} min`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
+            const days = Math.floor(hours / 24);
+            return `in ${days} day${days > 1 ? 's' : ''}`;
+        }
+
+        function showCalEventDetail(id) {
+            const e = calendarEvents.find(ev => ev.id === id);
+            if (!e) return;
+
+            const h = e.hour > 12 ? e.hour - 12 : (e.hour === 0 ? 12 : e.hour);
+            const ampm = e.hour >= 12 ? 'PM' : 'AM';
+            const timeLabel = e.hour >= 0 ? `${h}:${e.minute.toString().padStart(2, '0')} ${ampm}` : 'Interval';
+            
+            const statusIcon = e.lastStatus === 'ok' ? '✅' : e.lastStatus === 'error' ? '❌' : '⏳';
+            const lastRunStr = e.lastRun ? new Date(e.lastRun).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never';
+            const nextRunStr = e.nextRun ? new Date(e.nextRun).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'N/A';
+
+            // Simple modal overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+            overlay.onclick = (ev) => { if (ev.target === overlay) overlay.remove(); };
+
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, rgba(15,29,50,0.98), rgba(10,22,40,0.98)); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+                        <div>
+                            <div style="font-size: 1.15rem; font-weight: 700; color: ${e.color};">${e.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">${e.frequency}</div>
+                        </div>
+                        <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0.25rem;">✕</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Time</div>
+                            <div style="font-size: 0.9rem; color: var(--text-primary); font-weight: 600;">${timeLabel}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Model</div>
+                            <div style="font-size: 0.9rem; color: var(--text-primary); font-weight: 600;">${e.model || 'default'}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Last Run</div>
+                            <div style="font-size: 0.85rem; color: var(--text-primary);">${statusIcon} ${lastRunStr}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Next Run</div>
+                            <div style="font-size: 0.85rem; color: var(--text-primary);">${nextRunStr}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${e.enabled ? '#4ade80' : '#f87171'};"></span>
+                        <span style="font-size: 0.8rem; color: ${e.enabled ? '#4ade80' : '#f87171'}; font-weight: 500;">${e.enabled ? 'Enabled' : 'Disabled'}</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">• ${e.type}</span>
+                        <span style="font-size: 0.6rem; color: var(--text-muted); margin-left: auto; font-family: monospace;">${e.id.substring(0, 8)}</span>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(overlay);
+        }
+
+        // ============================================
         // MEMORY TAB
         // ============================================
         let memoryFiles = [];
