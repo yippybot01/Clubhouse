@@ -6511,7 +6511,7 @@
 
             // Check if this is structured JSON data
             let briefData = null;
-            if (brief.structured && brief.content) {
+            if (brief.content) {
                 try {
                     briefData = JSON.parse(brief.content);
                 } catch (e) {

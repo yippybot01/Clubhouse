@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       content: body.content || '',
       market: body.market || null,
       weather: body.weather || null,
+      structured: body.structured || false,
       createdAt: new Date().toISOString()
     };
 
