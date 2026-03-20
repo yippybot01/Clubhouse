@@ -2575,40 +2575,10 @@
                 <!-- Populated by JS -->
             </div>
 
-            <!-- Section 4: Inspiration Corner -->
-            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 2rem 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Inspiration: What Poppi Does Well</h3>
-            <div class="glass-card" style="padding: 1.5rem;">
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="padding: 1rem; background: rgba(251, 191, 36, 0.05); border-left: 3px solid #fbbf24; border-radius: 8px;">
-                        <div style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem;">🎯 Authentic Community Building</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
-                            Poppi excels at making customers feel like part of a movement, not just buyers. They share real stories, celebrate user content, and engage genuinely.
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
-                            <strong style="color: var(--accent);">How to apply:</strong> Feature real Yippy users in your content. Share their stories about focus, energy, or performance. Make them the heroes.
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 1rem; background: rgba(96, 165, 250, 0.05); border-left: 3px solid #60a5fa; border-radius: 8px;">
-                        <div style="font-size: 0.9rem; font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">✨ Playful Brand Voice</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
-                            Their tone is friendly, approachable, and fun without being unprofessional. They don't take themselves too seriously.
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
-                            <strong style="color: var(--accent);">How to apply:</strong> Inject more personality into captions and copy. Use humor where appropriate. Show the human side of Yippy.
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 1rem; background: rgba(192, 132, 252, 0.05); border-left: 3px solid #c084fc; border-radius: 8px;">
-                        <div style="font-size: 0.9rem; font-weight: 600; color: #c084fc; margin-bottom: 0.5rem;">🚀 Strategic Partnerships</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
-                            Poppi partners with influencers and brands that align with their values and reach their target audience authentically.
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
-                            <strong style="color: var(--accent);">How to apply:</strong> Identify micro-influencers in golf, gaming, and wellness. Send them Yippy for authentic reviews. Build long-term relationships.
-                        </div>
-                    </div>
-                </div>
+            <!-- Section 4: Inspiration Corner (Poppi Playbook) -->
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 2rem 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Poppi Playbook: Lessons for Yippy</h3>
+            <div id="brandPoppiInsights" class="glass-card" style="padding: 1.5rem;">
+                <!-- Populated by JS -->
             </div>
         </div>
     </main>
@@ -5698,22 +5668,22 @@
             // Instagram
             if (data.brand?.social?.instagram) {
                 const ig = data.brand.social.instagram;
-                document.getElementById('brandIgFollowers').textContent = ig.followers ? ig.followers.toLocaleString() : '--';
-                document.getElementById('brandIgPosts').textContent = ig.posts || '--';
+                document.getElementById('brandIgFollowers').textContent = typeof ig.followers === 'number' ? ig.followers.toLocaleString() : (ig.followers || '--');
+                document.getElementById('brandIgPosts').textContent = typeof ig.posts === 'number' ? ig.posts.toLocaleString() : (ig.posts || '--');
                 document.getElementById('brandIgActivity').textContent = ig.postFrequency || 'Unknown';
             }
 
             // Twitter
             if (data.brand?.social?.twitter) {
                 const tw = data.brand.social.twitter;
-                document.getElementById('brandTwitterFollowers').textContent = tw.followers ? tw.followers.toLocaleString() : 'API required';
+                document.getElementById('brandTwitterFollowers').textContent = typeof tw.followers === 'number' ? tw.followers.toLocaleString() : (tw.followers || '--');
             }
 
             // TikTok
             if (data.brand?.social?.tiktok) {
                 const tt = data.brand.social.tiktok;
-                document.getElementById('brandTikTokFollowers').textContent = tt.followers ? tt.followers.toLocaleString() : '--';
-                document.getElementById('brandTikTokLikes').textContent = tt.likes ? tt.likes.toLocaleString() : '--';
+                document.getElementById('brandTikTokFollowers').textContent = typeof tt.followers === 'number' ? tt.followers.toLocaleString() : (tt.followers || '--');
+                document.getElementById('brandTikTokLikes').textContent = typeof tt.likes === 'number' ? tt.likes.toLocaleString() : (tt.likes || '--');
             }
 
             // Competitor comparison
@@ -5721,6 +5691,50 @@
 
             // Recommendations
             renderRecommendations(data.recommendations || []);
+
+            // Poppi Insights
+            renderPoppiInsights(data.poppiInsights || []);
+        }
+
+        function renderPoppiInsights(insights) {
+            const container = document.getElementById('brandPoppiInsights');
+            if (!container) return;
+            const colors = ['#fbbf24', '#60a5fa', '#c084fc', '#4ade80'];
+            const bgColors = ['rgba(251,191,36,0.05)', 'rgba(96,165,250,0.05)', 'rgba(192,132,252,0.05)', 'rgba(74,222,128,0.05)'];
+            
+            if (insights.length === 0) {
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="padding: 1rem; background: rgba(251,191,36,0.05); border-left: 3px solid #fbbf24; border-radius: 8px;">
+                            <div style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem;">🎯 Founder-Led TikTok Content</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">Poppi co-founder filmed casual TikToks that drove $100K in sales overnight. Authenticity beats production quality.</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;"><strong style="color: var(--accent);">Apply:</strong> Mike films short golf course videos with Yippy. Show the story, not just the product.</div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(96,165,250,0.05); border-left: 3px solid #60a5fa; border-radius: 8px;">
+                            <div style="font-size: 0.9rem; font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">✨ Community Over Customers</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">Poppi built a cult following by making fans insiders. They reposted UGC and fans created content voluntarily.</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;"><strong style="color: var(--accent);">Apply:</strong> Build the 'Yippy Golf Club'. Feature customer course photos, create #PouchOnTheCourse.</div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(192,132,252,0.05); border-left: 3px solid #c084fc; border-radius: 8px;">
+                            <div style="font-size: 0.9rem; font-weight: 600; color: #c084fc; margin-bottom: 0.5rem;">🚀 Lifestyle Brand, Not Supplement</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">Poppi's "Soda that loves you back" positioned them as lifestyle, not health food. Bold and fun beats clinical.</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;"><strong style="color: var(--accent);">Apply:</strong> Position Yippy as "the golfer's edge" — part of the golf experience, not a supplement.</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '<div style="display: flex; flex-direction: column; gap: 1rem;">' + 
+                insights.map((insight, i) => {
+                    const c = colors[i % colors.length];
+                    const bg = bgColors[i % bgColors.length];
+                    return `
+                        <div style="padding: 1rem; background: ${bg}; border-left: 3px solid ${c}; border-radius: 8px;">
+                            <div style="font-size: 0.9rem; font-weight: 600; color: ${c}; margin-bottom: 0.5rem;">🎯 ${insight.tactic}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">${insight.whatPoppiDid}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;"><strong style="color: var(--accent);">How to apply:</strong> ${insight.howYippyCanApply}</div>
+                        </div>`;
+                }).join('') + '</div>';
         }
 
         function renderCompetitorComparison(data) {
@@ -5730,34 +5744,62 @@
                 return;
             }
 
+            const fmtFollowers = (v) => typeof v === 'number' ? v.toLocaleString() : (v || 'N/A');
+
+            // Comparison table
             let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">';
             html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">';
             html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Brand</th>';
-            html += '<th style="text-align: center; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">SEO Score</th>';
+            html += '<th style="text-align: center; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">SEO</th>';
             html += '<th style="text-align: center; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Instagram</th>';
-            html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Key Differentiators</th>';
+            html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Strengths</th>';
+            html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Weaknesses</th>';
             html += '</tr></thead><tbody>';
 
             // Yippy row
             html += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(74, 222, 128, 0.05);">';
-            html += '<td style="padding: 0.75rem; font-weight: 600; color: #4ade80;">Yippy (Us)</td>';
-            html += `<td style="padding: 0.75rem; text-align: center; font-weight: 600;">${data.brand?.website?.seoScore || 'N/A'}</td>`;
-            html += `<td style="padding: 0.75rem; text-align: center;">${data.brand?.social?.instagram?.followers ? data.brand.social.instagram.followers.toLocaleString() : 'N/A'}</td>`;
-            html += '<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">Non-nicotine, functional ingredients</td>';
+            html += '<td style="padding: 0.75rem; font-weight: 600; color: #4ade80;">⛳ Yippy</td>';
+            html += `<td style="padding: 0.75rem; text-align: center; font-weight: 600; color: #4ade80;">${data.brand?.website?.seoScore || '--'}</td>`;
+            html += `<td style="padding: 0.75rem; text-align: center;">${fmtFollowers(data.brand?.social?.instagram?.followers)}</td>`;
+            html += '<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">Only golf-positioned brand, two formulas, strong SEO</td>';
+            html += '<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">Early-stage social, no Amazon, no retail</td>';
             html += '</tr>';
 
-            // Competitor rows
             data.competitors.forEach(comp => {
+                const seo = comp.website?.seoScore || '--';
+                const seoColor = seo >= 80 ? '#4ade80' : seo >= 60 ? '#fbbf24' : '#f87171';
                 html += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">';
                 html += `<td style="padding: 0.75rem; font-weight: 500; color: var(--text-primary);">${comp.name}</td>`;
-                html += `<td style="padding: 0.75rem; text-align: center;">${comp.website?.seoScore || 'N/A'}</td>`;
-                html += `<td style="padding: 0.75rem; text-align: center;">${comp.social?.instagram?.followers ? comp.social.instagram.followers.toLocaleString() : 'N/A'}</td>`;
-                const strengths = (comp.strengths || []).slice(0, 2).join(', ') || 'N/A';
-                html += `<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">${strengths}</td>`;
+                html += `<td style="padding: 0.75rem; text-align: center; color: ${seoColor}; font-weight: 600;">${seo}</td>`;
+                html += `<td style="padding: 0.75rem; text-align: center;">${fmtFollowers(comp.social?.instagram?.followers)}</td>`;
+                const strengths = (comp.strengths || []).slice(0, 2).map(s => '✓ ' + s).join('<br>');
+                const weaknesses = (comp.weaknesses || []).slice(0, 2).map(s => '✗ ' + s).join('<br>');
+                html += `<td style="padding: 0.75rem; color: #4ade80; font-size: 0.72rem; line-height: 1.5;">${strengths || 'N/A'}</td>`;
+                html += `<td style="padding: 0.75rem; color: #f87171; font-size: 0.72rem; line-height: 1.5;">${weaknesses || 'N/A'}</td>`;
                 html += '</tr>';
             });
 
             html += '</tbody></table></div>';
+
+            // Competitive Gaps section
+            if (data.competitiveGaps) {
+                const gaps = data.competitiveGaps;
+                html += `<div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.15); border-radius: 10px;">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">🎯 Biggest Opportunity</div>
+                    <div style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; margin-bottom: 1rem;">${gaps.biggestOpportunity || ''}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.75rem; font-weight: 600; color: #4ade80; margin-bottom: 0.5rem;">Our Advantages</div>
+                            ${(gaps.yippyAdvantages || []).map(a => `<div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.3rem; padding-left: 0.75rem; border-left: 2px solid #4ade80;">✓ ${a}</div>`).join('')}
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; font-weight: 600; color: #f87171; margin-bottom: 0.5rem;">Gaps to Close</div>
+                            ${(gaps.yippyDisadvantages || []).map(d => `<div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.3rem; padding-left: 0.75rem; border-left: 2px solid #f87171;">✗ ${d}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }
+
             container.innerHTML = html;
         }
 
