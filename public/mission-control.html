@@ -1916,7 +1916,7 @@
                 <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
                 <button class="tab" data-tab="revenue">💰 Revenue</button>
                 <button class="tab" data-tab="command">🏢 Team</button>
-                <button class="tab" data-tab="projects">📋 Projects</button>
+                <button class="tab" data-tab="tasks">📋 Tasks</button>
                 <button class="tab" data-tab="skills">🎯 Skills</button>
                 <button class="tab" data-tab="memory">🧠 Memory</button>
                 <button class="tab" data-tab="calendar">📅 Calendar</button>
@@ -2211,34 +2211,40 @@
         </div>
 
         <!-- PROJECTS TAB -->
-        <div class="tab-content" id="projects-tab">
-            <div class="kanban-board">
-                <div class="kanban-column">
-                    <div class="kanban-header">
-                        <h3 class="kanban-title">Backlog</h3>
-                        <span class="kanban-count" id="backlogCount">0</span>
-                    </div>
-                    <div id="backlog-tasks"></div>
-                    <button class="add-task-btn" onclick="addTask('backlog')">+ Add Task</button>
+        <div class="tab-content" id="tasks-tab">
+            <!-- Stats Bar -->
+            <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: baseline; gap: 0.35rem;">
+                    <span id="taskStatInProgress" style="font-size: 1.6rem; font-weight: 700; color: #60a5fa;">0</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">In Progress</span>
                 </div>
-                
-                <div class="kanban-column">
-                    <div class="kanban-header">
-                        <h3 class="kanban-title">In Progress</h3>
-                        <span class="kanban-count" id="inProgressCount">0</span>
-                    </div>
-                    <div id="inProgress-tasks"></div>
-                    <button class="add-task-btn" onclick="addTask('inProgress')">+ Add Task</button>
+                <div style="display: flex; align-items: baseline; gap: 0.35rem;">
+                    <span id="taskStatTotal" style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary);">0</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Total</span>
                 </div>
-                
-                <div class="kanban-column">
-                    <div class="kanban-header">
-                        <h3 class="kanban-title">Done</h3>
-                        <span class="kanban-count" id="doneCount">0</span>
-                    </div>
-                    <div id="done-tasks"></div>
-                    <button class="add-task-btn" onclick="addTask('done')">+ Add Task</button>
+                <div style="display: flex; align-items: baseline; gap: 0.35rem;">
+                    <span id="taskStatCompletion" style="font-size: 1.6rem; font-weight: 700; color: #4ade80;">0%</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Completion</span>
                 </div>
+            </div>
+
+            <!-- Controls -->
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+                <button onclick="openNewTaskModal()" style="background: linear-gradient(135deg, #4ade80, #22c55e); color: #000; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">+ New Task</button>
+                <button onclick="filterTasks('all')" class="task-filter-btn active" data-filter="all" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--text-primary); padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">All</button>
+                <button onclick="filterTasks('mike')" class="task-filter-btn" data-filter="mike" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Mike</button>
+                <button onclick="filterTasks('yippybot')" class="task-filter-btn" data-filter="yippybot" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Yippybot</button>
+                <select id="taskProjectFilter" onchange="filterTasks(currentTaskFilter)" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                    <option value="all">All Projects</option>
+                </select>
+            </div>
+
+            <!-- Kanban Board -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; align-items: start;">
+                <div class="task-column" id="taskCol-backlog"></div>
+                <div class="task-column" id="taskCol-in-progress"></div>
+                <div class="task-column" id="taskCol-review"></div>
+                <div class="task-column" id="taskCol-done"></div>
             </div>
         </div>
 
@@ -4151,77 +4157,7 @@
         // ============================================
         // KANBAN BOARD
         // ============================================
-        function loadTasks() {
-            const tasks = safeGetArray('tasks');
-            
-            ['backlog', 'inProgress', 'done'].forEach(status => {
-                const statusTasks = tasks.filter(t => t.status === status);
-                const container = document.getElementById(`${status}-tasks`);
-                
-                container.innerHTML = statusTasks.map((task, i) => `
-                    <div class="task-card" onclick="editTask('${status}', ${i})">
-                        <div class="task-header">
-                            <div class="task-title">${task.title}</div>
-                            <span class="task-priority priority-${task.priority}">${task.priority}</span>
-                        </div>
-                        <div class="task-description">${task.description}</div>
-                        <div class="task-date">${task.date}</div>
-                    </div>
-                `).join('');
-                
-                // Update count
-                document.getElementById(`${status}Count`).textContent = statusTasks.length;
-            });
-        }
-        
-        function addTask(status) {
-            const title = prompt('Task title:');
-            if (!title) return;
-            
-            const description = prompt('Description (optional):') || '';
-            const priority = prompt('Priority (high/medium/low):') || 'medium';
-            
-            const tasks = safeGetArray('tasks');
-            tasks.push({
-                title,
-                description,
-                priority: priority.toLowerCase(),
-                status,
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            });
-            
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            loadTasks();
-            addActivity(`Added task: ${title}`);
-            updateMetrics();
-        }
-        
-        function editTask(status, index) {
-            const tasks = safeGetArray('tasks');
-            const statusTasks = tasks.filter(t => t.status === status);
-            const task = statusTasks[index];
-            
-            const action = prompt(`Edit task "${task.title}"\n\n1. Move to another column\n2. Delete\n3. Cancel\n\nEnter choice (1-3):`);
-            
-            if (action === '1') {
-                const newStatus = prompt('Move to (backlog/inProgress/done):');
-                if (['backlog', 'inProgress', 'done'].includes(newStatus)) {
-                    const taskIndex = tasks.indexOf(task);
-                    tasks[taskIndex].status = newStatus;
-                    localStorage.setItem('tasks', JSON.stringify(tasks));
-                    loadTasks();
-                    updateMetrics();
-                    addActivity(`Moved task "${task.title}" to ${newStatus}`);
-                }
-            } else if (action === '2') {
-                const taskIndex = tasks.indexOf(task);
-                tasks.splice(taskIndex, 1);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                loadTasks();
-                updateMetrics();
-                addActivity(`Deleted task: ${task.title}`);
-            }
-        }
+        // Old localStorage task functions removed — replaced by Task Board API
 
         // ============================================
         // TIMELINE
@@ -5426,6 +5362,290 @@
         }
 
         // ============================================
+        // TASK BOARD
+        // ============================================
+        let allTasks = [];
+        let currentTaskFilter = 'all';
+
+        const TASK_COLUMNS = [
+            { id: 'backlog', label: 'Backlog', color: '#a78bfa', icon: '⚪' },
+            { id: 'in-progress', label: 'In Progress', color: '#60a5fa', icon: '🔵' },
+            { id: 'review', label: 'Review', color: '#fb923c', icon: '🟠' },
+            { id: 'done', label: 'Done', color: '#4ade80', icon: '🟢' }
+        ];
+
+        const PRIORITY_COLORS = {
+            critical: '#f87171',
+            high: '#fb923c',
+            medium: '#fbbf24',
+            low: '#60a5fa'
+        };
+
+        const ASSIGNEE_COLORS = {
+            mike: '#c084fc',
+            yippybot: '#4ade80'
+        };
+
+        async function loadTasks() {
+            try {
+                const res = await fetch('/api/mc/tasks');
+                const data = await res.json();
+                allTasks = data.tasks || [];
+                
+                if (data.stats) {
+                    document.getElementById('taskStatInProgress').textContent = data.stats.inProgress;
+                    document.getElementById('taskStatTotal').textContent = data.stats.total;
+                    document.getElementById('taskStatCompletion').textContent = data.stats.completion + '%';
+                }
+
+                // Populate project filter
+                const projects = [...new Set(allTasks.map(t => t.project))].sort();
+                const projSelect = document.getElementById('taskProjectFilter');
+                if (projSelect) {
+                    const current = projSelect.value;
+                    projSelect.innerHTML = '<option value="all">All Projects</option>' + 
+                        projects.map(p => `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`).join('');
+                }
+
+                renderTaskBoard();
+            } catch (err) {
+                console.error('Failed to load tasks:', err);
+            }
+        }
+
+        function filterTasks(filter) {
+            if (filter !== 'all' && filter !== 'mike' && filter !== 'yippybot') filter = 'all';
+            currentTaskFilter = filter;
+            document.querySelectorAll('.task-filter-btn').forEach(btn => {
+                const isActive = btn.dataset.filter === filter;
+                btn.style.background = isActive ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)';
+                btn.style.borderColor = isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)';
+                btn.style.color = isActive ? 'var(--text-primary)' : 'var(--text-muted)';
+            });
+            renderTaskBoard();
+        }
+
+        function renderTaskBoard() {
+            const projectFilter = document.getElementById('taskProjectFilter')?.value || 'all';
+
+            let filtered = allTasks;
+            if (currentTaskFilter === 'mike') filtered = filtered.filter(t => t.assignee === 'mike');
+            if (currentTaskFilter === 'yippybot') filtered = filtered.filter(t => t.assignee === 'yippybot');
+            if (projectFilter !== 'all') filtered = filtered.filter(t => t.project === projectFilter);
+
+            TASK_COLUMNS.forEach(col => {
+                const colEl = document.getElementById(`taskCol-${col.id}`);
+                if (!colEl) return;
+
+                const tasks = filtered.filter(t => t.status === col.id);
+                
+                colEl.innerHTML = `
+                    <div style="padding: 0.75rem; border-bottom: 2px solid ${col.color}30; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${col.color};"></span>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">${col.label}</span>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 0.1rem 0.45rem; border-radius: 10px;">${tasks.length}</span>
+                        </div>
+                        <button onclick="openNewTaskModal('${col.id}')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1;" title="Add task">+</button>
+                    </div>
+                    <div style="padding: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; min-height: 100px;">
+                        ${tasks.length === 0 ? `<div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 1.5rem 0; opacity: 0.5;">No tasks</div>` : ''}
+                        ${tasks.map(t => renderTaskCard(t, col)).join('')}
+                    </div>`;
+            });
+        }
+
+        function renderTaskCard(task, col) {
+            const priorityColor = PRIORITY_COLORS[task.priority] || '#fbbf24';
+            const assigneeColor = ASSIGNEE_COLORS[task.assignee] || '#888';
+            const assigneeLabel = task.assignee === 'mike' ? 'M' : 'Y';
+            const assigneeName = task.assignee === 'mike' ? 'Mike' : 'Yippybot';
+            const updatedDate = new Date(task.updatedAt);
+            const ago = timeAgo(updatedDate);
+
+            return `
+                <div onclick="openTaskDetail('${task.id}')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 0.85rem; cursor: pointer; transition: all 0.15s; position: relative;" onmouseenter="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(255,255,255,0.06)'">
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: ${priorityColor}; flex-shrink: 0; margin-top: 0.35rem;"></span>
+                        <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">${task.title}</span>
+                    </div>
+                    ${task.description ? `<div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; margin-left: 1.1rem; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(task.description)}</div>` : ''}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-left: 1.1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span style="width: 20px; height: 20px; border-radius: 50%; background: ${assigneeColor}25; color: ${assigneeColor}; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700;">${assigneeLabel}</span>
+                            <span style="font-size: 0.65rem; color: var(--text-muted); background: rgba(255,255,255,0.04); padding: 0.15rem 0.45rem; border-radius: 4px;">${task.project}</span>
+                        </div>
+                        <span style="font-size: 0.6rem; color: var(--text-muted);">${ago}</span>
+                    </div>
+                </div>`;
+        }
+
+        function openTaskDetail(id) {
+            const task = allTasks.find(t => t.id === id);
+            if (!task) return;
+
+            const priorityColor = PRIORITY_COLORS[task.priority] || '#fbbf24';
+            const assigneeColor = ASSIGNEE_COLORS[task.assignee] || '#888';
+            const created = new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const updated = new Date(task.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+            overlay.onclick = (ev) => { if (ev.target === overlay) overlay.remove(); };
+
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, rgba(15,29,50,0.98), rgba(10,22,40,0.98)); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; max-width: 500px; width: 92%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${priorityColor};"></span>
+                                <span style="font-size: 0.7rem; color: ${priorityColor}; text-transform: uppercase; font-weight: 600;">${task.priority}</span>
+                            </div>
+                            <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0;">${task.title}</h3>
+                        </div>
+                        <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+                    </div>
+
+                    ${task.description ? `<p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 1.25rem;">${escapeHtml(task.description)}</p>` : ''}
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Status</div>
+                            <select onchange="updateTask('${task.id}', 'status', this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.85rem; width: 100%;">
+                                ${TASK_COLUMNS.map(c => `<option value="${c.id}" ${task.status === c.id ? 'selected' : ''}>${c.label}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Assignee</div>
+                            <select onchange="updateTask('${task.id}', 'assignee', this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.85rem; width: 100%;">
+                                <option value="mike" ${task.assignee === 'mike' ? 'selected' : ''}>Mike</option>
+                                <option value="yippybot" ${task.assignee === 'yippybot' ? 'selected' : ''}>Yippybot</option>
+                            </select>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Priority</div>
+                            <select onchange="updateTask('${task.id}', 'priority', this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.85rem; width: 100%;">
+                                <option value="critical" ${task.priority === 'critical' ? 'selected' : ''}>Critical</option>
+                                <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+                                <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+                            </select>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px;">
+                            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Project</div>
+                            <div style="font-size: 0.88rem; color: var(--text-primary);">${task.project}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Created ${created} • Updated ${updated}</div>
+                        <button onclick="deleteTask('${task.id}')" style="background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: #f87171; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">Delete</button>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(overlay);
+        }
+
+        function openNewTaskModal(status = 'backlog') {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+            overlay.onclick = (ev) => { if (ev.target === overlay) overlay.remove(); };
+
+            const projects = [...new Set(allTasks.map(t => t.project))].sort();
+
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, rgba(15,29,50,0.98), rgba(10,22,40,0.98)); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; max-width: 460px; width: 92%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">New Task</h3>
+                        <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <input id="newTaskTitle" type="text" placeholder="Task title..." style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.9rem; outline: none;" autofocus />
+                        <textarea id="newTaskDesc" placeholder="Description (optional)..." rows="3" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.85rem; outline: none; resize: vertical;"></textarea>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Assignee</label>
+                                <select id="newTaskAssignee" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.85rem;">
+                                    <option value="yippybot">Yippybot</option>
+                                    <option value="mike">Mike</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Priority</label>
+                                <select id="newTaskPriority" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.85rem;">
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Project</label>
+                                <input id="newTaskProject" type="text" list="projectList" value="General" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;" />
+                                <datalist id="projectList">${projects.map(p => `<option value="${p}">`).join('')}</datalist>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Status</label>
+                                <select id="newTaskStatus" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.85rem;">
+                                    ${TASK_COLUMNS.map(c => `<option value="${c.id}" ${c.id === status ? 'selected' : ''}>${c.label}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="createTask()" style="background: linear-gradient(135deg, #4ade80, #22c55e); color: #000; border: none; padding: 0.65rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; margin-top: 0.25rem;">Create Task</button>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('newTaskTitle')?.focus(), 100);
+        }
+
+        async function createTask() {
+            const title = document.getElementById('newTaskTitle')?.value?.trim();
+            if (!title) return;
+
+            await fetch('/api/mc/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'create',
+                    title,
+                    description: document.getElementById('newTaskDesc')?.value?.trim() || '',
+                    assignee: document.getElementById('newTaskAssignee')?.value || 'yippybot',
+                    priority: document.getElementById('newTaskPriority')?.value || 'medium',
+                    project: document.getElementById('newTaskProject')?.value?.trim() || 'General',
+                    status: document.getElementById('newTaskStatus')?.value || 'backlog'
+                })
+            });
+
+            document.querySelector('div[style*="position:fixed"][style*="z-index:10000"]')?.remove();
+            loadTasks();
+        }
+
+        async function updateTask(id, field, value) {
+            await fetch('/api/mc/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update', id, [field]: value })
+            });
+            document.querySelector('div[style*="position:fixed"][style*="z-index:10000"]')?.remove();
+            loadTasks();
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('Delete this task?')) return;
+            await fetch('/api/mc/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete', id })
+            });
+            document.querySelector('div[style*="position:fixed"][style*="z-index:10000"]')?.remove();
+            loadTasks();
+        }
+
+        // ============================================
         // CALENDAR TAB
         // ============================================
         let calendarEvents = [];
@@ -6065,6 +6285,13 @@
                 loadMemory();
             } catch (e) {
                 console.error('Memory error:', e);
+            }
+
+            // Initialize Task Board
+            try {
+                loadTasks();
+            } catch (e) {
+                console.error('Tasks error:', e);
             }
 
             // Initialize Calendar
