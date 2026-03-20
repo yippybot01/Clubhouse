@@ -64,6 +64,15 @@ export async function GET(request: NextRequest) {
       const forecastRes = await fetch(forecastUrl);
       const forecastData = await forecastRes.json();
 
+      // Check for API errors
+      if (forecastData.cod && forecastData.cod !== '200') {
+        return NextResponse.json({ 
+          error: 'OpenWeatherMap API error',
+          message: forecastData.message || 'API key may need activation (can take 1-2 hours)',
+          fallback: '7-day forecast temporarily unavailable'
+        }, { status: 503 });
+      }
+
       // Group by day and get one forecast per day (noon-ish)
       const dailyForecasts = [];
       const seenDates = new Set();
