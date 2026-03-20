@@ -1,57 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const city = searchParams.get('city') || 'McAdenville, NC';
-  
-  try {
-    // Use Open-Meteo (free, no API key, reliable)
-    // First geocode the city
-    const cityName = city.split(',')[0].trim();
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
-    const geoRes = await fetch(geoUrl);
-    const geoData = await geoRes.json();
-    
-    if (!geoData.results?.[0]) {
-      throw new Error('City not found');
-    }
-    
-    const { latitude, longitude, name } = geoData.results[0];
-    
-    // Get current weather
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
-    const weatherRes = await fetch(weatherUrl);
-    const weatherData = await weatherRes.json();
-    
-    const current = weatherData.current;
-    const condition = weatherCodeToText(current.weather_code);
-    
-    return NextResponse.json({
-      city: name,
-      temperature: `${Math.round(current.temperature_2m)}°F`,
-      condition,
-      feelsLike: `${Math.round(current.apparent_temperature)}°F`,
-      humidity: `${current.relative_humidity_2m}%`,
-      windSpeed: `${Math.round(current.wind_speed_10m)} mph`,
-      lastUpdated: new Date().toISOString()
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Failed to fetch weather', message: error.message },
-      { status: 500 }
-    );
-  }
-}
+const API_KEY = 'dcffc3ecfa81ce6e76867b87d0862d08';
 
-function weatherCodeToText(code: number): string {
-  const codes: Record<number, string> = {
-    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-    45: 'Foggy', 48: 'Rime fog', 51: 'Light drizzle', 53: 'Drizzle',
-    55: 'Heavy drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
-    71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
-    80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
-    85: 'Light snow showers', 86: 'Snow showers',
-    95: 'Thunderstorm', 96: 'Thunderstorm w/ hail', 99: 'Severe thunderstorm'
-  };
-  return codes[code] || 'Unknown';
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const city = searchParams.get('city') || 'McAdenville,NC,US';
+    const days = parseInt(searchParams.get('days') || '1');
+
+    // McAdenville, NC coordinates (hardcoded as fallback)
+    let lat = 35.2654;
+    let lon = -81.0814;
+
+    // Try to get coordinates via geocoding API
+    try {
+      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`;
+      const geoRes = await fetch(geoUrl);
+      const geoData = await geoRes.json();
+
+      if (geoData && geoData.length > 0 && geoData[0].lat) {
+        lat = geoData[0].lat;
+        lon = geoData[0].lon;
+      }
+    } catch (geoError) {
+      // Use default McAdenville coordinates
+      console.log('Geocoding failed, using default McAdenville coordinates');
+    }
+
+    if (days === 1) {
+      // Current weather
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${API_KEY}`;
+      const weatherRes = await fetch(weatherUrl);
+      const weatherData = await weatherRes.json();
+
+      // Check for API errors
+      if (weatherData.cod && weatherData.cod !== 200) {
+        return NextResponse.json({ 
+          error: 'OpenWeatherMap API error',
+          message: weatherData.message || 'API key may need activation (can take 1-2 hours)',
+          fallback: 'Weather data temporarily unavailable'
+        }, { status: 503 });
+      }
+
+      const temp = Math.round(weatherData.main.temp);
+      const feelsLike = Math.round(weatherData.main.feels_like);
+      const description = weatherData.weather[0].description;
+      const humidity = weatherData.main.humidity;
+      const windSpeed = Math.round(weatherData.wind.speed);
+
+      const forecast = `${temp}°F (feels like ${feelsLike}°F), ${description}. Humidity: ${humidity}%, Wind: ${windSpeed} mph`;
+
+      return NextResponse.json({ 
+        forecast,
+        temp,
+        description,
+        humidity,
+        windSpeed,
+        feelsLike
+      });
+    } else {
+      // 7-day forecast
+      const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=imperial&appid=${API_KEY}`;
+      const forecastRes = await fetch(forecastUrl);
+      const forecastData = await forecastRes.json();
+
+      // Group by day and get one forecast per day (noon-ish)
+      const dailyForecasts = [];
+      const seenDates = new Set();
+
+      for (const item of forecastData.list) {
+        const date = new Date(item.dt * 1000);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        
+        if (!seenDates.has(dateStr) && dailyForecasts.length < days) {
+          seenDates.add(dateStr);
+          const temp = Math.round(item.main.temp);
+          const description = item.weather[0].description;
+          dailyForecasts.push(`${dateStr}: ${temp}°F, ${description}`);
+        }
+      }
+
+      const forecast = dailyForecasts.join('\n');
+
+      return NextResponse.json({ forecast, daily: dailyForecasts });
+    }
+  } catch (error: any) {
+    console.error('Weather API error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
