@@ -5,27 +5,34 @@ export async function GET(request: NextRequest) {
   const city = searchParams.get('city') || 'McAdenville, NC';
   
   try {
-    const url = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
-    const response = await fetch(url);
+    // Use Open-Meteo (free, no API key, reliable)
+    // First geocode the city
+    const cityName = city.split(',')[0].trim();
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
+    const geoRes = await fetch(geoUrl);
+    const geoData = await geoRes.json();
     
-    if (!response.ok) {
-      throw new Error(`Weather API returned ${response.status}`);
+    if (!geoData.results?.[0]) {
+      throw new Error('City not found');
     }
     
-    const data = await response.json();
-    if (!data?.current_condition?.[0]) {
-      throw new Error('No weather data returned');
-    }
-    const current = data.current_condition[0];
+    const { latitude, longitude, name } = geoData.results[0];
+    
+    // Get current weather
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
+    const weatherRes = await fetch(weatherUrl);
+    const weatherData = await weatherRes.json();
+    
+    const current = weatherData.current;
+    const condition = weatherCodeToText(current.weather_code);
     
     return NextResponse.json({
-      city: city,
-      temperature: `${current.temp_F}°F`,
-      temperatureC: `${current.temp_C}°C`,
-      condition: current.weatherDesc[0].value,
-      feelsLike: `${current.FeelsLikeF}°F`,
-      humidity: `${current.humidity}%`,
-      windSpeed: `${current.windspeedMiles} mph`,
+      city: name,
+      temperature: `${Math.round(current.temperature_2m)}°F`,
+      condition,
+      feelsLike: `${Math.round(current.apparent_temperature)}°F`,
+      humidity: `${current.relative_humidity_2m}%`,
+      windSpeed: `${Math.round(current.wind_speed_10m)} mph`,
       lastUpdated: new Date().toISOString()
     });
   } catch (error: any) {
@@ -34,4 +41,17 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function weatherCodeToText(code: number): string {
+  const codes: Record<number, string> = {
+    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Foggy', 48: 'Rime fog', 51: 'Light drizzle', 53: 'Drizzle',
+    55: 'Heavy drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+    71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
+    80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
+    85: 'Light snow showers', 86: 'Snow showers',
+    95: 'Thunderstorm', 96: 'Thunderstorm w/ hail', 99: 'Severe thunderstorm'
+  };
+  return codes[code] || 'Unknown';
 }
