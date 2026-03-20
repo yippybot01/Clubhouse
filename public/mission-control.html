@@ -5623,11 +5623,33 @@
                     
                     bottomContent = '';
                     if (replySection) {
+                        // Format reply targets with proper Link: structure
                         let replyHtml = escapeHtml(replySection);
-                        replyHtml = replyHtml.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
-                        replyHtml = replyHtml.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
-                        replyHtml = replyHtml.replace(/\n/g, '<br>');
-                        bottomContent = `<div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">${replyHtml}</div>`;
+                        
+                        // Extract each tweet and format properly
+                        // Pattern: @handle: "text" — reason\n  Link: URL
+                        replyHtml = replyHtml.replace(
+                            /(@\w+):\s*(.+?)(?:\n\s*Link:\s*(https?:\/\/[^\s<]+))/gi,
+                            (match, handle, content, url) => {
+                                return `<div style="margin-bottom: 1rem;">
+                                    <div style="margin-bottom: 0.25rem;">
+                                        <span style="color: #60a5fa; font-weight: 600;">${handle}</span>: ${content}
+                                    </div>
+                                    <div style="font-size: 0.85rem;">
+                                        <span style="color: var(--text-muted);">Link:</span> <a href="${url}" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">${url}</a>
+                                    </div>
+                                </div>`;
+                            }
+                        );
+                        
+                        // Fallback: if pattern doesn't match, just make URLs and handles clickable
+                        if (!replyHtml.includes('<a href=')) {
+                            replyHtml = replyHtml.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
+                            replyHtml = replyHtml.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
+                            replyHtml = replyHtml.replace(/\n/g, '<br>');
+                        }
+                        
+                        bottomContent = `<div style="margin-top: 0.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">${replyHtml}</div>`;
                     }
                     if (founderSection) {
                         let fHtml = escapeHtml(founderSection);
@@ -5639,11 +5661,29 @@
             
             if (!trendColumns) {
                 let content = escapeHtml(rawContent);
+                
+                // Format Link: pattern in reply targets BEFORE other replacements
+                content = content.replace(
+                    /(@\w+):\s*(.+?)(?:\n\s*Link:\s*(https?:\/\/[^\s<]+))/gi,
+                    (match, handle, textContent, url) => {
+                        return `___TWEET_START___${handle}|||${textContent}|||${url}___TWEET_END___`;
+                    }
+                );
+                
                 content = content.replace(/(Founder['']s Takeaway:?\s*)(.*?)(\n|$)/gi, '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">$1</strong><strong>$2</strong></div>');
                 content = content.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
                 content = content.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
                 content = content.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
-                content = content.replace(/(🎯 REPLY TARGETS.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠Founder])|\s*$)/gis, '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">$1</div>');
+                content = content.replace(/(🎯 REPLY TARGETS.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠Founder])|\s*$)/gis, '<div style="margin-top: 0.75rem; padding: 1rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">$1</div>');
+                
+                // Convert tweet markers to proper HTML
+                content = content.replace(
+                    /___TWEET_START___(@\w+)\|\|\|(.+?)\|\|\|(https?:\/\/[^\s<]+)___TWEET_END___/g,
+                    (match, handle, textContent, url) => {
+                        return `<div style="margin-bottom: 1rem;"><div style="margin-bottom: 0.25rem;"><span style="color: #60a5fa; font-weight: 600;">${handle}</span>: ${textContent}</div><div style="font-size: 0.85rem;"><span style="color: var(--text-muted);">Link:</span> <a href="${url}" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">${url}</a></div></div>`;
+                    }
+                );
+                
                 content = content.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
                 content = content.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
                 content = content.replace(/\n/g, '<br>');
