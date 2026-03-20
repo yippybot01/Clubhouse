@@ -1918,6 +1918,7 @@
                 <button class="tab" data-tab="command">🏢 Team</button>
                 <button class="tab" data-tab="projects">📋 Projects</button>
                 <button class="tab" data-tab="skills">🎯 Skills</button>
+                <button class="tab" data-tab="memory">🧠 Memory</button>
                 <button class="tab" data-tab="timeline">📅 Timeline</button>
                 <button class="tab" data-tab="trends">🌪️ Trends</button>
             </nav>
@@ -2346,7 +2347,44 @@
             </div>
         </div>
 
-        <!-- NOTES TAB -->
+        <!-- MEMORY TAB -->
+        <div class="tab-content" id="memory-tab">
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; height: calc(100vh - 180px);">
+                <!-- Left Sidebar -->
+                <div style="display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
+                    <!-- Search -->
+                    <div style="position: relative;">
+                        <input type="text" id="memorySearch" placeholder="Search memory..." 
+                            style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-size: 0.85rem; outline: none; box-sizing: border-box;"
+                        />
+                        <span style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;">🔍</span>
+                    </div>
+                    
+                    <!-- Stats Bar -->
+                    <div id="memoryStats" style="display: flex; gap: 0.75rem; font-size: 0.7rem; color: var(--text-muted); padding: 0 0.25rem;">
+                        <span id="memStatFiles">-- files</span>
+                        <span>•</span>
+                        <span id="memStatWords">-- words</span>
+                    </div>
+
+                    <!-- File List -->
+                    <div id="memoryFileList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; padding-right: 0.25rem;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Content Area -->
+                <div id="memoryContent" style="overflow-y: auto; padding-right: 0.5rem;">
+                    <div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🧠</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 0.25rem;">Select a memory file</div>
+                        <div style="font-size: 0.85rem;">Browse daily journals and long-term memory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRENDS TAB -->
         <div class="tab-content" id="trends-tab">
             <!-- Search & Filter Bar -->
             <div class="glass-card" style="margin-bottom: 1rem; padding: 1rem;">
@@ -5351,6 +5389,259 @@
             return div.innerHTML;
         }
 
+        // ============================================
+        // MEMORY TAB
+        // ============================================
+        let memoryFiles = [];
+        let activeMemoryFile = null;
+
+        async function loadMemory() {
+            const searchEl = document.getElementById('memorySearch');
+            
+            async function fetchFiles(search = '') {
+                try {
+                    const params = new URLSearchParams();
+                    if (search) params.set('search', search);
+                    const res = await fetch(`/api/mc/memory?${params}`);
+                    const data = await res.json();
+                    memoryFiles = data.files || [];
+                    
+                    // Update stats
+                    if (data.stats) {
+                        document.getElementById('memStatFiles').textContent = `${data.stats.totalFiles} files`;
+                        document.getElementById('memStatWords').textContent = `${data.stats.totalWords.toLocaleString()} words`;
+                    }
+                    
+                    renderMemoryFileList(search);
+                } catch (err) {
+                    console.error('Failed to load memory files:', err);
+                }
+            }
+
+            if (searchEl) {
+                let debounce;
+                searchEl.addEventListener('input', () => {
+                    clearTimeout(debounce);
+                    debounce = setTimeout(() => fetchFiles(searchEl.value), 300);
+                });
+            }
+
+            await fetchFiles();
+        }
+
+        function renderMemoryFileList(search = '') {
+            const list = document.getElementById('memoryFileList');
+            if (!list) return;
+
+            if (memoryFiles.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.85rem;">No memory files found</div>';
+                return;
+            }
+
+            // Group: long-term first, then daily by time period
+            const longTerm = memoryFiles.filter(f => f.type === 'long-term');
+            const daily = memoryFiles.filter(f => f.type === 'daily');
+
+            // Group daily by relative time
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const yesterday = new Date(now - 86400000).toISOString().split('T')[0];
+            const weekAgo = new Date(now - 7 * 86400000).toISOString().split('T')[0];
+            const monthAgo = new Date(now - 30 * 86400000).toISOString().split('T')[0];
+
+            const groups = {};
+            daily.forEach(f => {
+                let group;
+                if (f.date === today) group = 'Today';
+                else if (f.date === yesterday) group = 'Yesterday';
+                else if (f.date >= weekAgo) group = 'This Week';
+                else if (f.date >= monthAgo) group = 'This Month';
+                else {
+                    const d = new Date(f.date + 'T12:00:00');
+                    group = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                }
+                if (!groups[group]) groups[group] = [];
+                groups[group].push(f);
+            });
+
+            let html = '';
+
+            // Long-term memory
+            longTerm.forEach(f => {
+                const isActive = activeMemoryFile === f.path;
+                const modDate = new Date(f.modified);
+                const modAgo = timeAgo(modDate);
+                html += `
+                    <div onclick="selectMemoryFile('${f.path}')" style="padding: 0.75rem; border-radius: 8px; cursor: pointer; border: 1px solid ${isActive ? 'rgba(16,185,129,0.4)' : 'transparent'}; background: ${isActive ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.02)'}; transition: all 0.15s;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">🧠</span>
+                            <span style="font-size: 0.85rem; font-weight: 600; color: #4ade80;">${f.name}</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; padding-left: 1.5rem;">
+                            ${f.words.toLocaleString()} words • Updated ${modAgo}
+                        </div>
+                        ${f.snippet ? `<div style="font-size: 0.7rem; color: #fbbf24; margin-top: 0.35rem; padding-left: 1.5rem; font-style: italic;">${highlightSearch(escapeHtml(f.snippet), search)}</div>` : ''}
+                        ${f.matchCount ? `<div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem; padding-left: 1.5rem;">${f.matchCount} match${f.matchCount > 1 ? 'es' : ''}</div>` : ''}
+                    </div>`;
+            });
+
+            // Section label
+            if (daily.length > 0) {
+                html += `<div style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 0.75rem 0.25rem 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📝</span> Daily Journal
+                </div>`;
+            }
+
+            // Daily files grouped
+            Object.entries(groups).forEach(([group, files]) => {
+                html += `<div style="font-size: 0.7rem; color: var(--text-muted); padding: 0.5rem 0.25rem 0.15rem; margin-top: 0.25rem;">${group} (${files.length})</div>`;
+                files.forEach(f => {
+                    const isActive = activeMemoryFile === f.path;
+                    const d = new Date(f.date + 'T12:00:00');
+                    const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const sizeKB = (f.size / 1024).toFixed(1);
+                    html += `
+                        <div onclick="selectMemoryFile('${f.path}')" style="padding: 0.6rem 0.75rem; border-radius: 8px; cursor: pointer; border: 1px solid ${isActive ? 'rgba(96,165,250,0.4)' : 'transparent'}; background: ${isActive ? 'rgba(96,165,250,0.08)' : 'rgba(255,255,255,0.02)'}; transition: all 0.15s; margin-left: 0.25rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 0.8rem; opacity: 0.5;">📄</span>
+                                <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-primary);">${dayLabel}</span>
+                            </div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); padding-left: 1.5rem; margin-top: 0.15rem;">
+                                ${sizeKB} KB • ${f.words.toLocaleString()} words
+                            </div>
+                            ${f.snippet ? `<div style="font-size: 0.65rem; color: #fbbf24; margin-top: 0.25rem; padding-left: 1.5rem; font-style: italic; line-height: 1.3;">${highlightSearch(escapeHtml(f.snippet), search)}</div>` : ''}
+                            ${f.matchCount ? `<div style="font-size: 0.6rem; color: var(--text-muted); margin-top: 0.15rem; padding-left: 1.5rem;">${f.matchCount} match${f.matchCount > 1 ? 'es' : ''}</div>` : ''}
+                        </div>`;
+                });
+            });
+
+            list.innerHTML = html;
+        }
+
+        async function selectMemoryFile(filePath) {
+            activeMemoryFile = filePath;
+            renderMemoryFileList(document.getElementById('memorySearch')?.value || '');
+
+            const content = document.getElementById('memoryContent');
+            content.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading...</div>';
+
+            try {
+                const res = await fetch(`/api/mc/memory?file=${encodeURIComponent(filePath)}`);
+                const data = await res.json();
+                
+                if (!data.file) {
+                    content.innerHTML = '<div class="glass-card" style="padding: 2rem; color: #f87171;">File not found</div>';
+                    return;
+                }
+
+                const f = data.file;
+                const modDate = new Date(f.modified);
+                const modFormatted = modDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+                const modTime = modDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                const sizeKB = (f.size / 1024).toFixed(1);
+                const isLongTerm = f.type === 'long-term';
+                const icon = isLongTerm ? '🧠' : '📄';
+                const title = isLongTerm ? 'Long-Term Memory' : `Journal: ${f.date}`;
+                const accentColor = isLongTerm ? '#4ade80' : '#60a5fa';
+
+                // Render markdown-ish content
+                const rendered = renderMemoryContent(f.content, document.getElementById('memorySearch')?.value || '');
+
+                content.innerHTML = `
+                    <div class="glass-card" style="padding: 0; overflow: hidden;">
+                        <!-- Header -->
+                        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                                    <span style="font-size: 1.5rem;">${icon}</span>
+                                    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin: 0;">${title}</h2>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); padding-left: 2.5rem;">
+                                    ${modFormatted} • ${sizeKB} KB • ${f.words.toLocaleString()} words
+                                </div>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right;">
+                                Modified ${modTime}
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div style="padding: 1.5rem 2rem 2rem; line-height: 1.7; font-size: 0.88rem; color: var(--text-secondary);">
+                            ${rendered}
+                        </div>
+                    </div>`;
+            } catch (err) {
+                content.innerHTML = `<div class="glass-card" style="padding: 2rem; color: #f87171;">Error loading file: ${err.message}</div>`;
+            }
+        }
+
+        function renderMemoryContent(md, search) {
+            let html = md;
+            
+            // Escape HTML first
+            html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Headers
+            html = html.replace(/^### (.+)$/gm, '<h4 style="font-size: 1rem; font-weight: 700; color: #fbbf24; margin: 1.5rem 0 0.5rem; padding-bottom: 0.25rem;">$1</h4>');
+            html = html.replace(/^## (.+)$/gm, '<h3 style="font-size: 1.15rem; font-weight: 700; color: #60a5fa; margin: 1.75rem 0 0.75rem; padding-bottom: 0.35rem; border-bottom: 1px solid rgba(96,165,250,0.15);">$1</h3>');
+            html = html.replace(/^# (.+)$/gm, '<h2 style="font-size: 1.3rem; font-weight: 700; color: #4ade80; margin: 2rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(74,222,128,0.15);">$1</h2>');
+            
+            // Bold and italic
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="color: var(--text-primary); font-weight: 600;">$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code style="background: rgba(255,255,255,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.82rem; color: #c084fc; font-family: monospace;">$1</code>');
+            
+            // Code blocks
+            html = html.replace(/```[\w]*\n([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem; line-height: 1.5; border: 1px solid rgba(255,255,255,0.06); margin: 0.75rem 0;"><code style="color: #e2e8f0; font-family: monospace;">$1</code></pre>');
+            
+            // Checkboxes
+            html = html.replace(/^- \[x\] (.+)$/gm, '<div style="display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.25rem 0; padding-left: 0.5rem;"><span style="color: #4ade80; flex-shrink: 0;">✅</span><span style="text-decoration: line-through; opacity: 0.6;">$1</span></div>');
+            html = html.replace(/^- \[ \] (.+)$/gm, '<div style="display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.25rem 0; padding-left: 0.5rem;"><span style="color: var(--text-muted); flex-shrink: 0;">⬜</span><span>$1</span></div>');
+            
+            // Bullet lists
+            html = html.replace(/^- (.+)$/gm, '<div style="display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.2rem 0; padding-left: 0.5rem;"><span style="color: var(--text-muted); flex-shrink: 0; margin-top: 0.35rem; font-size: 0.4rem;">●</span><span>$1</span></div>');
+            html = html.replace(/^  - (.+)$/gm, '<div style="display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.15rem 0; padding-left: 1.75rem;"><span style="color: var(--text-muted); flex-shrink: 0; margin-top: 0.4rem; font-size: 0.3rem;">●</span><span style="font-size: 0.84rem;">$1</span></div>');
+            
+            // Numbered lists
+            html = html.replace(/^(\d+)\. (.+)$/gm, '<div style="display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.2rem 0; padding-left: 0.5rem;"><span style="color: #60a5fa; flex-shrink: 0; font-weight: 600; font-size: 0.8rem; min-width: 1.2rem;">$1.</span><span>$2</span></div>');
+            
+            // Horizontal rules
+            html = html.replace(/^---+$/gm, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 1.5rem 0;">');
+            
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
+            
+            // Paragraphs (double newlines)
+            html = html.replace(/\n\n/g, '</p><p style="margin: 0.75rem 0;">');
+            
+            // Single newlines (that aren't already handled)
+            html = html.replace(/\n/g, '<br>');
+            
+            // Highlight search terms
+            if (search) {
+                html = highlightSearch(html, search);
+            }
+            
+            return `<div style="margin: 0;">${html}</div>`;
+        }
+
+        function highlightSearch(html, search) {
+            if (!search) return html;
+            const regex = new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return html.replace(regex, '<mark style="background: rgba(251,191,36,0.3); color: #fbbf24; padding: 0.1rem 0.2rem; border-radius: 2px;">$1</mark>');
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
         function loadSkills() {
             renderSkillsGrid();
             
@@ -5521,6 +5812,13 @@
                 loadSkills();
             } catch (e) {
                 console.error('Skills error:', e);
+            }
+
+            // Initialize Memory
+            try {
+                loadMemory();
+            } catch (e) {
+                console.error('Memory error:', e);
             }
             
             // Add welcome activity if first time
