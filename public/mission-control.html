@@ -4175,37 +4175,8 @@
         }
 
         // ============================================
-        // NOTES
+        // NOTES (removed — replaced by Trends tab)
         // ============================================
-        let notesTimeout;
-        const notesTextarea = document.getElementById('notesTextarea');
-        
-        notesTextarea.addEventListener('input', () => {
-            clearTimeout(notesTimeout);
-            
-            // Update character count
-            document.getElementById('charCount').textContent = 
-                `${notesTextarea.value.length} characters`;
-            
-            // Auto-save after 1 second of no typing
-            notesTimeout = setTimeout(async () => {
-                localStorage.setItem('notes', notesTextarea.value);
-                const now = new Date();
-                document.getElementById('lastSaved').textContent = 
-                    `Saved at ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-                
-                // Sync to server
-                if (serverOnline) {
-                    await syncToServer();
-                    logActivityToServer('Notes Updated', `Notes saved (${notesTextarea.value.length} chars)`, 'notes');
-                }
-            }, 1000);
-        });
-        
-        // Load notes on startup
-        notesTextarea.value = localStorage.getItem('notes') || '';
-        document.getElementById('charCount').textContent = 
-            `${notesTextarea.value.length} characters`;
 
         // ============================================
         // KEYBOARD SHORTCUTS
