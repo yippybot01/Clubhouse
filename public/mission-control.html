@@ -2131,6 +2131,14 @@
                     <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Orders/Day (This Month)</div>
                     <div id="revOrdersPerDay" style="font-size: 1.8rem; font-weight: 700; color: #c084fc;">0</div>
                     <div id="revOrdersPerDayChange" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">--</div>
+                    <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 0.8rem;">
+                        <span style="color: var(--text-muted);">This month</span>
+                        <span id="revMonthOrderCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.25rem;">
+                        <span style="color: var(--text-muted);">Today</span>
+                        <span id="revTodayOrderCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -3543,6 +3551,12 @@
             }
             
             document.getElementById('revOrdersPerDay').textContent = ordersPerDay.toFixed(1);
+            document.getElementById('revMonthOrderCount').textContent = thisMonthOrders.length;
+            const todayOrders = paidOrders.filter(o => {
+                const d = new Date(o.created_at);
+                return d.getDate() === now.getDate() && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+            document.getElementById('revTodayOrderCount').textContent = todayOrders.length;
             if (lastMonthOPD > 0) {
                 const opdChange = ((ordersPerDay - lastMonthOPD) / lastMonthOPD * 100).toFixed(1);
                 const opdDir = opdChange >= 0 ? '↑' : '↓';
