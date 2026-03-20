@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
     }
     
     const data = await response.json();
-    const current = data.data.current_condition[0];
+    if (!data?.current_condition?.[0]) {
+      throw new Error('No weather data returned');
+    }
+    const current = data.current_condition[0];
     
     return NextResponse.json({
       city: city,
