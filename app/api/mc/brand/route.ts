@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
 import * as cheerio from 'cheerio';
 
-const CACHE_FILE = path.join(process.cwd(), 'data', 'brand-analysis.json');
+const CACHE_FILE = join(process.cwd(), 'data', 'brand-analysis.json');
 
 // Brand configuration
 const BRAND_CONFIG = {
@@ -417,7 +417,7 @@ async function runBrandAnalysis() {
     data.recommendations = generateRecommendations(data);
 
     // Save to cache
-    await fs.writeFile(CACHE_FILE, JSON.stringify(data, null, 2));
+    await writeFile(CACHE_FILE, JSON.stringify(data, null, 2));
 
     return data;
   } catch (error) {
@@ -431,7 +431,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check if cache exists
     try {
-      const cached = await fs.readFile(CACHE_FILE, 'utf-8');
+      const cached = await readFile(CACHE_FILE, 'utf-8');
       const data = JSON.parse(cached);
       
       // If no lastUpdated or older than 24 hours, trigger new analysis
