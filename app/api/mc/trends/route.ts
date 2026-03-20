@@ -33,7 +33,7 @@ async function writeTrends(trends: any[]) {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const days = parseInt(searchParams.get('days') || '14');
+    const days = parseInt(searchParams.get('days') || '1');
     const search = (searchParams.get('search') || '').toLowerCase();
     
     let trends = await readTrends();

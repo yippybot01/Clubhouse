@@ -2438,10 +2438,10 @@
                     </select>
                     <select id="trendsDaysFilter"
                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 0.75rem; color: var(--text-primary); font-size: 0.85rem; font-family: Inter, sans-serif;">
+                        <option value="1" selected>Last 24 hours</option>
                         <option value="7">Last 7 days</option>
-                        <option value="14" selected>Last 14 days</option>
+                        <option value="14">Last 14 days</option>
                         <option value="30">Last 30 days</option>
-                        <option value="0">All time</option>
                     </select>
                     <div id="trendsCount" style="font-size: 0.75rem; color: var(--text-muted);">--</div>
                 </div>
@@ -5223,7 +5223,7 @@
             async function fetchAndRender() {
                 const search = searchEl ? searchEl.value : '';
                 const type = typeEl ? typeEl.value : 'all';
-                const days = daysEl ? parseInt(daysEl.value) || 0 : 14;
+                const days = daysEl ? parseInt(daysEl.value) || 1 : 1;
                 
                 try {
                     const params = new URLSearchParams();
@@ -5293,132 +5293,184 @@
                 midday: '#60a5fa',
                 evening: '#c084fc'
             };
-            
-            feed.innerHTML = trends.map(trend => {
-                const date = new Date(trend.timestamp);
-                const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                const label = typeLabels[trend.type] || trend.type;
-                const bgColor = typeColors[trend.type] || 'rgba(255,255,255,0.03)';
-                const borderColor = typeBorders[trend.type] || 'rgba(255,255,255,0.1)';
-                
-                // Process content
-                let rawContent = trend.content;
-                
-                // Check for two-column layout (US TRENDS + YIPPY NICHE)
-                const hasNiche = rawContent.includes('YIPPY NICHE') || rawContent.includes('Yippy Niche') || rawContent.includes('NICHE TRENDS');
-                const hasUS = rawContent.includes('US TRENDS') || rawContent.includes('Top 10 Trending');
-                
-                let trendColumns = '';
-                let bottomContent = '';
-                
-                if (hasNiche && hasUS) {
-                    // Split into sections
-                    const sections = rawContent.split(/(?=(?:🇺🇸|📊|🏌️|⛳|🎯|YIPPY NICHE|NICHE TRENDS|US TRENDS|REPLY TARGETS|Founder))/gi);
-                    
-                    let usSection = '';
-                    let nicheSection = '';
-                    let replySection = '';
-                    let founderSection = '';
-                    
-                    for (const sec of sections) {
-                        const trimmed = sec.trim();
-                        if (/^(🇺🇸|US TRENDS|Top 10 Trending)/i.test(trimmed)) usSection = trimmed;
-                        else if (/^(🏌️|⛳|YIPPY NICHE|NICHE TRENDS)/i.test(trimmed)) nicheSection = trimmed;
-                        else if (/^🎯|^REPLY TARGETS/i.test(trimmed)) replySection = trimmed;
-                        else if (/^Founder/i.test(trimmed)) founderSection = trimmed;
-                        else {
-                            // Assign to whichever is being built
-                            if (!usSection) usSection = trimmed;
-                            else if (!nicheSection) nicheSection = trimmed;
-                            else bottomContent += trimmed + '\n';
-                        }
-                    }
-                    
-                    if (usSection || nicheSection) {
-                        const formatSection = (text) => {
-                            let html = escapeHtml(text);
-                            html = html.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
-                            html = html.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
-                            html = html.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
-                            html = html.replace(/🔵/g, '<span style="color: #60a5fa;">🔵</span>');
-                            html = html.replace(/🟢/g, '<span style="color: #4ade80;">🟢</span>');
-                            html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
-                            html = html.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
-                            html = html.replace(/\n/g, '<br>');
-                            return html;
-                        };
+
+            // Group trends by date (YYYY-MM-DD)
+            const grouped = {};
+            trends.forEach(t => {
+                const d = new Date(t.timestamp);
+                const key = d.toISOString().slice(0, 10);
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(t);
+            });
+
+            // Sort date keys descending
+            const sortedDays = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+            const today = new Date().toISOString().slice(0, 10);
+
+            let html = '';
+
+            sortedDays.forEach((dayKey, dayIdx) => {
+                const dayTrends = grouped[dayKey]; // already sorted newest-first from API
+                const isToday = dayKey === today;
+                const isArchive = !isToday;
+                const dayDate = new Date(dayKey + 'T12:00:00');
+                const dayLabel = isToday ? 'Today' : dayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+                // Archive days get a collapsible header
+                if (isArchive) {
+                    const archiveId = 'archive_' + dayKey.replace(/-/g, '');
+                    html += `
+                        <div class="glass-card" style="padding: 0.75rem 1rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;" 
+                             onclick="const el=document.getElementById('${archiveId}'); const open=el.style.display!=='none'; el.style.display=open?'none':'flex'; this.querySelector('.archive-arrow').textContent=open?'▶':'▼'; this.style.opacity=open?'0.6':'1';">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="archive-arrow" style="font-size: 0.7rem; color: var(--text-muted);">▶</span>
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">📁 ${dayLabel}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">${dayTrends.length} report${dayTrends.length !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                        <div id="${archiveId}" style="display: none; flex-direction: column; gap: 0.75rem;">`;
+                    dayTrends.forEach(trend => {
+                        html += renderSingleTrend(trend, typeLabels, typeColors, typeBorders, false);
+                    });
+                    html += `</div>`;
+                    return;
+                }
+
+                // Today: latest report expanded, older ones collapsed
+                dayTrends.forEach((trend, idx) => {
+                    const isLatest = idx === 0;
+                    if (isLatest) {
+                        // Fully expanded — the main visible report
+                        html += renderSingleTrend(trend, typeLabels, typeColors, typeBorders, false);
+                    } else {
+                        // Collapsed with click to expand
+                        const collapseId = 'earlier_' + trend.id;
+                        const date = new Date(trend.timestamp);
+                        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        const label = typeLabels[trend.type] || trend.type;
+                        const borderColor = typeBorders[trend.type] || 'rgba(255,255,255,0.1)';
                         
-                        trendColumns = `
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1rem;">
-                                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 1rem;">
-                                    <div style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">🇺🇸 US Trends</div>
-                                    <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.7;">${formatSection(usSection.replace(/^(🇺🇸\s*)?US TRENDS\s*/i, '').replace(/^Top 10 Trending[^\n]*\n*/i, ''))}</div>
+                        html += `
+                            <div class="glass-card" style="padding: 0.75rem 1rem; border-left: 3px solid ${borderColor}; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;"
+                                 onclick="const el=document.getElementById('${collapseId}'); const hdr=document.getElementById('${collapseId}_hdr'); const open=el.style.display!=='none'; el.style.display=open?'none':'block'; hdr.querySelector('.collapse-arrow').textContent=open?'▶':'▼'; this.style.opacity=open?'0.7':'1';">
+                                <div id="${collapseId}_hdr" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="collapse-arrow" style="font-size: 0.7rem; color: var(--text-muted);">▶</span>
+                                    <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">${label}</span>
+                                    <span style="font-size: 0.7rem; color: var(--text-muted);">· ${timeStr} · Earlier today</span>
                                 </div>
-                                <div style="background: rgba(74,222,128,0.03); border: 1px solid rgba(74,222,128,0.12); border-radius: 10px; padding: 1rem;">
-                                    <div style="font-size: 0.8rem; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">⛳ Yippy Niche</div>
-                                    <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.7;">${formatSection(nicheSection.replace(/^(🏌️|⛳)?\s*(YIPPY NICHE|NICHE TRENDS)\s*/i, ''))}</div>
+                                <div id="${collapseId}" style="display: none; margin-top: 0.75rem;">
+                                    ${renderTrendContent(trend, typeLabels, typeColors, typeBorders)}
                                 </div>
                             </div>`;
-                        
-                        // Build bottom sections
-                        if (replySection) {
-                            let replyHtml = escapeHtml(replySection);
-                            replyHtml = replyHtml.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
-                            replyHtml = replyHtml.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
-                            replyHtml = replyHtml.replace(/\n/g, '<br>');
-                            bottomContent = `<div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">${replyHtml}</div>`;
-                        }
-                        if (founderSection) {
-                            let fHtml = escapeHtml(founderSection);
-                            fHtml = fHtml.replace(/\n/g, '<br>');
-                            bottomContent += `<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">${fHtml}</strong></div>`;
-                        }
+                    }
+                });
+            });
+
+            feed.innerHTML = html;
+        }
+
+        function renderTrendContent(trend, typeLabels, typeColors, typeBorders) {
+            let rawContent = trend.content;
+            const hasNiche = rawContent.includes('YIPPY NICHE') || rawContent.includes('Yippy Niche') || rawContent.includes('NICHE TRENDS');
+            const hasUS = rawContent.includes('US TRENDS') || rawContent.includes('Top 10 Trending');
+            
+            let trendColumns = '';
+            let bottomContent = '';
+            
+            if (hasNiche && hasUS) {
+                const sections = rawContent.split(/(?=(?:🇺🇸|📊|🏌️|⛳|🎯|YIPPY NICHE|NICHE TRENDS|US TRENDS|REPLY TARGETS|Founder))/gi);
+                let usSection = '', nicheSection = '', replySection = '', founderSection = '';
+                
+                for (const sec of sections) {
+                    const trimmed = sec.trim();
+                    if (/^(🇺🇸|US TRENDS|Top 10 Trending)/i.test(trimmed)) usSection = trimmed;
+                    else if (/^(🏌️|⛳|YIPPY NICHE|NICHE TRENDS)/i.test(trimmed)) nicheSection = trimmed;
+                    else if (/^🎯|^REPLY TARGETS/i.test(trimmed)) replySection = trimmed;
+                    else if (/^Founder/i.test(trimmed)) founderSection = trimmed;
+                    else {
+                        if (!usSection) usSection = trimmed;
+                        else if (!nicheSection) nicheSection = trimmed;
+                        else bottomContent += trimmed + '\n';
                     }
                 }
                 
-                // Fallback: single column (old format)
-                if (!trendColumns) {
-                    let content = escapeHtml(rawContent);
+                if (usSection || nicheSection) {
+                    const formatSection = (text) => {
+                        let html = escapeHtml(text);
+                        html = html.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
+                        html = html.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
+                        html = html.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
+                        html = html.replace(/🔵/g, '<span style="color: #60a5fa;">🔵</span>');
+                        html = html.replace(/🟢/g, '<span style="color: #4ade80;">🟢</span>');
+                        html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
+                        html = html.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
+                        html = html.replace(/\n/g, '<br>');
+                        return html;
+                    };
                     
-                    content = content.replace(
-                        /(Founder['']s Takeaway:?\s*)(.*?)(\n|$)/gi,
-                        '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">$1</strong><strong>$2</strong></div>'
-                    );
-                    content = content.replace(
-                        /(Yippy Radar.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠])|\s*$)/gis,
-                        '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(10, 75, 44, 0.15); border: 1px solid rgba(10, 75, 44, 0.3); border-radius: 6px;">$1</div>'
-                    );
-                    content = content.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
-                    content = content.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
-                    content = content.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
-                    content = content.replace(
-                        /(🎯 REPLY TARGETS.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠Founder])|\s*$)/gis,
-                        '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">$1</div>'
-                    );
-                    content = content.replace(
-                        /(https?:\/\/[^\s<]+)/g,
-                        '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>'
-                    );
-                    content = content.replace(
-                        /(@\w{1,15})/g,
-                        '<span style="color: #60a5fa; font-weight: 500;">$1</span>'
-                    );
-                    content = content.replace(/\n/g, '<br>');
-                    trendColumns = `<div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">${content}</div>`;
+                    trendColumns = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1rem;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 1rem;">
+                                <div style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">🇺🇸 US Trends</div>
+                                <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.7;">${formatSection(usSection.replace(/^(🇺🇸\s*)?US TRENDS\s*/i, '').replace(/^Top 10 Trending[^\n]*\n*/i, ''))}</div>
+                            </div>
+                            <div style="background: rgba(74,222,128,0.03); border: 1px solid rgba(74,222,128,0.12); border-radius: 10px; padding: 1rem;">
+                                <div style="font-size: 0.8rem; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">⛳ Yippy Niche</div>
+                                <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.7;">${formatSection(nicheSection.replace(/^(🏌️|⛳)?\s*(YIPPY NICHE|NICHE TRENDS)\s*/i, ''))}</div>
+                            </div>
+                        </div>`;
+                    
                     bottomContent = '';
+                    if (replySection) {
+                        let replyHtml = escapeHtml(replySection);
+                        replyHtml = replyHtml.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
+                        replyHtml = replyHtml.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
+                        replyHtml = replyHtml.replace(/\n/g, '<br>');
+                        bottomContent = `<div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">${replyHtml}</div>`;
+                    }
+                    if (founderSection) {
+                        let fHtml = escapeHtml(founderSection);
+                        fHtml = fHtml.replace(/\n/g, '<br>');
+                        bottomContent += `<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">${fHtml}</strong></div>`;
+                    }
                 }
-                
-                return `
-                    <div class="glass-card" style="padding: 1.25rem; border-left: 3px solid ${borderColor};">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">${label} — ${dateStr}</div>
-                            <div style="font-size: 0.7rem; color: var(--text-muted); background: ${bgColor}; padding: 0.2rem 0.6rem; border-radius: 4px;">${timeStr}</div>
-                        </div>
-                        ${trendColumns}
-                        ${bottomContent}
-                    </div>`;
-            }).join('');
+            }
+            
+            if (!trendColumns) {
+                let content = escapeHtml(rawContent);
+                content = content.replace(/(Founder['']s Takeaway:?\s*)(.*?)(\n|$)/gi, '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;"><strong style="color: #fbbf24;">$1</strong><strong>$2</strong></div>');
+                content = content.replace(/🔴/g, '<span style="color: #f87171;">🔴</span>');
+                content = content.replace(/🟡/g, '<span style="color: #fbbf24;">🟡</span>');
+                content = content.replace(/⚪/g, '<span style="color: rgba(255,255,255,0.5);">⚪</span>');
+                content = content.replace(/(🎯 REPLY TARGETS.*?)(\n\n|\n(?=[A-Z☀🔆🌙⚠Founder])|\s*$)/gis, '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 6px;">$1</div>');
+                content = content.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">$1</a>');
+                content = content.replace(/(@\w{1,15})/g, '<span style="color: #60a5fa; font-weight: 500;">$1</span>');
+                content = content.replace(/\n/g, '<br>');
+                trendColumns = `<div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">${content}</div>`;
+                bottomContent = '';
+            }
+            
+            return trendColumns + bottomContent;
+        }
+
+        function renderSingleTrend(trend, typeLabels, typeColors, typeBorders, collapsed) {
+            const date = new Date(trend.timestamp);
+            const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            const label = typeLabels[trend.type] || trend.type;
+            const bgColor = typeColors[trend.type] || 'rgba(255,255,255,0.03)';
+            const borderColor = typeBorders[trend.type] || 'rgba(255,255,255,0.1)';
+            
+            const content = renderTrendContent(trend, typeLabels, typeColors, typeBorders);
+            
+            return `
+                <div class="glass-card" style="padding: 1.25rem; border-left: 3px solid ${borderColor};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">${label} — ${dateStr}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); background: ${bgColor}; padding: 0.2rem 0.6rem; border-radius: 4px;">${timeStr}</div>
+                    </div>
+                    ${content}
+                </div>`;
         }
         
         function escapeHtml(text) {
