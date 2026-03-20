@@ -1920,6 +1920,7 @@
                 <button class="tab" data-tab="memory">🧠 Memory</button>
                 <button class="tab" data-tab="calendar">📅 Calendar</button>
                 <button class="tab" data-tab="trends">🌪️ Trends</button>
+                <button class="tab" data-tab="brand">🔍 Brand</button>
             </nav>
             
             <div class="header-right">
@@ -2461,6 +2462,155 @@
                 </div>
             </div>
         </div>
+
+        <!-- BRAND ANALYSIS TAB -->
+        <div class="tab-content" id="brand-tab">
+            <!-- Header -->
+            <div class="glass-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0;">Brand Analysis</h2>
+                        <p id="brandLastUpdated" style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0 0;">Loading...</p>
+                    </div>
+                    <button onclick="refreshBrandAnalysis()" id="brandRefreshBtn" class="add-client-btn" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">
+                        🔄 Refresh Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section 1: Our Brand Overview -->
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 0 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Our Brand Overview</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <!-- Website Health -->
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem;">🌐</span>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Website Health</div>
+                            <div id="brandWebsiteTitle" style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500; margin-top: 0.15rem;">yippypouches.com</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin: 1.5rem 0;">
+                        <div id="brandSeoScore" style="font-size: 3rem; font-weight: 700; color: #4ade80;">--</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">SEO Score</div>
+                    </div>
+                    <div id="brandWebsiteIssues" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem;">📸</span>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Instagram</div>
+                            <div style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500; margin-top: 0.15rem;">@yippypouches</div>
+                        </div>
+                    </div>
+                    <div id="brandIgFollowers" style="font-size: 2rem; font-weight: 700; color: #e4405f; margin-bottom: 0.5rem;">--</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <span>Posts</span>
+                        <span id="brandIgPosts" style="color: var(--text-primary); font-weight: 500;">--</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
+                        <span>Activity</span>
+                        <span id="brandIgActivity" style="color: var(--text-primary); font-weight: 500;">--</span>
+                    </div>
+                </div>
+
+                <!-- Twitter/X -->
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem;">𝕏</span>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Twitter / X</div>
+                            <div style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500; margin-top: 0.15rem;">@yippypouches</div>
+                        </div>
+                    </div>
+                    <div id="brandTwitterFollowers" style="font-size: 2rem; font-weight: 700; color: #1da1f2; margin-bottom: 0.5rem;">--</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; margin-top: 0.75rem; padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px;">
+                        ⚠️ Full metrics require API access
+                    </div>
+                </div>
+
+                <!-- TikTok -->
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem;">🎵</span>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">TikTok</div>
+                            <div style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500; margin-top: 0.15rem;">@yippypouches</div>
+                        </div>
+                    </div>
+                    <div id="brandTikTokFollowers" style="font-size: 2rem; font-weight: 700; color: #00f2ea; margin-bottom: 0.5rem;">--</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <span>Total Likes</span>
+                        <span id="brandTikTokLikes" style="color: var(--text-primary); font-weight: 500;">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Competitor Comparison -->
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 2rem 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Competitor Comparison</h3>
+            <div id="brandCompetitorGrid" class="glass-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Section 3: Recommendations -->
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 2rem 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Actionable Recommendations</h3>
+            
+            <!-- Filter chips -->
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                <button class="category-chip active" data-rec-filter="all" onclick="filterRecommendations('all')" style="padding: 0.35rem 0.75rem; background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 16px; color: #4ade80; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">All</button>
+                <button class="category-chip" data-rec-filter="website" onclick="filterRecommendations('website')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">Website</button>
+                <button class="category-chip" data-rec-filter="instagram" onclick="filterRecommendations('instagram')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">Instagram</button>
+                <button class="category-chip" data-rec-filter="twitter" onclick="filterRecommendations('twitter')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">X</button>
+                <button class="category-chip" data-rec-filter="tiktok" onclick="filterRecommendations('tiktok')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">TikTok</button>
+                <button class="category-chip" data-rec-filter="seo" onclick="filterRecommendations('seo')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">SEO</button>
+                <button class="category-chip" data-rec-filter="content" onclick="filterRecommendations('content')" style="padding: 0.35rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">Content</button>
+            </div>
+
+            <div id="brandRecommendations" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Section 4: Inspiration Corner -->
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin: 2rem 0 1rem; padding-left: 0.5rem; border-left: 3px solid var(--accent);">Inspiration: What Poppi Does Well</h3>
+            <div class="glass-card" style="padding: 1.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="padding: 1rem; background: rgba(251, 191, 36, 0.05); border-left: 3px solid #fbbf24; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem;">🎯 Authentic Community Building</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
+                            Poppi excels at making customers feel like part of a movement, not just buyers. They share real stories, celebrate user content, and engage genuinely.
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
+                            <strong style="color: var(--accent);">How to apply:</strong> Feature real Yippy users in your content. Share their stories about focus, energy, or performance. Make them the heroes.
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1rem; background: rgba(96, 165, 250, 0.05); border-left: 3px solid #60a5fa; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">✨ Playful Brand Voice</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
+                            Their tone is friendly, approachable, and fun without being unprofessional. They don't take themselves too seriously.
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
+                            <strong style="color: var(--accent);">How to apply:</strong> Inject more personality into captions and copy. Use humor where appropriate. Show the human side of Yippy.
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1rem; background: rgba(192, 132, 252, 0.05); border-left: 3px solid #c084fc; border-radius: 8px;">
+                        <div style="font-size: 0.9rem; font-weight: 600; color: #c084fc; margin-bottom: 0.5rem;">🚀 Strategic Partnerships</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
+                            Poppi partners with influencers and brands that align with their values and reach their target audience authentically.
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
+                            <strong style="color: var(--accent);">How to apply:</strong> Identify micro-influencers in golf, gaming, and wellness. Send them Yippy for authentic reviews. Build long-term relationships.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- ============================================
@@ -2816,6 +2966,9 @@
                 }
                 if (tabName === 'calendar') {
                     setTimeout(loadCalendar, 100);
+                }
+                if (tabName === 'brand') {
+                    setTimeout(loadBrand, 100);
                 }
             });
         });
@@ -5482,6 +5635,250 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ============================================
+        // BRAND ANALYSIS TAB
+        // ============================================
+        let currentBrandData = null;
+        let currentRecFilter = 'all';
+
+        async function loadBrand() {
+            try {
+                const response = await fetch('/api/mc/brand');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Brand analysis error:', data.error);
+                    return;
+                }
+                
+                currentBrandData = data;
+                renderBrandAnalysis(data);
+            } catch (error) {
+                console.error('Failed to load brand analysis:', error);
+            }
+        }
+
+        function renderBrandAnalysis(data) {
+            // Update last updated timestamp
+            if (data.lastUpdated) {
+                const date = new Date(data.lastUpdated);
+                const timeAgo = getTimeAgo(date);
+                document.getElementById('brandLastUpdated').textContent = `Last updated: ${timeAgo}`;
+            }
+
+            // Website health
+            if (data.brand?.website) {
+                const seoScore = data.brand.website.seoScore || 0;
+                const scoreColor = seoScore >= 80 ? '#4ade80' : seoScore >= 60 ? '#fbbf24' : '#f87171';
+                document.getElementById('brandSeoScore').textContent = seoScore;
+                document.getElementById('brandSeoScore').style.color = scoreColor;
+                document.getElementById('brandWebsiteTitle').textContent = data.brand.website.title || 'yippypouches.com';
+                
+                // Issues and strengths
+                let issuesHTML = '';
+                if (data.brand.website.issues && data.brand.website.issues.length > 0) {
+                    issuesHTML += '<div style="margin-bottom: 0.75rem;"><div style="font-weight: 600; color: #f87171; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Issues</div>';
+                    data.brand.website.issues.slice(0, 3).forEach(issue => {
+                        issuesHTML += `<div style="margin-bottom: 0.25rem; padding-left: 0.75rem; border-left: 2px solid #f87171; color: var(--text-muted);">• ${issue}</div>`;
+                    });
+                    issuesHTML += '</div>';
+                }
+                if (data.brand.website.strengths && data.brand.website.strengths.length > 0) {
+                    issuesHTML += '<div><div style="font-weight: 600; color: #4ade80; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Strengths</div>';
+                    data.brand.website.strengths.slice(0, 2).forEach(strength => {
+                        issuesHTML += `<div style="margin-bottom: 0.25rem; padding-left: 0.75rem; border-left: 2px solid #4ade80; color: var(--text-muted);">✓ ${strength}</div>`;
+                    });
+                    issuesHTML += '</div>';
+                }
+                document.getElementById('brandWebsiteIssues').innerHTML = issuesHTML || '<div style="color: var(--text-muted);">No data available</div>';
+            }
+
+            // Instagram
+            if (data.brand?.social?.instagram) {
+                const ig = data.brand.social.instagram;
+                document.getElementById('brandIgFollowers').textContent = ig.followers ? ig.followers.toLocaleString() : '--';
+                document.getElementById('brandIgPosts').textContent = ig.posts || '--';
+                document.getElementById('brandIgActivity').textContent = ig.postFrequency || 'Unknown';
+            }
+
+            // Twitter
+            if (data.brand?.social?.twitter) {
+                const tw = data.brand.social.twitter;
+                document.getElementById('brandTwitterFollowers').textContent = tw.followers ? tw.followers.toLocaleString() : 'API required';
+            }
+
+            // TikTok
+            if (data.brand?.social?.tiktok) {
+                const tt = data.brand.social.tiktok;
+                document.getElementById('brandTikTokFollowers').textContent = tt.followers ? tt.followers.toLocaleString() : '--';
+                document.getElementById('brandTikTokLikes').textContent = tt.likes ? tt.likes.toLocaleString() : '--';
+            }
+
+            // Competitor comparison
+            renderCompetitorComparison(data);
+
+            // Recommendations
+            renderRecommendations(data.recommendations || []);
+        }
+
+        function renderCompetitorComparison(data) {
+            const container = document.getElementById('brandCompetitorGrid');
+            if (!data.competitors || data.competitors.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No competitor data available</div>';
+                return;
+            }
+
+            let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">';
+            html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">';
+            html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Brand</th>';
+            html += '<th style="text-align: center; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">SEO Score</th>';
+            html += '<th style="text-align: center; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Instagram</th>';
+            html += '<th style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">Key Differentiators</th>';
+            html += '</tr></thead><tbody>';
+
+            // Yippy row
+            html += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(74, 222, 128, 0.05);">';
+            html += '<td style="padding: 0.75rem; font-weight: 600; color: #4ade80;">Yippy (Us)</td>';
+            html += `<td style="padding: 0.75rem; text-align: center; font-weight: 600;">${data.brand?.website?.seoScore || 'N/A'}</td>`;
+            html += `<td style="padding: 0.75rem; text-align: center;">${data.brand?.social?.instagram?.followers ? data.brand.social.instagram.followers.toLocaleString() : 'N/A'}</td>`;
+            html += '<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">Non-nicotine, functional ingredients</td>';
+            html += '</tr>';
+
+            // Competitor rows
+            data.competitors.forEach(comp => {
+                html += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">';
+                html += `<td style="padding: 0.75rem; font-weight: 500; color: var(--text-primary);">${comp.name}</td>`;
+                html += `<td style="padding: 0.75rem; text-align: center;">${comp.website?.seoScore || 'N/A'}</td>`;
+                html += `<td style="padding: 0.75rem; text-align: center;">${comp.social?.instagram?.followers ? comp.social.instagram.followers.toLocaleString() : 'N/A'}</td>`;
+                const strengths = (comp.strengths || []).slice(0, 2).join(', ') || 'N/A';
+                html += `<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.75rem;">${strengths}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function renderRecommendations(recommendations) {
+            const container = document.getElementById('brandRecommendations');
+            
+            // Filter by current filter
+            const filtered = currentRecFilter === 'all' 
+                ? recommendations 
+                : recommendations.filter(r => r.category === currentRecFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="glass-card" style="padding: 2rem; text-align: center; color: var(--text-muted);">No recommendations in this category</div>';
+                return;
+            }
+
+            const priorityIcons = {
+                high: '🔴',
+                medium: '🟡',
+                low: '⚪'
+            };
+
+            const categoryIcons = {
+                website: '🌐',
+                instagram: '📸',
+                twitter: '𝕏',
+                tiktok: '🎵',
+                seo: '🔍',
+                content: '✍️'
+            };
+
+            const effortColors = {
+                'quick-win': '#4ade80',
+                'medium': '#fbbf24',
+                'major': '#f87171'
+            };
+
+            let html = '';
+            filtered.forEach(rec => {
+                const icon = categoryIcons[rec.category] || '💡';
+                const priorityIcon = priorityIcons[rec.priority] || '⚪';
+                const effortColor = effortColors[rec.effort] || '#6b7280';
+                
+                html += `
+                    <div class="glass-card" style="padding: 1rem 1.25rem; border-left: 3px solid ${rec.priority === 'high' ? '#f87171' : rec.priority === 'medium' ? '#fbbf24' : 'rgba(255,255,255,0.2)'};">
+                        <div style="display: flex; justify-content: between; align-items: flex-start; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">${icon}</span>
+                                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">${rec.title}</span>
+                                    <span style="font-size: 0.7rem;">${priorityIcon}</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">${rec.description}</div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 4px;">${rec.category}</span>
+                                    <span style="font-size: 0.7rem; color: ${effortColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Effort: ${rec.effort}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterRecommendations(category) {
+            currentRecFilter = category;
+            
+            // Update chip styles
+            document.querySelectorAll('[data-rec-filter]').forEach(chip => {
+                if (chip.dataset.recFilter === category) {
+                    chip.style.background = 'rgba(74, 222, 128, 0.2)';
+                    chip.style.borderColor = 'rgba(74, 222, 128, 0.3)';
+                    chip.style.color = '#4ade80';
+                    chip.classList.add('active');
+                } else {
+                    chip.style.background = 'rgba(255,255,255,0.05)';
+                    chip.style.borderColor = 'rgba(255,255,255,0.1)';
+                    chip.style.color = 'var(--text-muted)';
+                    chip.classList.remove('active');
+                }
+            });
+
+            if (currentBrandData?.recommendations) {
+                renderRecommendations(currentBrandData.recommendations);
+            }
+        }
+
+        async function refreshBrandAnalysis() {
+            const btn = document.getElementById('brandRefreshBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Analyzing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/mc/brand', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Failed to refresh analysis: ' + data.error);
+                    return;
+                }
+                
+                currentBrandData = data;
+                renderBrandAnalysis(data);
+            } catch (error) {
+                console.error('Failed to refresh brand analysis:', error);
+                alert('Failed to refresh analysis');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
         // ============================================
