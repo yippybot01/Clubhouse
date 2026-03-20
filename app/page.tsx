@@ -1,22 +1,22 @@
 'use client';
 
+import { useEffect } from 'react';
+
 export default function Home() {
+  useEffect(() => {
+    window.location.replace('/mission-control.html');
+  }, []);
+
   return (
-    <iframe 
-      src="/mission-control.html" 
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        border: 'none',
-        margin: 0,
-        padding: 0,
-        overflow: 'hidden',
-        zIndex: 999999
-      }}
-      title="Mission Control"
-    />
+    <div style={{
+      minHeight: '100vh',
+      background: '#0A1628',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#9CA3AF'
+    }}>
+      Redirecting...
+    </div>
   );
 }
