@@ -2258,74 +2258,124 @@
             </div>
         </div>
 
-        <!-- TIMELINE TAB -->
+        <!-- CALENDAR TAB -->
         <div class="tab-content" id="calendar-tab">
             <!-- Calendar Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div>
-                    <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                         📅 Calendar
                     </h2>
-                    <p id="calCurrentLabel" style="font-size: 0.85rem; color: var(--text-muted); margin: 0.3rem 0 0;"></p>
+                    <p id="calCurrentLabel" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0 0; font-weight: 500;"></p>
                 </div>
 
                 <div style="display: flex; gap: 0.75rem; align-items: center;">
                     <!-- View Toggle -->
-                    <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.25rem; border: 1px solid rgba(255,255,255,0.1);">
-                        <button id="viewWeek" onclick="setCalendarView('week')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Week</button>
-                        <button id="viewMonth" onclick="setCalendarView('month')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: rgba(16,185,129,0.15); color: #10b981; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Month</button>
-                        <button id="viewYear" onclick="setCalendarView('year')" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">Year</button>
+                    <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.3rem; border: 1px solid rgba(255,255,255,0.1);">
+                        <button id="viewWeek" onclick="setCalendarView('week')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Week</button>
+                        <button id="viewMonth" onclick="setCalendarView('month')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: rgba(16,185,129,0.15); color: #10b981; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Month</button>
+                        <button id="viewYear" onclick="setCalendarView('year')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Year</button>
                     </div>
 
                     <!-- Navigation -->
-                    <button onclick="navigateCalendar('prev')" style="padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer;">◀</button>
-                    <button onclick="navigateCalendar('today')" style="padding: 0.5rem 1rem; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">Today</button>
-                    <button onclick="navigateCalendar('next')" style="padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer;">▶</button>
+                    <button onclick="navigateCalendar('prev')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">◀</button>
+                    <button onclick="navigateCalendar('today')" style="padding: 0.6rem 1.2rem; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Today</button>
+                    <button onclick="navigateCalendar('next')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">▶</button>
 
                     <!-- Add Event Button -->
-                    <button onclick="openAddEventModal()" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
-                        <span>+</span> Add Event
+                    <button onclick="openAddEventModal()" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(16,185,129,0.2);">
+                        <span style="font-size: 1.1rem;">+</span> Add Event
                     </button>
                 </div>
             </div>
 
             <!-- Calendar View Container -->
-            <div class="glass-card" style="padding: 1.5rem; min-height: 500px;">
+            <div class="glass-card" style="padding: 2rem; min-height: 600px;">
                 <div id="calendarViewContainer"></div>
             </div>
         </div>
 
-        <!-- Add Event Modal -->
-        <div id="addEventModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeAddEventModal()">
-            <div style="background: #1f2937; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px;" onclick="event.stopPropagation()">
-                <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.5rem;">Add Event</h3>
+        <!-- Add/Edit Event Modal -->
+        <div id="addEventModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeAddEventModal()">
+            <div style="background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 2.5rem; width: 90%; max-width: 550px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3 id="modalTitle" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0;">Add Event</h3>
+                    <button onclick="closeAddEventModal()" style="background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">✕</button>
+                </div>
                 
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="hidden" id="eventId">
+                
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                     <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Date</label>
-                        <input type="date" id="eventDate" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Event Title</label>
+                        <input type="text" id="eventTitle" placeholder="Team meeting, Birthday party, etc." style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; transition: all 0.2s;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'; this.style.background='rgba(255,255,255,0.08)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'; this.style.background='rgba(255,255,255,0.06)'">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Start Date</label>
+                            <input type="date" id="eventDate" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">End Date (optional)</label>
+                            <input type="date" id="eventEndDate" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        </div>
                     </div>
                     
                     <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Event Title</label>
-                        <input type="text" id="eventTitle" placeholder="Enter event title" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Time (optional)</label>
+                        <input type="time" id="eventTime" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
                     </div>
                     
                     <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Time (optional)</label>
-                        <input type="time" id="eventTime" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Description (optional)</label>
+                        <textarea id="eventDesc" placeholder="Add details about this event..." rows="3" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; resize: vertical; font-family: var(--font-family);" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'; this.style.background='rgba(255,255,255,0.08)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'; this.style.background='rgba(255,255,255,0.06)'"></textarea>
                     </div>
-                    
+
                     <div>
-                        <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Description (optional)</label>
-                        <textarea id="eventDesc" placeholder="Add details..." rows="3" style="width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; resize: vertical;"></textarea>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Color</label>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
+                            <button onclick="selectEventColor('#60a5fa')" data-color="#60a5fa" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #60a5fa; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#10b981')" data-color="#10b981" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #10b981; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#f59e0b')" data-color="#f59e0b" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #f59e0b; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#ef4444')" data-color="#ef4444" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ef4444; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#8b5cf6')" data-color="#8b5cf6" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #8b5cf6; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#ec4899')" data-color="#ec4899" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ec4899; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                        </div>
+                        <input type="hidden" id="eventColor" value="#60a5fa">
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button onclick="closeAddEventModal()" style="flex: 1; padding: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancel</button>
-                    <button onclick="saveEvent()" style="flex: 1; padding: 0.7rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Add Event</button>
+                <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
+                    <div id="deleteEventBtn" style="display: none; margin-right: auto;">
+                        <button onclick="deleteEvent()" style="padding: 0.8rem 1.2rem; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.15)'">Delete</button>
+                    </div>
+                    <button onclick="closeAddEventModal()" style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: var(--text-primary); border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Cancel</button>
+                    <button onclick="saveEvent()" style="flex: 1; padding: 0.8rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 16px rgba(16,185,129,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16,185,129,0.3)'">
+                        <span id="saveEventBtnText">Add Event</span>
+                    </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Day Details Modal -->
+        <div id="dayDetailsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeDayDetailsModal()">
+            <div style="background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 2.5rem; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h3 id="dayDetailsDate" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem;"></h3>
+                        <p id="dayDetailsSummary" style="font-size: 0.9rem; color: var(--text-muted); margin: 0;"></p>
+                    </div>
+                    <button onclick="closeDayDetailsModal()" style="background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">✕</button>
+                </div>
+                
+                <div id="dayDetailsEvents" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Events populate here -->
+                </div>
+
+                <button onclick="closeDayDetailsModal(); selectDateForEvent(document.getElementById('dayDetailsModal').dataset.date);" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                    + Add Event This Day
+                </button>
             </div>
         </div>
 
@@ -6289,32 +6339,51 @@
                 days.push(d);
             }
 
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date().toDateString();
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">';
             
-            // Day headers
-            dayNames.forEach(name => {
-                html += `<div style="text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 0.5rem;">${name}</div>`;
+            // Day headers with date
+            days.forEach((day, i) => {
+                const isToday = day.toDateString() === today;
+                html += `<div style="text-align: center; padding: 1rem; border-radius: 10px; background: ${isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.08) 100%)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'};">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">${dayNames[i]}</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: ${isToday ? '#10b981' : 'var(--text-primary)'}; ${isToday ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${day.getDate()}</div>
+                </div>`;
             });
 
-            // Day cells
+            html += '</div>';
+            
+            // Event cards in rows
+            html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem; margin-top: 1rem;">';
+            
             days.forEach(day => {
                 const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => e.date === dateStr);
+                const dayEvents = calendarEvents.filter(e => {
+                    if (e.endDate) {
+                        return dateStr >= e.date && dateStr <= e.endDate;
+                    }
+                    return e.date === dateStr;
+                });
                 const isToday = day.toDateString() === today;
 
                 html += `
-                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 120px; padding: 0.75rem; border-radius: 8px; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}'">
-                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">${day.getDate()}</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                            ${dayEvents.map(event => `
-                                <div style="font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(96,165,250,0.2); color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${event.title}${event.time ? ' at ' + event.time : ''}">
-                                    ${event.time ? event.time + ' ' : ''}${event.title}
-                                </div>
-                            `).join('')}
-                        </div>
+                    <div onclick="showDayDetails('${dateStr}')" style="min-height: 180px; padding: 1rem; border-radius: 12px; border: 2px solid ${isToday ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.03)'}; cursor: pointer; transition: all 0.25s; position: relative; overflow-y: auto;" onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${isToday ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.1)'}'; this.style.background='${isToday ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.03)'}'">
+                        ${dayEvents.length === 0 ? `
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No events</div>
+                        ` : `
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                ${dayEvents.map(event => `
+                                    <div onclick="event.stopPropagation(); editEvent('${event.id}')" style="padding: 0.625rem; border-radius: 8px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}35 0%, ${(event.color || '#60a5fa')}18 100%); border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 4px 12px ${(event.color || '#60a5fa')}30'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+                                        ${event.time ? `<div style="font-size: 0.7rem; font-weight: 600; color: ${event.color || '#60a5fa'}; margin-bottom: 0.25rem;">🕐 ${event.time}</div>` : ''}
+                                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: ${event.description ? '0.25rem' : '0'};">${event.title}</div>
+                                        ${event.description ? `<div style="font-size: 0.7rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${event.description}</div>` : ''}
+                                        ${event.endDate && event.endDate !== event.date ? `<div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem; font-style: italic;">Multi-day event</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
                     </div>
                 `;
             });
@@ -6339,27 +6408,33 @@
                 }
             }
 
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date().toDateString();
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">';
             
             // Day headers
             dayNames.forEach(name => {
-                html += `<div style="text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 0.5rem;">${name}</div>`;
+                html += `<div style="text-align: center; font-size: 0.875rem; font-weight: 700; color: var(--text-secondary); padding: 0.75rem 0; letter-spacing: 0.5px; text-transform: uppercase;">${name}</div>`;
             });
 
             // Day cells
             days.forEach(day => {
                 if (!day) {
-                    html += '<div style="min-height: 100px;"></div>';
+                    html += '<div style="min-height: 120px; border-radius: 12px; background: rgba(0,0,0,0.1);"></div>';
                     return;
                 }
 
                 const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => e.date === dateStr);
+                const dayEvents = calendarEvents.filter(e => {
+                    if (e.endDate) {
+                        // Multi-day event - check if day is within range
+                        return dateStr >= e.date && dateStr <= e.endDate;
+                    }
+                    return e.date === dateStr;
+                });
                 
-                // Check for tournaments on this date or spanning this date
+                // Check for tournaments
                 const dayTournaments = golfTournaments.filter(t => {
                     const start = new Date(t.startDate);
                     const end = new Date(t.endDate);
@@ -6370,22 +6445,24 @@
                 const isToday = day.toDateString() === today;
                 const hasTournament = dayTournaments.length > 0;
                 const hasMajor = dayTournaments.some(t => t.type === 'major');
+                const hasEvents = dayEvents.length > 0 || dayTournaments.length > 0;
 
                 html += `
-                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 100px; padding: 0.5rem; border-radius: 8px; border: 1px solid ${hasMajor ? 'rgba(251,191,36,0.5)' : (isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)')}; background: ${hasMajor ? 'rgba(251,191,36,0.1)' : (isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)')}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${hasMajor ? 'rgba(251,191,36,0.1)' : (isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)')}'">
-                        <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem;">${day.getDate()}</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                    <div onclick="showDayDetails('${dateStr}')" style="min-height: 120px; padding: 0.875rem; border-radius: 12px; border: 2px solid ${isToday ? 'rgba(16,185,129,0.5)' : (hasEvents ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)')}; background: ${hasMajor ? 'linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.03) 100%)' : (isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)')}; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${isToday ? 'rgba(16,185,129,0.5)' : (hasEvents ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)')}'; this.style.background='${hasMajor ? 'linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.03) 100%)' : (isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)')}'">
+                        ${isToday ? '<div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 40px 40px 0; border-color: transparent #10b981 transparent transparent;"></div>' : ''}
+                        <div style="font-size: 1.25rem; font-weight: 700; color: ${isToday ? '#10b981' : 'var(--text-primary)'}; margin-bottom: 0.5rem; ${isToday ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${day.getDate()}</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
                             ${dayTournaments.map(tournament => `
-                                <div style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 3px; background: ${tournament.type === 'major' ? 'rgba(251,191,36,0.3)' : 'rgba(74,222,128,0.2)'}; color: ${tournament.type === 'major' ? '#fbbf24' : '#4ade80'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;" title="${tournament.name} (${tournament.tour})">
-                                    ⛳ ${tournament.name}
+                                <div onclick="event.stopPropagation()" style="font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 6px; background: ${tournament.type === 'major' ? 'linear-gradient(135deg, rgba(251,191,36,0.25) 0%, rgba(251,191,36,0.15) 100%)' : 'linear-gradient(135deg, rgba(74,222,128,0.2) 0%, rgba(74,222,128,0.1) 100%)'}; color: ${tournament.type === 'major' ? '#fbbf24' : '#4ade80'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; border: 1px solid ${tournament.type === 'major' ? 'rgba(251,191,36,0.3)' : 'rgba(74,222,128,0.3)'};" title="${tournament.name} (${tournament.tour})">
+                                    ⛳ ${tournament.name.length > 20 ? tournament.name.substring(0, 20) + '...' : tournament.name}
                                 </div>
                             `).join('')}
                             ${dayEvents.slice(0, 2).map(event => `
-                                <div style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 3px; background: rgba(96,165,250,0.2); color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${event.title}">
-                                    ${event.title}
+                                <div onclick="event.stopPropagation(); editEvent('${event.id}')" style="font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 6px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}40 0%, ${(event.color || '#60a5fa')}20 100%); color: ${event.color || '#60a5fa'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" title="${event.title}${event.time ? ' at ' + event.time : ''}" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    ${event.time ? '🕐 ' + event.time + ' - ' : ''}${event.title.length > 18 ? event.title.substring(0, 18) + '...' : event.title}
                                 </div>
                             `).join('')}
-                            ${(dayEvents.length + dayTournaments.length) > 2 ? `<div style="font-size: 0.65rem; color: var(--text-muted);">+${(dayEvents.length + dayTournaments.length) - 2} more</div>` : ''}
+                            ${(dayEvents.length + dayTournaments.length) > 2 ? `<div style="font-size: 0.7rem; color: var(--text-muted); padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center; font-weight: 600;">+${(dayEvents.length + dayTournaments.length) - 2} more</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -6402,28 +6479,46 @@
                 months.push(new Date(year, i, 1));
             }
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">';
+            let html = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;">';
 
             months.forEach(month => {
                 const monthName = month.toLocaleString('en-US', { month: 'long' });
                 const monthStr = `${year}-${String(month.getMonth() + 1).padStart(2, '0')}`;
-                const monthEvents = calendarEvents.filter(e => e.date.startsWith(monthStr));
+                const monthEvents = calendarEvents.filter(e => {
+                    if (e.endDate) {
+                        // Check if event overlaps with this month
+                        return e.date.startsWith(monthStr) || e.endDate.startsWith(monthStr) || 
+                               (e.date < monthStr && e.endDate > monthStr);
+                    }
+                    return e.date.startsWith(monthStr);
+                });
+                
+                const hasEvents = monthEvents.length > 0;
+                const currentMonth = new Date().getMonth() === month.getMonth() && 
+                                   new Date().getFullYear() === year;
 
                 html += `
-                    <div onclick="jumpToMonth(${month.getMonth()})" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                        <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">${monthName}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                            ${monthEvents.length} event${monthEvents.length !== 1 ? 's' : ''}
+                    <div onclick="jumpToMonth(${month.getMonth()})" style="background: ${currentMonth ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)'}; border: 2px solid ${currentMonth ? 'rgba(16,185,129,0.4)' : (hasEvents ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)')}; border-radius: 16px; padding: 1.5rem; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${currentMonth ? 'rgba(16,185,129,0.4)' : (hasEvents ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)')}'; this.style.background='${currentMonth ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)'}'; this.style.boxShadow='none'">
+                        ${currentMonth ? '<div style="position: absolute; top: 0; right: 0; padding: 0.25rem 0.75rem; background: #10b981; color: white; font-size: 0.65rem; font-weight: 700; border-bottom-left-radius: 8px;">CURRENT</div>' : ''}
+                        <div style="font-weight: 700; color: ${currentMonth ? '#10b981' : 'var(--text-primary)'}; margin-bottom: 0.75rem; font-size: 1.3rem; ${currentMonth ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${monthName}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: ${monthEvents.length > 0 ? '1rem' : '0'}; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${hasEvents ? '#10b981' : 'rgba(255,255,255,0.2)'};"></div>
+                            <span>${monthEvents.length} event${monthEvents.length !== 1 ? 's' : ''}</span>
                         </div>
                         ${monthEvents.length > 0 ? `
-                            <div style="display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.75rem;">
-                                ${monthEvents.slice(0, 3).map(event => `
-                                    <div style="font-size: 0.75rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        • ${event.title}
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+                                ${monthEvents.slice(0, 4).map(event => `
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.5rem; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}25 0%, ${(event.color || '#60a5fa')}10 100%); border-left: 3px solid ${event.color || '#60a5fa'}; border-radius: 6px;">
+                                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font-weight: 500;">${event.title}</div>
                                     </div>
                                 `).join('')}
+                                ${monthEvents.length > 4 ? `<div style="font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.03); border-radius: 6px;">+${monthEvents.length - 4} more</div>` : ''}
                             </div>
-                        ` : ''}
+                        ` : `
+                            <div style="margin-top: 1rem; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; font-style: italic; background: rgba(0,0,0,0.1); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+                                No events
+                            </div>
+                        `}
                     </div>
                 `;
             });
@@ -6439,6 +6534,7 @@
 
         function selectDateForEvent(dateStr) {
             document.getElementById('eventDate').value = dateStr;
+            document.getElementById('eventEndDate').value = '';
             openAddEventModal();
         }
 
@@ -6446,49 +6542,136 @@
             const modal = document.getElementById('addEventModal');
             modal.style.display = 'flex';
             
+            // Reset form
+            document.getElementById('modalTitle').textContent = 'Add Event';
+            document.getElementById('saveEventBtnText').textContent = 'Add Event';
+            document.getElementById('deleteEventBtn').style.display = 'none';
+            document.getElementById('eventId').value = '';
+            
             // Set date to today if not already set
             const dateInput = document.getElementById('eventDate');
             if (!dateInput.value) {
                 dateInput.value = new Date().toISOString().split('T')[0];
             }
+            
+            // Set default color (blue)
+            selectEventColor('#60a5fa');
         }
 
         function closeAddEventModal() {
             document.getElementById('addEventModal').style.display = 'none';
+            document.getElementById('eventId').value = '';
             document.getElementById('eventTitle').value = '';
             document.getElementById('eventTime').value = '';
             document.getElementById('eventDesc').value = '';
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventEndDate').value = '';
+            document.getElementById('eventColor').value = '#60a5fa';
+        }
+
+        function selectEventColor(color) {
+            document.getElementById('eventColor').value = color;
+            // Update visual selection
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                if (btn.dataset.color === color) {
+                    btn.style.borderColor = '#ffffff';
+                    btn.style.transform = 'scale(1.15)';
+                } else {
+                    btn.style.borderColor = 'transparent';
+                    btn.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        async function editEvent(eventId) {
+            const event = calendarEvents.find(e => e.id === eventId);
+            if (!event) return;
+            
+            // Populate form
+            document.getElementById('modalTitle').textContent = 'Edit Event';
+            document.getElementById('saveEventBtnText').textContent = 'Save Changes';
+            document.getElementById('deleteEventBtn').style.display = 'block';
+            document.getElementById('eventId').value = event.id;
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventEndDate').value = event.endDate || '';
+            document.getElementById('eventTime').value = event.time || '';
+            document.getElementById('eventDesc').value = event.description || '';
+            
+            // Set color
+            selectEventColor(event.color || '#60a5fa');
+            
+            // Show modal
+            document.getElementById('addEventModal').style.display = 'flex';
+        }
+
+        async function deleteEvent() {
+            const eventId = document.getElementById('eventId').value;
+            if (!eventId) return;
+            
+            if (!confirm('Are you sure you want to delete this event?')) return;
+            
+            try {
+                const res = await fetch(`/api/mc/calendar?id=${eventId}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    calendarEvents = calendarEvents.filter(e => e.id !== eventId);
+                    closeAddEventModal();
+                    renderCalendar();
+                } else {
+                    alert('Failed to delete event');
+                }
+            } catch (err) {
+                console.error('Failed to delete event:', err);
+                alert('Failed to delete event');
+            }
         }
 
         async function saveEvent() {
+            const eventId = document.getElementById('eventId').value;
             const date = document.getElementById('eventDate').value;
+            const endDate = document.getElementById('eventEndDate').value;
             const title = document.getElementById('eventTitle').value;
             const time = document.getElementById('eventTime').value;
             const description = document.getElementById('eventDesc').value;
+            const color = document.getElementById('eventColor').value;
 
             if (!date || !title) {
                 alert('Please enter a date and title');
                 return;
             }
 
-            const newEvent = {
-                id: `event_${Date.now()}`,
+            const eventData = {
+                id: eventId || `event_${Date.now()}`,
                 title,
                 date,
+                endDate: endDate || null,
                 type: 'personal',
                 time: time || null,
-                description: description || null
+                description: description || null,
+                color: color || '#60a5fa'
             };
 
             try {
                 const res = await fetch('/api/mc/calendar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newEvent)
+                    body: JSON.stringify(eventData)
                 });
 
                 if (res.ok) {
-                    calendarEvents.push(newEvent);
+                    if (eventId) {
+                        // Update existing
+                        const index = calendarEvents.findIndex(e => e.id === eventId);
+                        if (index !== -1) {
+                            calendarEvents[index] = eventData;
+                        }
+                    } else {
+                        // Add new
+                        calendarEvents.push(eventData);
+                    }
                     closeAddEventModal();
                     renderCalendar();
                 } else {
@@ -6498,6 +6681,81 @@
                 console.error('Failed to save event:', err);
                 alert('Failed to save event');
             }
+        }
+
+        function showDayDetails(dateStr) {
+            const date = new Date(dateStr);
+            const dayEvents = calendarEvents.filter(e => {
+                if (e.endDate) {
+                    return dateStr >= e.date && dateStr <= e.endDate;
+                }
+                return e.date === dateStr;
+            });
+            const dayTournaments = golfTournaments.filter(t => {
+                const start = new Date(t.startDate);
+                const end = new Date(t.endDate);
+                const current = new Date(dateStr);
+                return current >= start && current <= end;
+            });
+            
+            const modal = document.getElementById('dayDetailsModal');
+            modal.dataset.date = dateStr;
+            
+            // Update header
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            document.getElementById('dayDetailsDate').textContent = dayName;
+            
+            const totalEvents = dayEvents.length + dayTournaments.length;
+            document.getElementById('dayDetailsSummary').textContent = `${totalEvents} event${totalEvents !== 1 ? 's' : ''}`;
+            
+            // Render events
+            let html = '';
+            
+            // Tournaments first
+            if (dayTournaments.length > 0) {
+                dayTournaments.forEach(tournament => {
+                    html += `
+                        <div style="padding: 1.25rem; border-radius: 12px; background: linear-gradient(135deg, ${tournament.type === 'major' ? 'rgba(251,191,36,0.15)' : 'rgba(74,222,128,0.15)'} 0%, ${tournament.type === 'major' ? 'rgba(251,191,36,0.05)' : 'rgba(74,222,128,0.05)'} 100%); border: 1px solid ${tournament.type === 'major' ? 'rgba(251,191,36,0.3)' : 'rgba(74,222,128,0.3)'};">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.5rem;">⛳</span>
+                                <div>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${tournament.name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${tournament.tour} ${tournament.type === 'major' ? '• Major Championship' : ''}</div>
+                                </div>
+                            </div>
+                            ${tournament.location ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">📍 ${tournament.location}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            // Personal events
+            if (dayEvents.length > 0) {
+                dayEvents.forEach(event => {
+                    html += `
+                        <div onclick="editEvent('${event.id}')" style="padding: 1.25rem; border-radius: 12px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}25 0%, ${(event.color || '#60a5fa')}10 100%); border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='${(event.color || '#60a5fa')}'" onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='${(event.color || '#60a5fa')}50'">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${event.title}</div>
+                                <div style="font-size: 0.7rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-muted);">Personal</div>
+                            </div>
+                            ${event.time ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">🕐 ${event.time}</div>` : ''}
+                            ${event.description ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">${event.description}</div>` : ''}
+                            ${event.endDate && event.endDate !== event.date ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-style: italic;">📅 Multi-day: ${event.date} to ${event.endDate}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            if (totalEvents === 0) {
+                html = '<div style="text-align: center; padding: 3rem; color: var(--text-muted); font-style: italic;">No events scheduled for this day</div>';
+            }
+            
+            document.getElementById('dayDetailsEvents').innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function closeDayDetailsModal() {
+            document.getElementById('dayDetailsModal').style.display = 'none';
         }
         // MEMORY TAB
         // ============================================
