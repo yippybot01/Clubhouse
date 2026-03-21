@@ -6180,15 +6180,25 @@
         let calendarDate = new Date();
         let calendarEvents = [];
 
+        let golfTournaments = [];
+        
         async function loadCalendar() {
             try {
+                // Load personal events
                 const res = await fetch('/api/mc/calendar');
                 const data = await res.json();
                 calendarEvents = data.events || [];
+                
+                // Load golf tournaments
+                const tournRes = await fetch('/api/mc/tournaments');
+                const tournData = await tournRes.json();
+                golfTournaments = tournData.tournaments || [];
+                
                 renderCalendar();
             } catch (err) {
                 console.error('Failed to load calendar:', err);
                 calendarEvents = [];
+                golfTournaments = [];
                 renderCalendar();
             }
         }
@@ -6348,18 +6358,34 @@
 
                 const dateStr = day.toISOString().split('T')[0];
                 const dayEvents = calendarEvents.filter(e => e.date === dateStr);
+                
+                // Check for tournaments on this date or spanning this date
+                const dayTournaments = golfTournaments.filter(t => {
+                    const start = new Date(t.startDate);
+                    const end = new Date(t.endDate);
+                    const current = new Date(dateStr);
+                    return current >= start && current <= end;
+                });
+                
                 const isToday = day.toDateString() === today;
+                const hasTournament = dayTournaments.length > 0;
+                const hasMajor = dayTournaments.some(t => t.type === 'major');
 
                 html += `
-                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 100px; padding: 0.5rem; border-radius: 8px; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)'}'">
+                    <div onclick="selectDateForEvent('${dateStr}')" style="min-height: 100px; padding: 0.5rem; border-radius: 8px; border: 1px solid ${hasMajor ? 'rgba(251,191,36,0.5)' : (isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)')}; background: ${hasMajor ? 'rgba(251,191,36,0.1)' : (isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)')}; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='${hasMajor ? 'rgba(251,191,36,0.1)' : (isToday ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)')}'">
                         <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem;">${day.getDate()}</div>
                         <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                            ${dayTournaments.map(tournament => `
+                                <div style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 3px; background: ${tournament.type === 'major' ? 'rgba(251,191,36,0.3)' : 'rgba(74,222,128,0.2)'}; color: ${tournament.type === 'major' ? '#fbbf24' : '#4ade80'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;" title="${tournament.name} (${tournament.tour})">
+                                    ⛳ ${tournament.name}
+                                </div>
+                            `).join('')}
                             ${dayEvents.slice(0, 2).map(event => `
                                 <div style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 3px; background: rgba(96,165,250,0.2); color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${event.title}">
                                     ${event.title}
                                 </div>
                             `).join('')}
-                            ${dayEvents.length > 2 ? `<div style="font-size: 0.65rem; color: var(--text-muted);">+${dayEvents.length - 2} more</div>` : ''}
+                            ${(dayEvents.length + dayTournaments.length) > 2 ? `<div style="font-size: 0.65rem; color: var(--text-muted);">+${(dayEvents.length + dayTournaments.length) - 2} more</div>` : ''}
                         </div>
                     </div>
                 `;
