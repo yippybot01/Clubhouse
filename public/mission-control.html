@@ -3571,10 +3571,10 @@ loadTodos();
                     setTimeout(loadTrends, 100);
                 }
                 if (tabName === 'tasks') {
-                    setTimeout(loadTasks, 100);
+                    // setTimeout(loadTasks, 100) // DISABLED;
                 }
                 if (tabName === 'calendar') {
-                    setTimeout(loadCalendar, 100);
+                    setTimeout(loadCalendar, 100) // Keep calendar;
                 }
                 if (tabName == 'morning-news') {
                     setTimeout(loadMorningNews, 100);
@@ -8378,7 +8378,7 @@ loadTodos();
 
             // Initialize Calendar
             try {
-                loadCalendar();
+                // loadCalendar() // DISABLED;
             } catch (e) {
                 console.error('Calendar error:', e);
             }
