@@ -6973,171 +6973,171 @@ loadTodos();
 
         // ============================================
         // TASK BOARD
-        // TASKS TAB
-        let todaysTasks = [];
-
-        async function loadTasks() {
-            try {
-                // Fetch cron jobs (scheduled tasks)
-                const cronRes = await fetch('/api/cron/list');
-                const cronData = await cronRes.json();
-                
-                const now = Date.now();
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const todayEnd = new Date();
-                todayEnd.setHours(23, 59, 59, 999);
-
-                todaysTasks = (cronData.jobs || []).map(job => {
-                    const nextRun = job.state?.nextRunAtMs || 0;
-                    const lastRun = job.state?.lastRunAtMs || 0;
-                    const lastStatus = job.state?.lastStatus;
-                    
-                    // Determine status
-                    let status = 'scheduled';
-                    if (lastRun >= todayStart.getTime() && lastStatus === 'ok') {
-                        status = 'completed';
-                    } else if (lastRun >= todayStart.getTime() && lastStatus === 'running') {
-                        status = 'in-progress';
-                    }
-                    
-                    // Only include if scheduled for today or ran today
-                    const scheduledToday = nextRun >= todayStart.getTime() && nextRun <= todayEnd.getTime();
-                    const ranToday = lastRun >= todayStart.getTime();
-                    
-                    return {
-                        id: job.id,
-                        name: job.name,
-                        nextRun: nextRun,
-                        lastRun: lastRun,
-                        status: status,
-                        scheduledToday: scheduledToday,
-                        ranToday: ranToday,
-                        enabled: job.enabled
-                    };
-                }).filter(t => (t.scheduledToday || t.ranToday) && t.enabled);
-
-                renderTasks();
-            } catch (err) {
-                console.error('Failed to load tasks:', err);
-                todaysTasks = [];
-                renderTasks();
-            }
-        }
-
-        function renderTasks() {
-            const now = Date.now();
-            
-            // Update day label
-            const today = new Date();
-            document.getElementById('tasksDayLabel').textContent = today.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-
-            // Group tasks
-            const inProgress = todaysTasks.filter(t => t.status === 'in-progress');
-            const scheduled = todaysTasks.filter(t => t.status === 'scheduled' && t.nextRun > now);
-            const completed = todaysTasks.filter(t => t.status === 'completed');
-
-            // Update counts
-            document.getElementById('inProgressCount').textContent = inProgress.length;
-            document.getElementById('scheduledCount').textContent = scheduled.length;
-            document.getElementById('completedCount').textContent = completed.length;
-
-            // Render each column
-            document.getElementById('tasksInProgress').innerHTML = inProgress.length > 0 
-                ? inProgress.map(renderTaskCard).join('') 
-                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks running</div>';
-            
-            document.getElementById('tasksScheduled').innerHTML = scheduled.length > 0 
-                ? scheduled.sort((a, b) => a.nextRun - b.nextRun).map(renderTaskCard).join('') 
-                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks scheduled</div>';
-            
-            document.getElementById('tasksCompleted').innerHTML = completed.length > 0 
-                ? completed.sort((a, b) => b.lastRun - a.lastRun).map(renderTaskCard).join('') 
-                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">Nothing completed yet</div>';
-        }
-
-        function renderTaskCard(task) {
-            const statusColors = {
-                'in-progress': '#60a5fa',
-                'scheduled': '#fbbf24',
-                'completed': '#4ade80'
-            };
-            const color = statusColors[task.status] || '#888';
-
-            let timeLabel = '';
-            if (task.status === 'scheduled' && task.nextRun) {
-                const date = new Date(task.nextRun);
-                timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            } else if (task.status === 'completed' && task.lastRun) {
-                const date = new Date(task.lastRun);
-                timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            }
-
-            const statusIcons = {
-                'in-progress': '⏳',
-                'scheduled': '🕐',
-                'completed': '✅'
-            };
-            const icon = statusIcons[task.status] || '📋';
-
-            return `
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid ${color}; border-radius: 8px; padding: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1rem;">${icon}</span>
-                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${task.name}</div>
-                    </div>
-                    ${timeLabel ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${timeLabel}</div>` : ''}
-                </div>
-            `;
-        }
-
-        function getRelativeTime(timestamp) {
-            const now = Date.now();
-            const diff = timestamp - now;
-            const minutes = Math.floor(Math.abs(diff) / 60000);
-            const hours = Math.floor(minutes / 60);
-
-            if (diff > 0) {
-                if (minutes < 60) return `in ${minutes}m`;
-                return `in ${hours}h ${minutes % 60}m`;
-            } else {
-                if (minutes < 60) return `${minutes}m ago`;
-                return `${hours}h ago`;
-            }
-        }
-        // ============================================
-        // CALENDAR TAB
-        let calendarView = 'month'; // week, month, or year
-        let calendarDate = new Date();
-        let calendarEvents = [];
-
-        let golfTournaments = [];
-        
-        async function loadCalendar() {
-            try {
-                // Load personal events
-                const res = await fetch('/api/mc/calendar');
-                const data = await res.json();
-                calendarEvents = data.events || [];
-                
-                // Load golf tournaments
-                const tournRes = await fetch('/api/mc/tournaments');
-                const tournData = await tournRes.json();
-                golfTournaments = tournData.tournaments || [];
-                
-                renderCalendar();
-            } catch (err) {
-                console.error('Failed to load calendar:', err);
-                calendarEvents = [];
-                golfTournaments = [];
-                renderCalendar();
-            }
-        }
-
+// OLD_TASK_SYSTEM_DISABLED:         // TASKS TAB
+// OLD_TASK_SYSTEM_DISABLED:         let todaysTasks = [];
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:         async function loadTasks() {
+// OLD_TASK_SYSTEM_DISABLED:             try {
+// OLD_TASK_SYSTEM_DISABLED:                 // Fetch cron jobs (scheduled tasks)
+// OLD_TASK_SYSTEM_DISABLED:                 const cronRes = await fetch('/api/cron/list');
+// OLD_TASK_SYSTEM_DISABLED:                 const cronData = await cronRes.json();
+// OLD_TASK_SYSTEM_DISABLED:                 
+// OLD_TASK_SYSTEM_DISABLED:                 const now = Date.now();
+// OLD_TASK_SYSTEM_DISABLED:                 const todayStart = new Date();
+// OLD_TASK_SYSTEM_DISABLED:                 todayStart.setHours(0, 0, 0, 0);
+// OLD_TASK_SYSTEM_DISABLED:                 const todayEnd = new Date();
+// OLD_TASK_SYSTEM_DISABLED:                 todayEnd.setHours(23, 59, 59, 999);
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:                 todaysTasks = (cronData.jobs || []).map(job => {
+// OLD_TASK_SYSTEM_DISABLED:                     const nextRun = job.state?.nextRunAtMs || 0;
+// OLD_TASK_SYSTEM_DISABLED:                     const lastRun = job.state?.lastRunAtMs || 0;
+// OLD_TASK_SYSTEM_DISABLED:                     const lastStatus = job.state?.lastStatus;
+// OLD_TASK_SYSTEM_DISABLED:                     
+// OLD_TASK_SYSTEM_DISABLED:                     // Determine status
+// OLD_TASK_SYSTEM_DISABLED:                     let status = 'scheduled';
+// OLD_TASK_SYSTEM_DISABLED:                     if (lastRun >= todayStart.getTime() && lastStatus === 'ok') {
+// OLD_TASK_SYSTEM_DISABLED:                         status = 'completed';
+// OLD_TASK_SYSTEM_DISABLED:                     } else if (lastRun >= todayStart.getTime() && lastStatus === 'running') {
+// OLD_TASK_SYSTEM_DISABLED:                         status = 'in-progress';
+// OLD_TASK_SYSTEM_DISABLED:                     }
+// OLD_TASK_SYSTEM_DISABLED:                     
+// OLD_TASK_SYSTEM_DISABLED:                     // Only include if scheduled for today or ran today
+// OLD_TASK_SYSTEM_DISABLED:                     const scheduledToday = nextRun >= todayStart.getTime() && nextRun <= todayEnd.getTime();
+// OLD_TASK_SYSTEM_DISABLED:                     const ranToday = lastRun >= todayStart.getTime();
+// OLD_TASK_SYSTEM_DISABLED:                     
+// OLD_TASK_SYSTEM_DISABLED:                     return {
+// OLD_TASK_SYSTEM_DISABLED:                         id: job.id,
+// OLD_TASK_SYSTEM_DISABLED:                         name: job.name,
+// OLD_TASK_SYSTEM_DISABLED:                         nextRun: nextRun,
+// OLD_TASK_SYSTEM_DISABLED:                         lastRun: lastRun,
+// OLD_TASK_SYSTEM_DISABLED:                         status: status,
+// OLD_TASK_SYSTEM_DISABLED:                         scheduledToday: scheduledToday,
+// OLD_TASK_SYSTEM_DISABLED:                         ranToday: ranToday,
+// OLD_TASK_SYSTEM_DISABLED:                         enabled: job.enabled
+// OLD_TASK_SYSTEM_DISABLED:                     };
+// OLD_TASK_SYSTEM_DISABLED:                 }).filter(t => (t.scheduledToday || t.ranToday) && t.enabled);
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:                 renderTasks();
+// OLD_TASK_SYSTEM_DISABLED:             } catch (err) {
+// OLD_TASK_SYSTEM_DISABLED:                 console.error('Failed to load tasks:', err);
+// OLD_TASK_SYSTEM_DISABLED:                 todaysTasks = [];
+// OLD_TASK_SYSTEM_DISABLED:                 renderTasks();
+// OLD_TASK_SYSTEM_DISABLED:             }
+// OLD_TASK_SYSTEM_DISABLED:         }
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:         function renderTasks() {
+// OLD_TASK_SYSTEM_DISABLED:             const now = Date.now();
+// OLD_TASK_SYSTEM_DISABLED:             
+// OLD_TASK_SYSTEM_DISABLED:             // Update day label
+// OLD_TASK_SYSTEM_DISABLED:             const today = new Date();
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksDayLabel').textContent = today.toLocaleDateString('en-US', { 
+// OLD_TASK_SYSTEM_DISABLED:                 weekday: 'long', 
+// OLD_TASK_SYSTEM_DISABLED:                 month: 'long', 
+// OLD_TASK_SYSTEM_DISABLED:                 day: 'numeric' 
+// OLD_TASK_SYSTEM_DISABLED:             });
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             // Group tasks
+// OLD_TASK_SYSTEM_DISABLED:             const inProgress = todaysTasks.filter(t => t.status === 'in-progress');
+// OLD_TASK_SYSTEM_DISABLED:             const scheduled = todaysTasks.filter(t => t.status === 'scheduled' && t.nextRun > now);
+// OLD_TASK_SYSTEM_DISABLED:             const completed = todaysTasks.filter(t => t.status === 'completed');
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             // Update counts
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('inProgressCount').textContent = inProgress.length;
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('scheduledCount').textContent = scheduled.length;
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('completedCount').textContent = completed.length;
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             // Render each column
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksInProgress').innerHTML = inProgress.length > 0 
+// OLD_TASK_SYSTEM_DISABLED:                 ? inProgress.map(renderTaskCard).join('') 
+// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks running</div>';
+// OLD_TASK_SYSTEM_DISABLED:             
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksScheduled').innerHTML = scheduled.length > 0 
+// OLD_TASK_SYSTEM_DISABLED:                 ? scheduled.sort((a, b) => a.nextRun - b.nextRun).map(renderTaskCard).join('') 
+// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks scheduled</div>';
+// OLD_TASK_SYSTEM_DISABLED:             
+// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksCompleted').innerHTML = completed.length > 0 
+// OLD_TASK_SYSTEM_DISABLED:                 ? completed.sort((a, b) => b.lastRun - a.lastRun).map(renderTaskCard).join('') 
+// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">Nothing completed yet</div>';
+// OLD_TASK_SYSTEM_DISABLED:         }
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:         function renderTaskCard(task) {
+// OLD_TASK_SYSTEM_DISABLED:             const statusColors = {
+// OLD_TASK_SYSTEM_DISABLED:                 'in-progress': '#60a5fa',
+// OLD_TASK_SYSTEM_DISABLED:                 'scheduled': '#fbbf24',
+// OLD_TASK_SYSTEM_DISABLED:                 'completed': '#4ade80'
+// OLD_TASK_SYSTEM_DISABLED:             };
+// OLD_TASK_SYSTEM_DISABLED:             const color = statusColors[task.status] || '#888';
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             let timeLabel = '';
+// OLD_TASK_SYSTEM_DISABLED:             if (task.status === 'scheduled' && task.nextRun) {
+// OLD_TASK_SYSTEM_DISABLED:                 const date = new Date(task.nextRun);
+// OLD_TASK_SYSTEM_DISABLED:                 timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+// OLD_TASK_SYSTEM_DISABLED:             } else if (task.status === 'completed' && task.lastRun) {
+// OLD_TASK_SYSTEM_DISABLED:                 const date = new Date(task.lastRun);
+// OLD_TASK_SYSTEM_DISABLED:                 timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+// OLD_TASK_SYSTEM_DISABLED:             }
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             const statusIcons = {
+// OLD_TASK_SYSTEM_DISABLED:                 'in-progress': '⏳',
+// OLD_TASK_SYSTEM_DISABLED:                 'scheduled': '🕐',
+// OLD_TASK_SYSTEM_DISABLED:                 'completed': '✅'
+// OLD_TASK_SYSTEM_DISABLED:             };
+// OLD_TASK_SYSTEM_DISABLED:             const icon = statusIcons[task.status] || '📋';
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             return `
+// OLD_TASK_SYSTEM_DISABLED:                 <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid ${color}; border-radius: 8px; padding: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+// OLD_TASK_SYSTEM_DISABLED:                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+// OLD_TASK_SYSTEM_DISABLED:                         <span style="font-size: 1rem;">${icon}</span>
+// OLD_TASK_SYSTEM_DISABLED:                         <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${task.name}</div>
+// OLD_TASK_SYSTEM_DISABLED:                     </div>
+// OLD_TASK_SYSTEM_DISABLED:                     ${timeLabel ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${timeLabel}</div>` : ''}
+// OLD_TASK_SYSTEM_DISABLED:                 </div>
+// OLD_TASK_SYSTEM_DISABLED:             `;
+// OLD_TASK_SYSTEM_DISABLED:         }
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:         function getRelativeTime(timestamp) {
+// OLD_TASK_SYSTEM_DISABLED:             const now = Date.now();
+// OLD_TASK_SYSTEM_DISABLED:             const diff = timestamp - now;
+// OLD_TASK_SYSTEM_DISABLED:             const minutes = Math.floor(Math.abs(diff) / 60000);
+// OLD_TASK_SYSTEM_DISABLED:             const hours = Math.floor(minutes / 60);
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:             if (diff > 0) {
+// OLD_TASK_SYSTEM_DISABLED:                 if (minutes < 60) return `in ${minutes}m`;
+// OLD_TASK_SYSTEM_DISABLED:                 return `in ${hours}h ${minutes % 60}m`;
+// OLD_TASK_SYSTEM_DISABLED:             } else {
+// OLD_TASK_SYSTEM_DISABLED:                 if (minutes < 60) return `${minutes}m ago`;
+// OLD_TASK_SYSTEM_DISABLED:                 return `${hours}h ago`;
+// OLD_TASK_SYSTEM_DISABLED:             }
+// OLD_TASK_SYSTEM_DISABLED:         }
+// OLD_TASK_SYSTEM_DISABLED:         // ============================================
+// OLD_TASK_SYSTEM_DISABLED:         // CALENDAR TAB
+// OLD_TASK_SYSTEM_DISABLED:         let calendarView = 'month'; // week, month, or year
+// OLD_TASK_SYSTEM_DISABLED:         let calendarDate = new Date();
+// OLD_TASK_SYSTEM_DISABLED:         let calendarEvents = [];
+// OLD_TASK_SYSTEM_DISABLED: 
+// OLD_TASK_SYSTEM_DISABLED:         let golfTournaments = [];
+// OLD_TASK_SYSTEM_DISABLED:         
+// OLD_TASK_SYSTEM_DISABLED:         async function loadCalendar() {
+// OLD_TASK_SYSTEM_DISABLED:             try {
+// OLD_TASK_SYSTEM_DISABLED:                 // Load personal events
+// OLD_TASK_SYSTEM_DISABLED:                 const res = await fetch('/api/mc/calendar');
+// OLD_TASK_SYSTEM_DISABLED:                 const data = await res.json();
+// OLD_TASK_SYSTEM_DISABLED:                 calendarEvents = data.events || [];
+// OLD_TASK_SYSTEM_DISABLED:                 
+// OLD_TASK_SYSTEM_DISABLED:                 // Load golf tournaments
+// OLD_TASK_SYSTEM_DISABLED:                 const tournRes = await fetch('/api/mc/tournaments');
+// OLD_TASK_SYSTEM_DISABLED:                 const tournData = await tournRes.json();
+// OLD_TASK_SYSTEM_DISABLED:                 golfTournaments = tournData.tournaments || [];
+// OLD_TASK_SYSTEM_DISABLED:                 
+// OLD_TASK_SYSTEM_DISABLED:                 renderCalendar();
+// OLD_TASK_SYSTEM_DISABLED:             } catch (err) {
+// OLD_TASK_SYSTEM_DISABLED:                 console.error('Failed to load calendar:', err);
+// OLD_TASK_SYSTEM_DISABLED:                 calendarEvents = [];
+// OLD_TASK_SYSTEM_DISABLED:                 golfTournaments = [];
+// OLD_TASK_SYSTEM_DISABLED:                 renderCalendar();
+// OLD_TASK_SYSTEM_DISABLED:             }
+// OLD_TASK_SYSTEM_DISABLED:         }
+// OLD_TASK_SYSTEM_DISABLED: 
         function setCalendarView(view) {
             calendarView = view;
             // Update button styles
@@ -8336,7 +8336,7 @@ loadTodos();
             }
             
             try {
-                loadTasks();
+                // loadTasks() // DISABLED - using new sticky-note system;
             } catch (e) {
                 console.error('Tasks error:', e);
             }
@@ -8371,7 +8371,7 @@ loadTodos();
 
             // Initialize Task Board
             try {
-                loadTasks();
+                // loadTasks() // DISABLED - using new sticky-note system;
             } catch (e) {
                 console.error('Tasks error:', e);
             }
