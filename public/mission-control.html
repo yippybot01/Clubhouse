@@ -291,6 +291,17 @@
         }
         
         /* ============================================
+           TWEET CARDS
+           ============================================ */
+        .tweet-card {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .tweet-card:active {
+            cursor: grabbing;
+        }
+        
+        /* ============================================
            DASHBOARD TAB
            ============================================ */
         .welcome-bar {
@@ -1922,6 +1933,7 @@
                 <button class="tab" data-tab="trends">🌪️ Trends</button>
                 <button class="tab" data-tab="morning-news">📰 Morning News</button>
                 <button class="tab" data-tab="brand">🔍 Brand</button>
+                <button class="tab" data-tab="tweets">🐦 Tweets</button>
             </nav>
             
             <div class="header-right">
@@ -2211,54 +2223,505 @@
             </div>
         </div>
 
-        <!-- PROJECTS TAB -->
-        <div class="tab-content" id="tasks-tab">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin: 0;">Today's Schedule</h2>
-                <div style="font-size: 0.85rem; color: var(--text-muted);" id="tasksDayLabel"></div>
-            </div>
+        <!-- TASKS TAB (STICKY NOTES TO-DO LIST) -->
+<!-- STICKY NOTES TO-DO LIST COMPONENT -->
+<style>
+    /* Sticky Notes Color Palette */
+    .sticky-yellow { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: #854d0e; }
+    .sticky-pink { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #7f1d1d; }
+    .sticky-blue { background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%); color: #1e3a8a; }
+    .sticky-green { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); color: #14532d; }
+    .sticky-purple { background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%); color: #581c87; }
+    .sticky-orange { background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); color: #7c2d12; }
 
-            <!-- Three Column Layout -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                <!-- In Progress -->
-                <div class="glass-card" style="padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #60a5fa;"></div>
-                        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin: 0;">In Progress</h3>
-                        <span id="inProgressCount" style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;">0</span>
-                    </div>
-                    <div id="tasksInProgress" style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 100px;">
-                        <!-- Tasks populate here -->
-                    </div>
-                </div>
+    /* Sticky Note Card */
+    .sticky-note {
+        position: relative;
+        padding: 1.25rem;
+        border-radius: 0.5rem;
+        box-shadow: 
+            0 4px 6px rgba(0, 0, 0, 0.1),
+            0 1px 3px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Permanent Marker', cursive;
+        transform: rotate(-0.5deg);
+        animation: fadeIn 0.3s ease;
+    }
 
-                <!-- Scheduled -->
-                <div class="glass-card" style="padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24;"></div>
-                        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin: 0;">Scheduled</h3>
-                        <span id="scheduledCount" style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;">0</span>
-                    </div>
-                    <div id="tasksScheduled" style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 100px;">
-                        <!-- Tasks populate here -->
-                    </div>
-                </div>
+    .sticky-note:nth-child(even) {
+        transform: rotate(0.5deg);
+    }
 
-                <!-- Completed -->
-                <div class="glass-card" style="padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
-                        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin: 0;">Completed</h3>
-                        <span id="completedCount" style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;">0</span>
-                    </div>
-                    <div id="tasksCompleted" style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 100px;">
-                        <!-- Tasks populate here -->
-                    </div>
-                </div>
-            </div>
+    .sticky-note:hover {
+        transform: translateY(-4px) rotate(0deg) !important;
+        box-shadow: 
+            0 12px 24px rgba(0, 0, 0, 0.15),
+            0 4px 8px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Sticky Note Content */
+    .sticky-note-text {
+        flex: 1;
+        font-size: 1rem;
+        line-height: 1.6;
+        word-wrap: break-word;
+        outline: none;
+        border: none;
+        background: transparent;
+        font-family: 'Permanent Marker', cursive;
+        resize: none;
+        overflow: hidden;
+    }
+
+    .sticky-note-text::placeholder {
+        opacity: 0.5;
+    }
+
+    /* Actions Row */
+    .sticky-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.75rem;
+        gap: 0.5rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .sticky-note:hover .sticky-actions {
+        opacity: 1;
+    }
+
+    .sticky-timestamp {
+        font-size: 0.7rem;
+        opacity: 0.6;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .sticky-btn {
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.375rem;
+        border: none;
+        font-size: 0.75rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+        font-family: 'Inter', sans-serif;
+        background: rgba(0, 0, 0, 0.1);
+        color: inherit;
+    }
+
+    .sticky-btn:hover {
+        background: rgba(0, 0, 0, 0.2);
+        transform: scale(1.05);
+    }
+
+    /* Add New Sticky Button */
+    .add-sticky {
+        border: 3px dashed rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-muted);
+        padding: 2rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        min-height: 140px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .add-sticky:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.06);
+        transform: scale(1.02);
+    }
+
+    .add-sticky-icon {
+        font-size: 2.5rem;
+        opacity: 0.7;
+    }
+
+    /* Grid Layout */
+    .sticky-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    /* Completed Section */
+    .completed-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .completed-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .completed-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .completed-count {
+        background: rgba(74, 222, 128, 0.2);
+        color: #4ade80;
+        padding: 0.35rem 0.85rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .completed-item {
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+
+    .completed-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        opacity: 1;
+    }
+
+    .completed-item-text {
+        flex: 1;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    .completed-item-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-right: 1rem;
+    }
+
+    .delete-completed-btn {
+        background: rgba(255, 68, 68, 0.15);
+        border: 1px solid rgba(255, 68, 68, 0.3);
+        color: #ff4444;
+        padding: 0.45rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .delete-completed-btn:hover {
+        background: rgba(255, 68, 68, 0.25);
+        transform: scale(1.02);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+
+<!-- TASKS TAB (UPDATED) -->
+<div class="tab-content" id="tasks-tab">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+                📝 To-Do List
+            </h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0 0;">
+                Click a card to edit, check to complete
+            </p>
         </div>
 
-        <!-- CALENDAR TAB -->
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; background: rgba(96, 165, 250, 0.15); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 0.75rem;">
+                <span style="font-size: 1.2rem;">✓</span>
+                <span id="activeTaskCount" style="font-weight: 700; font-size: 1.1rem; color: #60a5fa;">0</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Tasks Grid -->
+    <div id="activeTasks" class="sticky-grid">
+        <!-- Sticky notes populate here -->
+    </div>
+
+    <!-- Completed This Week Section -->
+    <div class="completed-section">
+        <div class="completed-header">
+            <div class="completed-title">
+                <span>🎯</span>
+                Completed This Week
+                <span id="completedWeekCount" class="completed-count">0</span>
+            </div>
+            <button onclick="clearCompletedTasks()" class="delete-completed-btn">
+                Clear Completed
+            </button>
+        </div>
+
+        <div id="completedTasks">
+            <!-- Completed tasks populate here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// TO-DO LIST STATE & STORAGE
+// ============================================
+
+let todos = [];
+const COLORS = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
+
+// Load from localStorage
+function loadTodos() {
+    const saved = localStorage.getItem('clubhouse_todos');
+    if (saved) {
+        todos = JSON.parse(saved);
+    }
+    renderTodos();
+}
+
+// Save to localStorage
+function saveTodos() {
+    localStorage.setItem('clubhouse_todos', JSON.stringify(todos));
+}
+
+// Get week boundaries
+function getWeekBoundaries() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - dayOfWeek);
+    startOfWeek.setHours(0, 0, 0, 0);
+    return startOfWeek.getTime();
+}
+
+// ============================================
+// CREATE NEW TODO
+// ============================================
+
+function addTodo() {
+    const newTodo = {
+        id: Date.now(),
+        text: '',
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        completed: false,
+        createdAt: Date.now(),
+        completedAt: null
+    };
+    
+    todos.unshift(newTodo);
+    saveTodos();
+    renderTodos();
+    
+    // Focus the new textarea
+    setTimeout(() => {
+        const textarea = document.querySelector(`[data-todo-id="${newTodo.id}"]`);
+        if (textarea) textarea.focus();
+    }, 100);
+}
+
+// ============================================
+// UPDATE TODO TEXT
+// ============================================
+
+function updateTodoText(id, text) {
+    const todo = todos.find(t => t.id === id);
+    if (todo) {
+        todo.text = text;
+        saveTodos();
+    }
+}
+
+// ============================================
+// COMPLETE TODO
+// ============================================
+
+function completeTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (todo) {
+        todo.completed = true;
+        todo.completedAt = Date.now();
+        saveTodos();
+        renderTodos();
+    }
+}
+
+// ============================================
+// DELETE TODO
+// ============================================
+
+function deleteTodo(id) {
+    todos = todos.filter(t => t.id !== id);
+    saveTodos();
+    renderTodos();
+}
+
+// ============================================
+// CLEAR COMPLETED TASKS
+// ============================================
+
+function clearCompletedTasks() {
+    if (!confirm('Clear all completed tasks from this week?')) return;
+    
+    todos = todos.filter(t => !t.completed);
+    saveTodos();
+    renderTodos();
+}
+
+// ============================================
+// RENDER ALL TODOS
+// ============================================
+
+function renderTodos() {
+    const weekStart = getWeekBoundaries();
+    
+    // Split active and completed
+    const active = todos.filter(t => !t.completed);
+    const completed = todos.filter(t => t.completed && t.completedAt >= weekStart);
+    
+    // Update counts
+    document.getElementById('activeTaskCount').textContent = active.length;
+    document.getElementById('completedWeekCount').textContent = completed.length;
+    
+    // Render active tasks
+    const activeContainer = document.getElementById('activeTasks');
+    if (active.length === 0) {
+        activeContainer.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-state-icon">📝</div>
+                <p>No active tasks. Click "+ Add Task" to get started!</p>
+            </div>
+        `;
+    } else {
+        activeContainer.innerHTML = active.map(todo => `
+            <div class="sticky-note sticky-${todo.color}" data-id="${todo.id}">
+                <textarea 
+                    class="sticky-note-text" 
+                    data-todo-id="${todo.id}"
+                    placeholder="Type your task..."
+                    oninput="updateTodoText(${todo.id}, this.value)"
+                >${todo.text || ''}</textarea>
+                
+                <div class="sticky-actions">
+                    <span class="sticky-timestamp">${formatTimeAgo(todo.createdAt)}</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="sticky-btn" onclick="completeTodo(${todo.id})" title="Complete">
+                            ✓ Done
+                        </button>
+                        <button class="sticky-btn" onclick="deleteTodo(${todo.id})" title="Delete">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Add "Add New" button
+    activeContainer.innerHTML += `
+        <div class="add-sticky" onclick="addTodo()">
+            <div class="add-sticky-icon">+</div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Add Task</div>
+        </div>
+    `;
+    
+    // Auto-resize textareas
+    document.querySelectorAll('.sticky-note-text').forEach(textarea => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+    
+    // Render completed tasks
+    const completedContainer = document.getElementById('completedTasks');
+    if (completed.length === 0) {
+        completedContainer.innerHTML = `
+            <div class="empty-state">
+                <p>No tasks completed this week yet. Keep going! 💪</p>
+            </div>
+        `;
+    } else {
+        completedContainer.innerHTML = completed.map(todo => `
+            <div class="completed-item">
+                <div class="completed-item-text">${todo.text || '(Empty task)'}</div>
+                <div class="completed-item-date">${formatDate(todo.completedAt)}</div>
+                <button class="sticky-btn" onclick="deleteTodo(${todo.id})" style="background: rgba(255,68,68,0.2);">
+                    🗑️
+                </button>
+            </div>
+        `).join('');
+    }
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function formatTimeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+    return Math.floor(seconds / 86400) + 'd ago';
+}
+
+function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return `${days[date.getDay()]} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+// Initialize
+loadTodos();
+</script>
         <div class="tab-content" id="calendar-tab">
             <!-- Calendar Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -2695,6 +3158,65 @@
                 <!-- Populated by JS -->
             </div>
         </div>
+
+        <!-- TWEETS TAB -->
+        <div class="tab-content" id="tweets-tab">
+            <!-- Header -->
+            <div class="glass-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0;">Tweet Bank</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0 0;">Review, queue, and post tweets to grow @yippypouches</p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button onclick="generateTweets()" id="generateTweetsBtn" class="add-client-btn" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">
+                            ✨ Generate Tweets
+                        </button>
+                        <button onclick="showTweetQueue()" class="add-client-btn" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                            📋 View Queue (<span id="queueCount">0</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Switcher -->
+            <div id="tweetViewSwitcher" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <button class="category-chip active" data-view="review" onclick="switchTweetView('review')" style="padding: 0.5rem 1rem; background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 8px; color: #4ade80; font-size: 0.9rem; cursor: pointer;">
+                    🎴 Review Cards
+                </button>
+                <button class="category-chip" data-view="queue" onclick="switchTweetView('queue')" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-muted); font-size: 0.9rem; cursor: pointer;">
+                    📅 Queue
+                </button>
+            </div>
+
+            <!-- Review View: Card Stack -->
+            <div id="reviewView" style="display: block;">
+                <div id="cardStack" style="position: relative; height: 500px; display: flex; align-items: center; justify-content: center;">
+                    <div id="emptyState" style="text-align: center; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🐦</div>
+                        <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No tweets to review</h3>
+                        <p>Click "Generate Tweets" to create fresh content</p>
+                    </div>
+                </div>
+
+                <!-- Swipe Controls -->
+                <div id="swipeControls" style="display: none; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                    <button onclick="swipeLeft()" class="add-client-btn" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; font-size: 1.2rem; padding: 1rem 2rem;">
+                        ❌ Trash
+                    </button>
+                    <button onclick="swipeRight()" class="add-client-btn" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; font-size: 1.2rem; padding: 1rem 2rem;">
+                        ✅ Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- Queue View: Organized by Day -->
+            <div id="queueView" style="display: none;">
+                <div id="queueContent">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- ============================================
@@ -3059,6 +3581,12 @@
                 }
                 if (tabName === 'brand') {
                     setTimeout(loadBrand, 100);
+                }
+                if (tabName === 'tweets') {
+                    setTimeout(() => {
+                        loadTweetQueue();
+                        updateQueueCount();
+                    }, 100);
                 }
             });
         });
@@ -6084,6 +6612,363 @@
             if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
             if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // ============================================
+        // TWEET BANK
+        // ============================================
+        let currentTweetDeck = [];
+        let currentCardIndex = 0;
+        let tweetQueue = [];
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        // Load tweet queue from localStorage
+        function loadTweetQueue() {
+            const saved = localStorage.getItem('tweetQueue');
+            if (saved) {
+                tweetQueue = JSON.parse(saved);
+                updateQueueCount();
+            }
+        }
+
+        // Save tweet queue to localStorage
+        function saveTweetQueue() {
+            localStorage.setItem('tweetQueue', JSON.stringify(tweetQueue));
+            updateQueueCount();
+        }
+
+        // Update queue count badge
+        function updateQueueCount() {
+            document.getElementById('queueCount').textContent = tweetQueue.length;
+        }
+
+        // Switch between review and queue views
+        function switchTweetView(view) {
+            document.querySelectorAll('[data-view]').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.borderColor = 'rgba(255,255,255,0.1)';
+                btn.style.color = 'var(--text-muted)';
+            });
+            
+            const activeBtn = document.querySelector(`[data-view="${view}"]`);
+            activeBtn.classList.add('active');
+            activeBtn.style.background = 'rgba(74, 222, 128, 0.2)';
+            activeBtn.style.borderColor = 'rgba(74, 222, 128, 0.3)';
+            activeBtn.style.color = '#4ade80';
+
+            if (view === 'review') {
+                document.getElementById('reviewView').style.display = 'block';
+                document.getElementById('queueView').style.display = 'none';
+            } else {
+                document.getElementById('reviewView').style.display = 'none';
+                document.getElementById('queueView').style.display = 'block';
+                renderQueue();
+            }
+        }
+
+        // Generate tweets using AI
+        async function generateTweets() {
+            const btn = document.getElementById('generateTweetsBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generating...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/tweets/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error('Failed to generate tweets');
+
+                const data = await response.json();
+                currentTweetDeck = data.tweets || [];
+                currentCardIndex = 0;
+                
+                renderCardStack();
+                
+            } catch (error) {
+                console.error('Failed to generate tweets:', error);
+                alert('Failed to generate tweets. Check console for details.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Render the card stack
+        function renderCardStack() {
+            const container = document.getElementById('cardStack');
+            const emptyState = document.getElementById('emptyState');
+            const controls = document.getElementById('swipeControls');
+
+            // Remove any existing cards first
+            const existingCard = document.getElementById('currentCard');
+            if (existingCard) {
+                existingCard.remove();
+            }
+
+            if (currentCardIndex >= currentTweetDeck.length) {
+                if (emptyState) emptyState.style.display = 'block';
+                if (controls) controls.style.display = 'none';
+                return;
+            }
+
+            if (emptyState) emptyState.style.display = 'none';
+            if (controls) controls.style.display = 'flex';
+
+            const tweet = currentTweetDeck[currentCardIndex];
+
+            // Create new card element
+            const cardHTML = `
+                <div class="tweet-card" id="currentCard" style="width: 100%; max-width: 600px; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 2rem; cursor: grab; user-select: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 0 auto;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                            🥤
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">Yippy Pouches</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">@yippypouches</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 1.1rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 1.5rem; white-space: pre-wrap;">${tweet.text}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                            ${tweet.category || 'General'} • ${tweet.text.length} chars
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                            ${currentCardIndex + 1} / ${currentTweetDeck.length}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', cardHTML);
+
+            // Add touch/mouse event listeners for swipe
+            const card = document.getElementById('currentCard');
+            if (card) {
+                card.addEventListener('mousedown', handleDragStart);
+                card.addEventListener('touchstart', handleDragStart);
+            }
+        }
+
+        // Swipe handlers
+        function handleDragStart(e) {
+            isDragging = true;
+            startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            currentX = startX;
+            
+            const card = document.getElementById('currentCard');
+            if (card) {
+                card.style.transition = 'none';
+            }
+            
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('touchmove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
+            document.addEventListener('touchend', handleDragEnd);
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const diff = currentX - startX;
+            const card = document.getElementById('currentCard');
+            if (card) {
+                const rotation = diff * 0.05;
+                const opacity = Math.max(0.3, 1 - Math.abs(diff) / 400);
+                card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                card.style.opacity = opacity;
+            }
+        }
+
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            const diff = currentX - startX;
+            
+            document.removeEventListener('mousemove', handleDragMove);
+            document.removeEventListener('touchmove', handleDragMove);
+            document.removeEventListener('mouseup', handleDragEnd);
+            document.removeEventListener('touchend', handleDragEnd);
+
+            const card = document.getElementById('currentCard');
+            
+            if (Math.abs(diff) > 100) {
+                if (diff > 0) {
+                    swipeRight();
+                } else {
+                    swipeLeft();
+                }
+            } else {
+                // Snap back to center
+                if (card) {
+                    card.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
+                    card.style.transform = 'translateX(0) rotate(0deg)';
+                    card.style.opacity = '1';
+                }
+            }
+        }
+
+        function swipeLeft() {
+            animateSwipe('left');
+            setTimeout(() => {
+                currentCardIndex++;
+                renderCardStack();
+            }, 300);
+        }
+
+        function swipeRight() {
+            const tweet = currentTweetDeck[currentCardIndex];
+            tweetQueue.push({
+                ...tweet,
+                addedAt: new Date().toISOString(),
+                scheduledFor: getNextAvailableDay()
+            });
+            saveTweetQueue();
+            
+            animateSwipe('right');
+            setTimeout(() => {
+                currentCardIndex++;
+                renderCardStack();
+            }, 300);
+        }
+
+        function animateSwipe(direction) {
+            const card = document.getElementById('currentCard');
+            if (!card) return;
+            
+            const distance = direction === 'left' ? -800 : 800;
+            const rotation = direction === 'left' ? -40 : 40;
+            card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+            card.style.transform = `translateX(${distance}px) rotate(${rotation}deg)`;
+            card.style.opacity = '0';
+        }
+
+        function getNextAvailableDay() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            const todayTweets = tweetQueue.filter(t => t.scheduledFor === todayStr).length;
+            
+            if (todayTweets < 2) return todayStr;
+            
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            return tomorrow.toISOString().split('T')[0];
+        }
+
+        // Render the queue view
+        function renderQueue() {
+            const container = document.getElementById('queueContent');
+            
+            if (tweetQueue.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card" style="padding: 3rem; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                        <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Queue is empty</h3>
+                        <p style="color: var(--text-muted);">Save tweets from the review stack to see them here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by date
+            const grouped = {};
+            tweetQueue.forEach(tweet => {
+                if (!grouped[tweet.scheduledFor]) grouped[tweet.scheduledFor] = [];
+                grouped[tweet.scheduledFor].push(tweet);
+            });
+
+            const html = Object.keys(grouped).sort().map(date => {
+                const dateObj = new Date(date + 'T00:00:00');
+                const isToday = date === new Date().toISOString().split('T')[0];
+                const dayLabel = isToday ? 'Today' : dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+                return `
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; padding-left: 0.5rem; border-left: 3px solid ${isToday ? '#4ade80' : 'var(--accent)'};">
+                            ${dayLabel} (${grouped[date].length} tweets)
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            ${grouped[date].map((tweet, idx) => `
+                                <div class="glass-card" style="padding: 1.25rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                        <div style="font-size: 0.85rem; color: var(--text-muted);">${tweet.category || 'General'}</div>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button onclick="copyTweet('${date}', ${idx})" style="padding: 0.25rem 0.75rem; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+                                                📋 Copy
+                                            </button>
+                                            <button onclick="remixTweet('${date}', ${idx})" style="padding: 0.25rem 0.75rem; background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+                                                🔄 Remix
+                                            </button>
+                                            <button onclick="deleteTweet('${date}', ${idx})" style="padding: 0.25rem 0.75rem; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 1rem; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap;">${tweet.text}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">${tweet.text.length} chars</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function copyTweet(date, idx) {
+            const tweet = tweetQueue.find((t, i) => t.scheduledFor === date && tweetQueue.filter(x => x.scheduledFor === date).indexOf(t) === idx);
+            if (tweet) {
+                navigator.clipboard.writeText(tweet.text);
+                alert('Tweet copied to clipboard!');
+            }
+        }
+
+        async function remixTweet(date, idx) {
+            const tweet = tweetQueue.find((t, i) => t.scheduledFor === date && tweetQueue.filter(x => x.scheduledFor === date).indexOf(t) === idx);
+            if (!tweet) return;
+
+            try {
+                const response = await fetch('/api/tweets/remix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ originalTweet: tweet.text })
+                });
+
+                if (!response.ok) throw new Error('Failed to remix');
+
+                const data = await response.json();
+                tweet.text = data.remixedTweet;
+                saveTweetQueue();
+                renderQueue();
+                
+            } catch (error) {
+                console.error('Remix failed:', error);
+                alert('Failed to remix tweet');
+            }
+        }
+
+        function deleteTweet(date, idx) {
+            const queueForDate = tweetQueue.filter(t => t.scheduledFor === date);
+            const tweet = queueForDate[idx];
+            const globalIdx = tweetQueue.indexOf(tweet);
+            
+            if (globalIdx > -1) {
+                tweetQueue.splice(globalIdx, 1);
+                saveTweetQueue();
+                renderQueue();
+            }
+        }
+
+        function showTweetQueue() {
+            switchTweetView('queue');
         }
 
         // ============================================
