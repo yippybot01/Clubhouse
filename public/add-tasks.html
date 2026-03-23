@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Tasks to Clubhouse...</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #050508;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        .status {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+        .success {
+            color: #4ade80;
+        }
+        .loading {
+            color: #60a5fa;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        button:hover {
+            transform: scale(1.02);
+        }
+        .task-list {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .task-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Adding Tasks to Clubhouse</h1>
+        <div class="status loading" id="status">Processing...</div>
+        <div class="task-list" id="taskList"></div>
+        <button id="goButton" style="display: none;" onclick="window.location.href='/mission-control.html'">
+            Go to Dashboard →
+        </button>
+    </div>
+
+    <script>
+        const tasks = [
+            "Work on sample/biz cards to be able to pass out.",
+            "Follow up with Micah&Sean",
+            "Setup Amazon",
+            "Upload images to a folder for Cowork to post using buffer to twitter",
+            "Resize the clips so we can post to see how they look",
+            "Send Micah Some Mango Samples",
+            "Schedule call with Bauman with Jack",
+            "Create a prompt Dashboard Repository for all the most effective openclaw prompts.",
+            "Create financial analysis for Yippy",
+            "Offer to micah - first 3 months - earnout to equity",
+            "Ask Bauman about running his as an ad",
+            "Create slideshow for micah",
+            "Create a Mike@yippypouches.com",
+            "Email Tristan with our feedback on samples",
+            "Send out Weekly Gol Recap post",
+            "Make 10 Twitter replies",
+            "Complete 10 samples/Tiktok orders through USPS"
+        ];
+
+        const COLORS = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
+
+        function addTasks() {
+            // Load existing todos
+            let todos = [];
+            const saved = localStorage.getItem('clubhouse_todos');
+            if (saved) {
+                todos = JSON.parse(saved);
+            }
+
+            // Add new tasks
+            const now = Date.now();
+            const taskListHtml = tasks.map((taskText, index) => {
+                const newTodo = {
+                    id: now + index,
+                    text: taskText,
+                    color: COLORS[index % COLORS.length],
+                    completed: false,
+                    createdAt: now + index,
+                    completedAt: null
+                };
+                todos.push(newTodo);
+                
+                return `<div class="task-item">✓ ${taskText}</div>`;
+            }).join('');
+
+            // Save back to localStorage
+            localStorage.setItem('clubhouse_todos', JSON.stringify(todos));
+
+            // Update UI
+            document.getElementById('status').innerHTML = `<span class="success">✅ Successfully added ${tasks.length} tasks!</span>`;
+            document.getElementById('taskList').innerHTML = taskListHtml;
+            document.getElementById('goButton').style.display = 'block';
+        }
+
+        // Run on page load
+        setTimeout(addTasks, 500);
+    </script>
+</body>
+</html>
