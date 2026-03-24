@@ -8548,6 +8548,8 @@ loadTodos();
                 html += `
                     <div class="gcal-month-spanning-event"
                          onclick="showEventPopup('${event.id}', event)"
+                         data-track="${track}"
+                         data-event-id="${event.id}"
                          style="
                              grid-column: ${startCol} / span ${colSpan};
                              grid-row: ${gridRow};
@@ -8563,7 +8565,7 @@ loadTodos();
                              pointer-events: auto;
                              margin-top: ${25 + (track * 22)}px;
                          ">
-                        ${isFirstSegment ? escapeHtml(event.title) : '↵ ' + escapeHtml(event.title)}
+                        ${isFirstSegment ? escapeHtml(event.title) + ' [T' + track + ']' : '↵ ' + escapeHtml(event.title) + ' [T' + track + ']'}
                     </div>
                 `;
             });
