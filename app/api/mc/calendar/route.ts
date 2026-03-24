@@ -47,23 +47,30 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { id, title, date, type, time, description } = body;
+    const { id, title, date, endDate, type, time, description, color } = body;
     
     if (!title || !date) {
       return NextResponse.json({ error: 'title and date are required' }, { status: 400 });
     }
     
-    const events = await readEvents();
+    let events = await readEvents();
     
     const newEvent = {
       id: id || `event_${Date.now()}`,
       title,
       date,
+      endDate: endDate || null,
       type: type || 'personal',
       time: time || null,
       description: description || null,
+      color: color || '#60a5fa',
       createdAt: new Date().toISOString()
     };
+    
+    // If updating an existing event, replace it
+    if (id) {
+      events = events.filter((e: any) => e.id !== id);
+    }
     
     events.push(newEvent);
     await writeEvents(events);

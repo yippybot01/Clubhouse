@@ -2248,7 +2248,7 @@
         min-height: 120px;
         display: flex;
         flex-direction: column;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Permanent Marker', cursive;
         transform: rotate(-0.5deg);
         animation: fadeIn 0.3s ease;
     }
@@ -2279,7 +2279,7 @@
         outline: none;
         border: none;
         background: transparent;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Permanent Marker', cursive;
         resize: none;
         overflow: hidden;
     }
@@ -2495,27 +2495,13 @@
                 Completed This Week
                 <span id="completedWeekCount" class="completed-count">0</span>
             </div>
-            <button onclick="archiveCompletedTasks()" class="delete-completed-btn" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
-                📦 Archive Week
+            <button onclick="clearCompletedTasks()" class="delete-completed-btn">
+                Clear Completed
             </button>
         </div>
 
         <div id="completedTasks">
             <!-- Completed tasks populate here -->
-        </div>
-    </div>
-
-    <!-- Weekly Archive Section -->
-    <div class="completed-section" style="margin-top: 2rem;">
-        <div class="completed-header">
-            <div class="completed-title">
-                <span>📚</span>
-                Weekly Archive
-            </div>
-        </div>
-
-        <div id="weeklyArchive">
-            <!-- Archived weeks populate here -->
         </div>
     </div>
 </div>
@@ -2526,7 +2512,6 @@
 // ============================================
 
 let todos = [];
-let archives = [];
 const COLORS = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
 
 // Load from localStorage
@@ -2535,23 +2520,12 @@ function loadTodos() {
     if (saved) {
         todos = JSON.parse(saved);
     }
-    
-    const savedArchives = localStorage.getItem('clubhouse_todo_archives');
-    if (savedArchives) {
-        archives = JSON.parse(savedArchives);
-    }
-    
     renderTodos();
-    renderArchives();
 }
 
 // Save to localStorage
 function saveTodos() {
     localStorage.setItem('clubhouse_todos', JSON.stringify(todos));
-}
-
-function saveArchives() {
-    localStorage.setItem('clubhouse_todo_archives', JSON.stringify(archives));
 }
 
 // Get week boundaries
@@ -2562,15 +2536,6 @@ function getWeekBoundaries() {
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
     return startOfWeek.getTime();
-}
-
-function getWeekLabel(timestamp) {
-    const date = new Date(timestamp);
-    const endDate = new Date(timestamp);
-    endDate.setDate(endDate.getDate() + 6);
-    
-    const options = { month: 'short', day: 'numeric' };
-    return `${date.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}, ${date.getFullYear()}`;
 }
 
 // ============================================
@@ -2635,132 +2600,15 @@ function deleteTodo(id) {
 }
 
 // ============================================
-// ARCHIVE COMPLETED TASKS
+// CLEAR COMPLETED TASKS
 // ============================================
 
-function archiveCompletedTasks() {
-    const weekStart = getWeekBoundaries();
-    const completed = todos.filter(t => t.completed && t.completedAt >= weekStart);
+function clearCompletedTasks() {
+    if (!confirm('Clear all completed tasks from this week?')) return;
     
-    if (completed.length === 0) {
-        alert('No completed tasks to archive this week.');
-        return;
-    }
-    
-    if (!confirm(`Archive ${completed.length} completed task(s) from this week?`)) return;
-    
-    // Create archive entry
-    const archive = {
-        id: Date.now(),
-        weekStart: weekStart,
-        weekLabel: getWeekLabel(weekStart),
-        tasks: completed,
-        archivedAt: Date.now()
-    };
-    
-    // Add to archives (most recent first)
-    archives.unshift(archive);
-    
-    // Remove completed tasks from active todos
-    todos = todos.filter(t => !t.completed || t.completedAt < weekStart);
-    
+    todos = todos.filter(t => !t.completed);
     saveTodos();
-    saveArchives();
     renderTodos();
-    renderArchives();
-}
-
-// ============================================
-// RENDER ARCHIVES
-// ============================================
-
-function renderArchives() {
-    const archiveContainer = document.getElementById('weeklyArchive');
-    
-    if (archives.length === 0) {
-        archiveContainer.innerHTML = `
-            <div class="empty-state">
-                <p>No archived weeks yet. Click "📦 Archive Week" to save completed tasks.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    archiveContainer.innerHTML = archives.map(archive => `
-        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 0.75rem; margin-bottom: 1rem; overflow: hidden;">
-            <!-- Archive Header (Collapsible) -->
-            <div onclick="toggleArchive(${archive.id})" style="padding: 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span id="archive-arrow-${archive.id}" style="font-size: 1rem; transition: transform 0.2s;">▶</span>
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">
-                            Week of ${archive.weekLabel}
-                        </div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                            ${archive.tasks.length} task${archive.tasks.length !== 1 ? 's' : ''} completed
-                        </div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">
-                    Archived ${formatDate(archive.archivedAt)}
-                </div>
-            </div>
-            
-            <!-- Archive Content (Hidden by default) -->
-            <div id="archive-content-${archive.id}" style="display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-                ${archive.tasks.map(task => `
-                    <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.03); display: flex; justify-content: space-between; align-items: center;">
-                        <div style="flex: 1;">
-                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
-                                ✓ ${task.text || '(Empty task)'}
-                            </div>
-                            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">
-                                Completed ${formatDate(task.completedAt)}
-                            </div>
-                        </div>
-                        <div style="width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, ${getColorGradient(task.color)});"></div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-function getColorGradient(color) {
-    const gradients = {
-        'yellow': '#fef08a 0%, #fde047 100%',
-        'pink': '#fecaca 0%, #fca5a5 100%',
-        'blue': '#bfdbfe 0%, #93c5fd 100%',
-        'green': '#bbf7d0 0%, #86efac 100%',
-        'purple': '#e9d5ff 0%, #d8b4fe 100%',
-        'orange': '#fed7aa 0%, #fdba74 100%'
-    };
-    return gradients[color] || '#888 0%, #666 100%';
-}
-
-function toggleArchive(archiveId) {
-    const content = document.getElementById(`archive-content-${archiveId}`);
-    const arrow = document.getElementById(`archive-arrow-${archiveId}`);
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        arrow.style.transform = 'rotate(90deg)';
-    } else {
-        content.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
-    }
-}
-
-// ============================================
-// DELETE ARCHIVE (Optional)
-// ============================================
-
-function deleteArchive(archiveId) {
-    if (!confirm('Delete this archived week? This cannot be undone.')) return;
-    
-    archives = archives.filter(a => a.id !== archiveId);
-    saveArchives();
-    renderArchives();
 }
 
 // ============================================
@@ -2781,44 +2629,44 @@ function renderTodos() {
     // Render active tasks
     const activeContainer = document.getElementById('activeTasks');
     if (active.length === 0) {
-        activeContainer.innerHTML = \`
+        activeContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <div class="empty-state-icon">📝</div>
                 <p>No active tasks. Click "+ Add Task" to get started!</p>
             </div>
-        \`;
+        `;
     } else {
-        activeContainer.innerHTML = active.map(todo => \`
-            <div class="sticky-note sticky-\${todo.color}" data-id="\${todo.id}">
+        activeContainer.innerHTML = active.map(todo => `
+            <div class="sticky-note sticky-${todo.color}" data-id="${todo.id}">
                 <textarea 
                     class="sticky-note-text" 
-                    data-todo-id="\${todo.id}"
+                    data-todo-id="${todo.id}"
                     placeholder="Type your task..."
-                    oninput="updateTodoText(\${todo.id}, this.value)"
-                >\${todo.text || ''}</textarea>
+                    oninput="updateTodoText(${todo.id}, this.value)"
+                >${todo.text || ''}</textarea>
                 
                 <div class="sticky-actions">
-                    <span class="sticky-timestamp">\${formatTimeAgo(todo.createdAt)}</span>
+                    <span class="sticky-timestamp">${formatTimeAgo(todo.createdAt)}</span>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="sticky-btn" onclick="completeTodo(\${todo.id})" title="Complete">
+                        <button class="sticky-btn" onclick="completeTodo(${todo.id})" title="Complete">
                             ✓ Done
                         </button>
-                        <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" title="Delete">
+                        <button class="sticky-btn" onclick="deleteTodo(${todo.id})" title="Delete">
                             🗑️
                         </button>
                     </div>
                 </div>
             </div>
-        \`).join('');
+        `).join('');
     }
     
     // Add "Add New" button
-    activeContainer.innerHTML += \`
+    activeContainer.innerHTML += `
         <div class="add-sticky" onclick="addTodo()">
             <div class="add-sticky-icon">+</div>
             <div style="font-weight: 600; font-size: 0.95rem;">Add Task</div>
         </div>
-    \`;
+    `;
     
     // Auto-resize textareas
     document.querySelectorAll('.sticky-note-text').forEach(textarea => {
@@ -2834,21 +2682,21 @@ function renderTodos() {
     // Render completed tasks
     const completedContainer = document.getElementById('completedTasks');
     if (completed.length === 0) {
-        completedContainer.innerHTML = \`
+        completedContainer.innerHTML = `
             <div class="empty-state">
                 <p>No tasks completed this week yet. Keep going! 💪</p>
             </div>
-        \`;
+        `;
     } else {
-        completedContainer.innerHTML = completed.map(todo => \`
+        completedContainer.innerHTML = completed.map(todo => `
             <div class="completed-item">
-                <div class="completed-item-text">\${todo.text || '(Empty task)'}</div>
-                <div class="completed-item-date">\${formatDate(todo.completedAt)}</div>
-                <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" style="background: rgba(255,68,68,0.2);">
+                <div class="completed-item-text">${todo.text || '(Empty task)'}</div>
+                <div class="completed-item-date">${formatDate(todo.completedAt)}</div>
+                <button class="sticky-btn" onclick="deleteTodo(${todo.id})" style="background: rgba(255,68,68,0.2);">
                     🗑️
                 </button>
             </div>
-        \`).join('');
+        `).join('');
     }
 }
 
@@ -2868,7 +2716,7 @@ function formatTimeAgo(timestamp) {
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return \`\${days[date.getDay()]} \${date.getHours()}:\${String(date.getMinutes()).padStart(2, '0')}\`;
+    return `${days[date.getDay()]} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 // Initialize
@@ -3723,10 +3571,10 @@ loadTodos();
                     setTimeout(loadTrends, 100);
                 }
                 if (tabName === 'tasks') {
-                    // setTimeout(loadTasks, 100) // DISABLED;
+                    setTimeout(loadTasks, 100);
                 }
                 if (tabName === 'calendar') {
-                    setTimeout(loadCalendar, 100) // Keep calendar;
+                    setTimeout(loadCalendar, 100);
                 }
                 if (tabName == 'morning-news') {
                     setTimeout(loadMorningNews, 100);
@@ -4106,7 +3954,7 @@ loadTodos();
                 role: 'Main Agent • Orchestrator',
                 avatar: '🤖',
                 status: 'online',
-                model: 'Claude Opus 4.6',
+                model: 'Claude Sonnet 4.5',
                 lastActive: new Date().toISOString(),
                 description: 'Your primary AI assistant and chief of staff. Coordinates all business operations, manages other agents, and handles day-to-day tasks for Yippy Pouches.',
                 capabilities: [
@@ -4130,7 +3978,7 @@ loadTodos();
                 role: 'Dashboard Architect • UI/UX',
                 avatar: '🏗️',
                 status: 'busy',
-                model: 'Claude Opus 4.6',
+                model: 'Claude Opus 4',
                 lastActive: new Date(Date.now() - 1800000).toISOString(),
                 description: 'Specialized UI architect focused on the Clubhouse dashboard. Expert in Next.js, React, design systems, and premium UI/UX implementation.',
                 capabilities: [
@@ -4154,7 +4002,7 @@ loadTodos();
                 role: 'Email & Communication',
                 avatar: '✉️',
                 status: 'online',
-                model: 'Claude Opus 4.6',
+                model: 'Claude Sonnet 4.5',
                 lastActive: new Date(Date.now() - 900000).toISOString(),
                 description: 'Email marketing specialist. Handles customer communication, nurture sequences, and conversion-focused copywriting.',
                 capabilities: [
@@ -4178,7 +4026,7 @@ loadTodos();
                 role: 'Strategy & Insights',
                 avatar: '🧠',
                 status: 'online',
-                model: 'Claude Opus 4.6',
+                model: 'Claude Sonnet 4.5',
                 lastActive: new Date(Date.now() - 3600000).toISOString(),
                 description: 'Strategic analyst focused on business intelligence, market research, and data-driven decision making.',
                 capabilities: [
@@ -7125,143 +6973,143 @@ loadTodos();
 
         // ============================================
         // TASK BOARD
-// OLD_TASK_SYSTEM_DISABLED:         // TASKS TAB
-// OLD_TASK_SYSTEM_DISABLED:         let todaysTasks = [];
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:         async function loadTasks() {
-// OLD_TASK_SYSTEM_DISABLED:             try {
-// OLD_TASK_SYSTEM_DISABLED:                 // Fetch cron jobs (scheduled tasks)
-// OLD_TASK_SYSTEM_DISABLED:                 const cronRes = await fetch('/api/cron/list');
-// OLD_TASK_SYSTEM_DISABLED:                 const cronData = await cronRes.json();
-// OLD_TASK_SYSTEM_DISABLED:                 
-// OLD_TASK_SYSTEM_DISABLED:                 const now = Date.now();
-// OLD_TASK_SYSTEM_DISABLED:                 const todayStart = new Date();
-// OLD_TASK_SYSTEM_DISABLED:                 todayStart.setHours(0, 0, 0, 0);
-// OLD_TASK_SYSTEM_DISABLED:                 const todayEnd = new Date();
-// OLD_TASK_SYSTEM_DISABLED:                 todayEnd.setHours(23, 59, 59, 999);
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:                 todaysTasks = (cronData.jobs || []).map(job => {
-// OLD_TASK_SYSTEM_DISABLED:                     const nextRun = job.state?.nextRunAtMs || 0;
-// OLD_TASK_SYSTEM_DISABLED:                     const lastRun = job.state?.lastRunAtMs || 0;
-// OLD_TASK_SYSTEM_DISABLED:                     const lastStatus = job.state?.lastStatus;
-// OLD_TASK_SYSTEM_DISABLED:                     
-// OLD_TASK_SYSTEM_DISABLED:                     // Determine status
-// OLD_TASK_SYSTEM_DISABLED:                     let status = 'scheduled';
-// OLD_TASK_SYSTEM_DISABLED:                     if (lastRun >= todayStart.getTime() && lastStatus === 'ok') {
-// OLD_TASK_SYSTEM_DISABLED:                         status = 'completed';
-// OLD_TASK_SYSTEM_DISABLED:                     } else if (lastRun >= todayStart.getTime() && lastStatus === 'running') {
-// OLD_TASK_SYSTEM_DISABLED:                         status = 'in-progress';
-// OLD_TASK_SYSTEM_DISABLED:                     }
-// OLD_TASK_SYSTEM_DISABLED:                     
-// OLD_TASK_SYSTEM_DISABLED:                     // Only include if scheduled for today or ran today
-// OLD_TASK_SYSTEM_DISABLED:                     const scheduledToday = nextRun >= todayStart.getTime() && nextRun <= todayEnd.getTime();
-// OLD_TASK_SYSTEM_DISABLED:                     const ranToday = lastRun >= todayStart.getTime();
-// OLD_TASK_SYSTEM_DISABLED:                     
-// OLD_TASK_SYSTEM_DISABLED:                     return {
-// OLD_TASK_SYSTEM_DISABLED:                         id: job.id,
-// OLD_TASK_SYSTEM_DISABLED:                         name: job.name,
-// OLD_TASK_SYSTEM_DISABLED:                         nextRun: nextRun,
-// OLD_TASK_SYSTEM_DISABLED:                         lastRun: lastRun,
-// OLD_TASK_SYSTEM_DISABLED:                         status: status,
-// OLD_TASK_SYSTEM_DISABLED:                         scheduledToday: scheduledToday,
-// OLD_TASK_SYSTEM_DISABLED:                         ranToday: ranToday,
-// OLD_TASK_SYSTEM_DISABLED:                         enabled: job.enabled
-// OLD_TASK_SYSTEM_DISABLED:                     };
-// OLD_TASK_SYSTEM_DISABLED:                 }).filter(t => (t.scheduledToday || t.ranToday) && t.enabled);
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:                 renderTasks();
-// OLD_TASK_SYSTEM_DISABLED:             } catch (err) {
-// OLD_TASK_SYSTEM_DISABLED:                 console.error('Failed to load tasks:', err);
-// OLD_TASK_SYSTEM_DISABLED:                 todaysTasks = [];
-// OLD_TASK_SYSTEM_DISABLED:                 renderTasks();
-// OLD_TASK_SYSTEM_DISABLED:             }
-// OLD_TASK_SYSTEM_DISABLED:         }
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:         function renderTasks() {
-// OLD_TASK_SYSTEM_DISABLED:             const now = Date.now();
-// OLD_TASK_SYSTEM_DISABLED:             
-// OLD_TASK_SYSTEM_DISABLED:             // Update day label
-// OLD_TASK_SYSTEM_DISABLED:             const today = new Date();
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksDayLabel').textContent = today.toLocaleDateString('en-US', { 
-// OLD_TASK_SYSTEM_DISABLED:                 weekday: 'long', 
-// OLD_TASK_SYSTEM_DISABLED:                 month: 'long', 
-// OLD_TASK_SYSTEM_DISABLED:                 day: 'numeric' 
-// OLD_TASK_SYSTEM_DISABLED:             });
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             // Group tasks
-// OLD_TASK_SYSTEM_DISABLED:             const inProgress = todaysTasks.filter(t => t.status === 'in-progress');
-// OLD_TASK_SYSTEM_DISABLED:             const scheduled = todaysTasks.filter(t => t.status === 'scheduled' && t.nextRun > now);
-// OLD_TASK_SYSTEM_DISABLED:             const completed = todaysTasks.filter(t => t.status === 'completed');
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             // Update counts
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('inProgressCount').textContent = inProgress.length;
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('scheduledCount').textContent = scheduled.length;
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('completedCount').textContent = completed.length;
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             // Render each column
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksInProgress').innerHTML = inProgress.length > 0 
-// OLD_TASK_SYSTEM_DISABLED:                 ? inProgress.map(renderTaskCard).join('') 
-// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks running</div>';
-// OLD_TASK_SYSTEM_DISABLED:             
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksScheduled').innerHTML = scheduled.length > 0 
-// OLD_TASK_SYSTEM_DISABLED:                 ? scheduled.sort((a, b) => a.nextRun - b.nextRun).map(renderTaskCard).join('') 
-// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks scheduled</div>';
-// OLD_TASK_SYSTEM_DISABLED:             
-// OLD_TASK_SYSTEM_DISABLED:             document.getElementById('tasksCompleted').innerHTML = completed.length > 0 
-// OLD_TASK_SYSTEM_DISABLED:                 ? completed.sort((a, b) => b.lastRun - a.lastRun).map(renderTaskCard).join('') 
-// OLD_TASK_SYSTEM_DISABLED:                 : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">Nothing completed yet</div>';
-// OLD_TASK_SYSTEM_DISABLED:         }
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:         function renderTaskCard(task) {
-// OLD_TASK_SYSTEM_DISABLED:             const statusColors = {
-// OLD_TASK_SYSTEM_DISABLED:                 'in-progress': '#60a5fa',
-// OLD_TASK_SYSTEM_DISABLED:                 'scheduled': '#fbbf24',
-// OLD_TASK_SYSTEM_DISABLED:                 'completed': '#4ade80'
-// OLD_TASK_SYSTEM_DISABLED:             };
-// OLD_TASK_SYSTEM_DISABLED:             const color = statusColors[task.status] || '#888';
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             let timeLabel = '';
-// OLD_TASK_SYSTEM_DISABLED:             if (task.status === 'scheduled' && task.nextRun) {
-// OLD_TASK_SYSTEM_DISABLED:                 const date = new Date(task.nextRun);
-// OLD_TASK_SYSTEM_DISABLED:                 timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-// OLD_TASK_SYSTEM_DISABLED:             } else if (task.status === 'completed' && task.lastRun) {
-// OLD_TASK_SYSTEM_DISABLED:                 const date = new Date(task.lastRun);
-// OLD_TASK_SYSTEM_DISABLED:                 timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-// OLD_TASK_SYSTEM_DISABLED:             }
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             const statusIcons = {
-// OLD_TASK_SYSTEM_DISABLED:                 'in-progress': '⏳',
-// OLD_TASK_SYSTEM_DISABLED:                 'scheduled': '🕐',
-// OLD_TASK_SYSTEM_DISABLED:                 'completed': '✅'
-// OLD_TASK_SYSTEM_DISABLED:             };
-// OLD_TASK_SYSTEM_DISABLED:             const icon = statusIcons[task.status] || '📋';
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             return `
-// OLD_TASK_SYSTEM_DISABLED:                 <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid ${color}; border-radius: 8px; padding: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-// OLD_TASK_SYSTEM_DISABLED:                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-// OLD_TASK_SYSTEM_DISABLED:                         <span style="font-size: 1rem;">${icon}</span>
-// OLD_TASK_SYSTEM_DISABLED:                         <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${task.name}</div>
-// OLD_TASK_SYSTEM_DISABLED:                     </div>
-// OLD_TASK_SYSTEM_DISABLED:                     ${timeLabel ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${timeLabel}</div>` : ''}
-// OLD_TASK_SYSTEM_DISABLED:                 </div>
-// OLD_TASK_SYSTEM_DISABLED:             `;
-// OLD_TASK_SYSTEM_DISABLED:         }
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:         function getRelativeTime(timestamp) {
-// OLD_TASK_SYSTEM_DISABLED:             const now = Date.now();
-// OLD_TASK_SYSTEM_DISABLED:             const diff = timestamp - now;
-// OLD_TASK_SYSTEM_DISABLED:             const minutes = Math.floor(Math.abs(diff) / 60000);
-// OLD_TASK_SYSTEM_DISABLED:             const hours = Math.floor(minutes / 60);
-// OLD_TASK_SYSTEM_DISABLED: 
-// OLD_TASK_SYSTEM_DISABLED:             if (diff > 0) {
-// OLD_TASK_SYSTEM_DISABLED:                 if (minutes < 60) return `in ${minutes}m`;
-// OLD_TASK_SYSTEM_DISABLED:                 return `in ${hours}h ${minutes % 60}m`;
-// OLD_TASK_SYSTEM_DISABLED:             } else {
-// OLD_TASK_SYSTEM_DISABLED:                 if (minutes < 60) return `${minutes}m ago`;
-// OLD_TASK_SYSTEM_DISABLED:                 return `${hours}h ago`;
-// OLD_TASK_SYSTEM_DISABLED:             }
-// OLD_TASK_SYSTEM_DISABLED:         }
-// OLD_TASK_SYSTEM_DISABLED:         // ============================================
+        // TASKS TAB
+        let todaysTasks = [];
+
+        async function loadTasks() {
+            try {
+                // Fetch cron jobs (scheduled tasks)
+                const cronRes = await fetch('/api/cron/list');
+                const cronData = await cronRes.json();
+                
+                const now = Date.now();
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setHours(23, 59, 59, 999);
+
+                todaysTasks = (cronData.jobs || []).map(job => {
+                    const nextRun = job.state?.nextRunAtMs || 0;
+                    const lastRun = job.state?.lastRunAtMs || 0;
+                    const lastStatus = job.state?.lastStatus;
+                    
+                    // Determine status
+                    let status = 'scheduled';
+                    if (lastRun >= todayStart.getTime() && lastStatus === 'ok') {
+                        status = 'completed';
+                    } else if (lastRun >= todayStart.getTime() && lastStatus === 'running') {
+                        status = 'in-progress';
+                    }
+                    
+                    // Only include if scheduled for today or ran today
+                    const scheduledToday = nextRun >= todayStart.getTime() && nextRun <= todayEnd.getTime();
+                    const ranToday = lastRun >= todayStart.getTime();
+                    
+                    return {
+                        id: job.id,
+                        name: job.name,
+                        nextRun: nextRun,
+                        lastRun: lastRun,
+                        status: status,
+                        scheduledToday: scheduledToday,
+                        ranToday: ranToday,
+                        enabled: job.enabled
+                    };
+                }).filter(t => (t.scheduledToday || t.ranToday) && t.enabled);
+
+                renderTasks();
+            } catch (err) {
+                console.error('Failed to load tasks:', err);
+                todaysTasks = [];
+                renderTasks();
+            }
+        }
+
+        function renderTasks() {
+            const now = Date.now();
+            
+            // Update day label
+            const today = new Date();
+            document.getElementById('tasksDayLabel').textContent = today.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            // Group tasks
+            const inProgress = todaysTasks.filter(t => t.status === 'in-progress');
+            const scheduled = todaysTasks.filter(t => t.status === 'scheduled' && t.nextRun > now);
+            const completed = todaysTasks.filter(t => t.status === 'completed');
+
+            // Update counts
+            document.getElementById('inProgressCount').textContent = inProgress.length;
+            document.getElementById('scheduledCount').textContent = scheduled.length;
+            document.getElementById('completedCount').textContent = completed.length;
+
+            // Render each column
+            document.getElementById('tasksInProgress').innerHTML = inProgress.length > 0 
+                ? inProgress.map(renderTaskCard).join('') 
+                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks running</div>';
+            
+            document.getElementById('tasksScheduled').innerHTML = scheduled.length > 0 
+                ? scheduled.sort((a, b) => a.nextRun - b.nextRun).map(renderTaskCard).join('') 
+                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">No tasks scheduled</div>';
+            
+            document.getElementById('tasksCompleted').innerHTML = completed.length > 0 
+                ? completed.sort((a, b) => b.lastRun - a.lastRun).map(renderTaskCard).join('') 
+                : '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">Nothing completed yet</div>';
+        }
+
+        function renderTaskCard(task) {
+            const statusColors = {
+                'in-progress': '#60a5fa',
+                'scheduled': '#fbbf24',
+                'completed': '#4ade80'
+            };
+            const color = statusColors[task.status] || '#888';
+
+            let timeLabel = '';
+            if (task.status === 'scheduled' && task.nextRun) {
+                const date = new Date(task.nextRun);
+                timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } else if (task.status === 'completed' && task.lastRun) {
+                const date = new Date(task.lastRun);
+                timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
+
+            const statusIcons = {
+                'in-progress': '⏳',
+                'scheduled': '🕐',
+                'completed': '✅'
+            };
+            const icon = statusIcons[task.status] || '📋';
+
+            return `
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid ${color}; border-radius: 8px; padding: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1rem;">${icon}</span>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${task.name}</div>
+                    </div>
+                    ${timeLabel ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${timeLabel}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function getRelativeTime(timestamp) {
+            const now = Date.now();
+            const diff = timestamp - now;
+            const minutes = Math.floor(Math.abs(diff) / 60000);
+            const hours = Math.floor(minutes / 60);
+
+            if (diff > 0) {
+                if (minutes < 60) return `in ${minutes}m`;
+                return `in ${hours}h ${minutes % 60}m`;
+            } else {
+                if (minutes < 60) return `${minutes}m ago`;
+                return `${hours}h ago`;
+            }
+        }
+        // ============================================
         // CALENDAR TAB
         let calendarView = 'month'; // week, month, or year
         let calendarDate = new Date();
@@ -8461,96 +8309,6 @@ loadTodos();
         // ============================================
         // INITIALIZATION
         // ============================================
-        // ============================================
-        // ACTIVE AGENTS DATA
-        // ============================================
-        
-        const ACTIVE_AGENTS = [
-            {
-                id: 'yippybot',
-                name: 'Yippybot',
-                avatar: '🤖',
-                role: 'Executive Assistant & Chief of Staff',
-                status: 'active',
-                model: 'Claude Opus 4.6',
-                lastActive: new Date().toISOString(),
-                description: 'Main autonomous assistant for Yippy Pouches. Handles operations, analysis, automation, and strategic support. Available 24/7 for business operations, growth initiatives, and day-to-day tasks.',
-                capabilities: [
-                    'Business operations & analysis',
-                    'Financial tracking & reporting',
-                    'Strategic planning & recommendations',
-                    'Automation & integrations',
-                    'Research & competitive analysis',
-                    'Content & marketing support',
-                    '24/7 availability'
-                ],
-                notes: 'Primary agent for all Yippy Pouches operations. Cost-conscious with Haiku-first model selection. Manages Clubhouse dashboard, financial tracking, and daily operations.',
-                recentActivity: [
-                    { time: new Date().toISOString(), task: 'Built sticky-note to-do list with weekly archive feature' },
-                    { time: new Date(Date.now() - 3600000).toISOString(), task: 'Updated dashboard with colorful task cards' },
-                    { time: new Date(Date.now() - 7200000).toISOString(), task: 'Fixed calendar and task system conflicts' }
-                ]
-            },
-            {
-                id: 'devin',
-                name: 'Devin',
-                avatar: '🎨',
-                role: 'UI/UX Designer & Dashboard Specialist',
-                status: 'idle',
-                model: 'Claude Opus 4.6',
-                lastActive: new Date(Date.now() - 86400000 * 2).toISOString(),
-                description: 'Expert UI/UX designer specializing in dashboard architecture, visual design, and user experience. Uses Impeccable design skills for production-grade interfaces. Available for major redesigns and new components.',
-                capabilities: [
-                    'Dashboard architecture & design',
-                    'Component library development',
-                    'Design system creation',
-                    'Performance optimization',
-                    'Visual design & aesthetics',
-                    'Technical implementation',
-                    'Golf country club aesthetic'
-                ],
-                notes: 'Completed major Clubhouse redesign on Mar 18. Uses Opus model for quality UI work. Available for dashboard improvements, new features, and design system work.',
-                recentActivity: [
-                    { time: new Date(Date.now() - 86400000 * 2).toISOString(), task: 'Completed Clubhouse redesign with golf country club aesthetic' },
-                    { time: new Date(Date.now() - 86400000 * 2.5).toISOString(), task: 'Redesigned 9 dashboard tabs with new color scheme' },
-                    { time: new Date(Date.now() - 86400000 * 3).toISOString(), task: 'Created Agent Command Center visualization' }
-                ]
-            },
-            {
-                id: 'twister',
-                name: 'Twister',
-                avatar: '🌪️',
-                role: 'Twitter/X Trends Analyst',
-                status: 'active',
-                model: 'Claude Opus 4.6',
-                lastActive: new Date(Date.now() - 3600000 * 4).toISOString(),
-                description: 'Real-time Twitter/X trends monitoring via Chrome CDP. Scrapes trending topics and search results 3x daily. Read-only access - never posts or interacts.',
-                capabilities: [
-                    'Twitter/X trend monitoring',
-                    'Tweet search & discovery',
-                    'Trend analysis (3x daily)',
-                    'Competitive intelligence',
-                    'Content inspiration',
-                    'Brand mention tracking'
-                ],
-                notes: 'Runs autonomously on schedule: 7am, 12pm, 8pm EST. Chrome CDP connection on port 9558. Feeds data to Trends tab in Clubhouse dashboard.',
-                recentActivity: [
-                    { time: new Date(Date.now() - 3600000 * 4).toISOString(), task: 'Evening trends sync (8pm)' },
-                    { time: new Date(Date.now() - 3600000 * 11).toISOString(), task: 'Midday trends sync (12pm)' },
-                    { time: new Date(Date.now() - 3600000 * 16).toISOString(), task: 'Morning trends sync (7am)' }
-                ]
-            }
-        ];
-        
-        // Initialize agents data on page load
-        function initializeActiveAgents() {
-            localStorage.setItem('agents', JSON.stringify(ACTIVE_AGENTS));
-            console.log('✅ Loaded 3 active agents:', ACTIVE_AGENTS.map(a => a.name).join(', '));
-        }
-        
-        // Call on page load
-        initializeActiveAgents();
-        
         async function init() {
             try {
                 // Initialize server connection first
@@ -8578,7 +8336,7 @@ loadTodos();
             }
             
             try {
-                // loadTasks() // DISABLED - using new sticky-note system;
+                loadTasks();
             } catch (e) {
                 console.error('Tasks error:', e);
             }
@@ -8613,7 +8371,7 @@ loadTodos();
 
             // Initialize Task Board
             try {
-                // loadTasks() // DISABLED - using new sticky-note system;
+                loadTasks();
             } catch (e) {
                 console.error('Tasks error:', e);
             }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test To-Dos</title>
+</head>
+<body>
+<h2>Testing localStorage</h2>
+<div id="output"></div>
+
+<script>
+// Check what's in localStorage
+const saved = localStorage.getItem('clubhouse_todos');
+let todos = saved ? JSON.parse(saved) : [];
+
+const output = document.getElementById('output');
+
+if (todos.length === 0) {
+    output.innerHTML = `<p><strong>Adding 17 tasks...</strong></p>`;
+    
+    const tasks = ["Work on sample/biz cards to be able to pass out.","Follow up with Micah&Sean","Setup Amazon","Upload images to a folder for Cowork to post using buffer to twitter","Resize the clips so we can post to see how they look","Send Micah Some Mango Samples","Schedule call with Bauman with Jack","Create a prompt Dashboard Repository for all the most effective openclaw prompts.","Create financial analysis for Yippy","Offer to micah - first 3 months - earnout to equity","Ask Bauman about running his as an ad","Create slideshow for micah","Create a Mike@yippypouches.com","Email Tristan with our feedback on samples","Send out Weekly Gol Recap post","Make 10 Twitter replies","Complete 10 samples/Tiktok orders through USPS"];
+    const COLORS = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
+    const now = Date.now();
+    
+    todos = tasks.map((text, i) => ({
+        id: now + i,
+        text,
+        color: COLORS[i % 6],
+        completed: false,
+        createdAt: now + i,
+        completedAt: null
+    }));
+    
+    localStorage.setItem('clubhouse_todos', JSON.stringify(todos));
+    
+    setTimeout(() => {
+        output.innerHTML = `
+            <p><strong>✅ Successfully added ${todos.length} tasks!</strong></p>
+            <ul style="text-align: left; max-width: 600px;">
+                ${todos.map(t => `<li>${t.text} <span style="color: ${t.color};">(${t.color})</span></li>`).join('')}
+            </ul>
+            <p><strong><a href="/mission-control.html">→ Go to Dashboard Now</a></strong></p>
+        `;
+    }, 100);
+} else {
+    output.innerHTML = `
+        <p><strong>✅ Found ${todos.length} tasks in localStorage!</strong></p>
+        <ul style="text-align: left; max-width: 600px;">
+            ${todos.map(t => `<li>${t.text} <span style="color: gray;">(${t.color})</span></li>`).join('')}
+        </ul>
+        <p><strong><a href="/mission-control.html">→ Go to Dashboard</a></strong></p>
+    `;
+}
+</script>
+</body>
+</html>
