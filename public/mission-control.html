@@ -2495,13 +2495,27 @@
                 Completed This Week
                 <span id="completedWeekCount" class="completed-count">0</span>
             </div>
-            <button onclick="clearCompletedTasks()" class="delete-completed-btn">
-                Clear Completed
+            <button onclick="archiveCompletedTasks()" class="delete-completed-btn" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
+                📦 Archive Week
             </button>
         </div>
 
         <div id="completedTasks">
             <!-- Completed tasks populate here -->
+        </div>
+    </div>
+
+    <!-- Weekly Archive Section -->
+    <div class="completed-section" style="margin-top: 2rem;">
+        <div class="completed-header">
+            <div class="completed-title">
+                <span>📚</span>
+                Weekly Archive
+            </div>
+        </div>
+
+        <div id="weeklyArchive">
+            <!-- Archived weeks populate here -->
         </div>
     </div>
 </div>
@@ -2512,6 +2526,7 @@
 // ============================================
 
 let todos = [];
+let archives = [];
 const COLORS = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
 
 // Load from localStorage
@@ -2520,12 +2535,23 @@ function loadTodos() {
     if (saved) {
         todos = JSON.parse(saved);
     }
+    
+    const savedArchives = localStorage.getItem('clubhouse_todo_archives');
+    if (savedArchives) {
+        archives = JSON.parse(savedArchives);
+    }
+    
     renderTodos();
+    renderArchives();
 }
 
 // Save to localStorage
 function saveTodos() {
     localStorage.setItem('clubhouse_todos', JSON.stringify(todos));
+}
+
+function saveArchives() {
+    localStorage.setItem('clubhouse_todo_archives', JSON.stringify(archives));
 }
 
 // Get week boundaries
@@ -2536,6 +2562,15 @@ function getWeekBoundaries() {
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
     return startOfWeek.getTime();
+}
+
+function getWeekLabel(timestamp) {
+    const date = new Date(timestamp);
+    const endDate = new Date(timestamp);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    const options = { month: 'short', day: 'numeric' };
+    return `${date.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}, ${date.getFullYear()}`;
 }
 
 // ============================================
@@ -2600,15 +2635,132 @@ function deleteTodo(id) {
 }
 
 // ============================================
-// CLEAR COMPLETED TASKS
+// ARCHIVE COMPLETED TASKS
 // ============================================
 
-function clearCompletedTasks() {
-    if (!confirm('Clear all completed tasks from this week?')) return;
+function archiveCompletedTasks() {
+    const weekStart = getWeekBoundaries();
+    const completed = todos.filter(t => t.completed && t.completedAt >= weekStart);
     
-    todos = todos.filter(t => !t.completed);
+    if (completed.length === 0) {
+        alert('No completed tasks to archive this week.');
+        return;
+    }
+    
+    if (!confirm(`Archive ${completed.length} completed task(s) from this week?`)) return;
+    
+    // Create archive entry
+    const archive = {
+        id: Date.now(),
+        weekStart: weekStart,
+        weekLabel: getWeekLabel(weekStart),
+        tasks: completed,
+        archivedAt: Date.now()
+    };
+    
+    // Add to archives (most recent first)
+    archives.unshift(archive);
+    
+    // Remove completed tasks from active todos
+    todos = todos.filter(t => !t.completed || t.completedAt < weekStart);
+    
     saveTodos();
+    saveArchives();
     renderTodos();
+    renderArchives();
+}
+
+// ============================================
+// RENDER ARCHIVES
+// ============================================
+
+function renderArchives() {
+    const archiveContainer = document.getElementById('weeklyArchive');
+    
+    if (archives.length === 0) {
+        archiveContainer.innerHTML = `
+            <div class="empty-state">
+                <p>No archived weeks yet. Click "📦 Archive Week" to save completed tasks.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    archiveContainer.innerHTML = archives.map(archive => `
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 0.75rem; margin-bottom: 1rem; overflow: hidden;">
+            <!-- Archive Header (Collapsible) -->
+            <div onclick="toggleArchive(${archive.id})" style="padding: 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="archive-arrow-${archive.id}" style="font-size: 1rem; transition: transform 0.2s;">▶</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">
+                            Week of ${archive.weekLabel}
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            ${archive.tasks.length} task${archive.tasks.length !== 1 ? 's' : ''} completed
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                    Archived ${formatDate(archive.archivedAt)}
+                </div>
+            </div>
+            
+            <!-- Archive Content (Hidden by default) -->
+            <div id="archive-content-${archive.id}" style="display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                ${archive.tasks.map(task => `
+                    <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.03); display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                ✓ ${task.text || '(Empty task)'}
+                            </div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">
+                                Completed ${formatDate(task.completedAt)}
+                            </div>
+                        </div>
+                        <div style="width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, ${getColorGradient(task.color)});"></div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function getColorGradient(color) {
+    const gradients = {
+        'yellow': '#fef08a 0%, #fde047 100%',
+        'pink': '#fecaca 0%, #fca5a5 100%',
+        'blue': '#bfdbfe 0%, #93c5fd 100%',
+        'green': '#bbf7d0 0%, #86efac 100%',
+        'purple': '#e9d5ff 0%, #d8b4fe 100%',
+        'orange': '#fed7aa 0%, #fdba74 100%'
+    };
+    return gradients[color] || '#888 0%, #666 100%';
+}
+
+function toggleArchive(archiveId) {
+    const content = document.getElementById(`archive-content-${archiveId}`);
+    const arrow = document.getElementById(`archive-arrow-${archiveId}`);
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+    } else {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+// ============================================
+// DELETE ARCHIVE (Optional)
+// ============================================
+
+function deleteArchive(archiveId) {
+    if (!confirm('Delete this archived week? This cannot be undone.')) return;
+    
+    archives = archives.filter(a => a.id !== archiveId);
+    saveArchives();
+    renderArchives();
 }
 
 // ============================================
@@ -2629,44 +2781,44 @@ function renderTodos() {
     // Render active tasks
     const activeContainer = document.getElementById('activeTasks');
     if (active.length === 0) {
-        activeContainer.innerHTML = `
+        activeContainer.innerHTML = \`
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <div class="empty-state-icon">📝</div>
                 <p>No active tasks. Click "+ Add Task" to get started!</p>
             </div>
-        `;
+        \`;
     } else {
-        activeContainer.innerHTML = active.map(todo => `
-            <div class="sticky-note sticky-${todo.color}" data-id="${todo.id}">
+        activeContainer.innerHTML = active.map(todo => \`
+            <div class="sticky-note sticky-\${todo.color}" data-id="\${todo.id}">
                 <textarea 
                     class="sticky-note-text" 
-                    data-todo-id="${todo.id}"
+                    data-todo-id="\${todo.id}"
                     placeholder="Type your task..."
-                    oninput="updateTodoText(${todo.id}, this.value)"
-                >${todo.text || ''}</textarea>
+                    oninput="updateTodoText(\${todo.id}, this.value)"
+                >\${todo.text || ''}</textarea>
                 
                 <div class="sticky-actions">
-                    <span class="sticky-timestamp">${formatTimeAgo(todo.createdAt)}</span>
+                    <span class="sticky-timestamp">\${formatTimeAgo(todo.createdAt)}</span>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="sticky-btn" onclick="completeTodo(${todo.id})" title="Complete">
+                        <button class="sticky-btn" onclick="completeTodo(\${todo.id})" title="Complete">
                             ✓ Done
                         </button>
-                        <button class="sticky-btn" onclick="deleteTodo(${todo.id})" title="Delete">
+                        <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" title="Delete">
                             🗑️
                         </button>
                     </div>
                 </div>
             </div>
-        `).join('');
+        \`).join('');
     }
     
     // Add "Add New" button
-    activeContainer.innerHTML += `
+    activeContainer.innerHTML += \`
         <div class="add-sticky" onclick="addTodo()">
             <div class="add-sticky-icon">+</div>
             <div style="font-weight: 600; font-size: 0.95rem;">Add Task</div>
         </div>
-    `;
+    \`;
     
     // Auto-resize textareas
     document.querySelectorAll('.sticky-note-text').forEach(textarea => {
@@ -2682,21 +2834,21 @@ function renderTodos() {
     // Render completed tasks
     const completedContainer = document.getElementById('completedTasks');
     if (completed.length === 0) {
-        completedContainer.innerHTML = `
+        completedContainer.innerHTML = \`
             <div class="empty-state">
                 <p>No tasks completed this week yet. Keep going! 💪</p>
             </div>
-        `;
+        \`;
     } else {
-        completedContainer.innerHTML = completed.map(todo => `
+        completedContainer.innerHTML = completed.map(todo => \`
             <div class="completed-item">
-                <div class="completed-item-text">${todo.text || '(Empty task)'}</div>
-                <div class="completed-item-date">${formatDate(todo.completedAt)}</div>
-                <button class="sticky-btn" onclick="deleteTodo(${todo.id})" style="background: rgba(255,68,68,0.2);">
+                <div class="completed-item-text">\${todo.text || '(Empty task)'}</div>
+                <div class="completed-item-date">\${formatDate(todo.completedAt)}</div>
+                <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" style="background: rgba(255,68,68,0.2);">
                     🗑️
                 </button>
             </div>
-        `).join('');
+        \`).join('');
     }
 }
 
@@ -2716,7 +2868,7 @@ function formatTimeAgo(timestamp) {
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return `${days[date.getDay()]} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return \`\${days[date.getDay()]} \${date.getHours()}:\${String(date.getMinutes()).padStart(2, '0')}\`;
 }
 
 // Initialize
