@@ -3212,8 +3212,9 @@ loadTodos();
                 .gcal-month-grid {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    grid-template-rows: repeat(6, 1fr);
+                    grid-template-rows: repeat(6, minmax(100px, auto));
                     gap: 1px;
+                    position: relative;
                 }
                 
                 .gcal-month-day {
@@ -3226,6 +3227,21 @@ loadTodos();
                     display: flex;
                     flex-direction: column;
                     min-height: 100px;
+                    z-index: 1;
+                }
+                
+                .gcal-month-spanning-event {
+                    margin-top: 25px;
+                    z-index: 10;
+                    transition: all 0.2s;
+                    align-self: start;
+                }
+                
+                .gcal-month-spanning-event:hover {
+                    filter: brightness(1.2);
+                    z-index: 20;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 }
                 
                 .gcal-month-day:hover {
@@ -8374,21 +8390,27 @@ loadTodos();
             const prevMonthDays = new Date(year, month, 0).getDate();
             for (let i = firstDay - 1; i >= 0; i--) {
                 const d = new Date(year, month - 1, prevMonthDays - i);
-                days.push({ date: d, otherMonth: true });
+                days.push({ date: d, otherMonth: true, index: days.length });
             }
             // Current month days
             for (let i = 1; i <= daysInMonth; i++) {
-                days.push({ date: new Date(year, month, i), otherMonth: false });
+                days.push({ date: new Date(year, month, i), otherMonth: false, index: days.length });
             }
             // Next month days to fill grid
             const remaining = 42 - days.length;
             for (let i = 1; i <= remaining; i++) {
                 const d = new Date(year, month + 1, i);
-                days.push({ date: d, otherMonth: true });
+                days.push({ date: d, otherMonth: true, index: days.length });
             }
 
             const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date().toDateString();
+
+            // Build a map of date string to day index
+            const dateToIndex = {};
+            days.forEach(({ date, index }) => {
+                dateToIndex[date.toISOString().split('T')[0]] = index;
+            });
 
             let html = '<div class="gcal-month-view">';
             
@@ -8402,45 +8424,115 @@ loadTodos();
             // Month grid
             html += '<div class="gcal-month-grid">';
             
-            days.forEach(({ date, otherMonth }) => {
+            // Render day cells
+            days.forEach(({ date, otherMonth, index }) => {
                 const dateStr = date.toISOString().split('T')[0];
                 const isToday = date.toDateString() === today;
                 
-                // Get events for this day (only show multi-day events on start date)
+                const row = Math.floor(index / 7) + 1;
+                const col = (index % 7) + 1;
+                
+                // Get single-day events for this day
                 const dayEvents = getVisibleEvents().filter(e => {
-                    return e.date === dateStr;
+                    return e.date === dateStr && (!e.endDate || e.endDate === e.date);
                 });
-
-                const visibleEvents = dayEvents.slice(0, 3);
-                const moreCount = dayEvents.length - 3;
 
                 html += `
                     <div class="gcal-month-day ${isToday ? 'today' : ''} ${otherMonth ? 'other-month' : ''}" 
-                         onclick="createEventAtDay('${dateStr}')">
+                         onclick="createEventAtDay('${dateStr}')"
+                         data-date="${dateStr}"
+                         style="grid-column: ${col}; grid-row: ${row};">
                         <div class="gcal-month-day-number">${date.getDate()}</div>
                         <div class="gcal-month-events">
-                            ${visibleEvents.map(event => {
+                            ${dayEvents.map(event => {
                                 const cal = calendars.find(c => c.id === event.calendar);
                                 const color = event.color || cal?.color || '#60a5fa';
                                 const time = event.allDay ? '' : (event.startTime || event.time || '');
-                                const isMultiDay = event.endDate && event.endDate !== event.date;
-                                const multiDayIndicator = isMultiDay ? ' →' : '';
                                 return `
                                     <div class="gcal-month-event" 
                                          onclick="event.stopPropagation(); showEventPopup('${event.id}', event)"
                                          style="background: ${color}; color: white;">
-                                        ${time ? time + ' ' : ''}${escapeHtml(event.title)}${multiDayIndicator}
+                                        ${time ? time + ' ' : ''}${escapeHtml(event.title)}
                                     </div>
                                 `;
                             }).join('')}
-                            ${moreCount > 0 ? `
-                                <div class="gcal-month-more" onclick="event.stopPropagation(); showDayDetails('${dateStr}')">
-                                    +${moreCount} more
-                                </div>
-                            ` : ''}
                         </div>
                     </div>
                 `;
+            });
+
+            // Render multi-day spanning events
+            const multiDayEvents = getVisibleEvents().filter(e => e.endDate && e.endDate !== e.date);
+            
+            multiDayEvents.forEach(event => {
+                const startIdx = dateToIndex[event.date];
+                const endIdx = dateToIndex[event.endDate];
+                
+                if (startIdx === undefined || endIdx === undefined) return;
+                
+                const startRow = Math.floor(startIdx / 7) + 1;
+                const endRow = Math.floor(endIdx / 7) + 1;
+                const startCol = (startIdx % 7) + 1;
+                const endCol = (endIdx % 7) + 1;
+                
+                const cal = calendars.find(c => c.id === event.calendar);
+                const color = event.color || cal?.color || '#60a5fa';
+                
+                // If event spans multiple weeks, render multiple bars
+                if (startRow === endRow) {
+                    // Single row spanning event
+                    const colSpan = endCol - startCol + 1;
+                    html += `
+                        <div class="gcal-month-spanning-event"
+                             onclick="showEventPopup('${event.id}', event)"
+                             style="
+                                 grid-column: ${startCol} / span ${colSpan};
+                                 grid-row: ${startRow};
+                                 background: ${color};
+                                 color: white;
+                                 padding: 2px 6px;
+                                 border-radius: 3px;
+                                 font-size: 0.7rem;
+                                 white-space: nowrap;
+                                 overflow: hidden;
+                                 text-overflow: ellipsis;
+                                 cursor: pointer;
+                                 pointer-events: auto;
+                             ">
+                            ${escapeHtml(event.title)}
+                        </div>
+                    `;
+                } else {
+                    // Multi-week event - render segments
+                    for (let row = startRow; row <= endRow; row++) {
+                        const isFirstRow = row === startRow;
+                        const isLastRow = row === endRow;
+                        const segmentStartCol = isFirstRow ? startCol : 1;
+                        const segmentEndCol = isLastRow ? endCol : 7;
+                        const colSpan = segmentEndCol - segmentStartCol + 1;
+                        
+                        html += `
+                            <div class="gcal-month-spanning-event"
+                                 onclick="showEventPopup('${event.id}', event)"
+                                 style="
+                                     grid-column: ${segmentStartCol} / span ${colSpan};
+                                     grid-row: ${row};
+                                     background: ${color};
+                                     color: white;
+                                     padding: 2px 6px;
+                                     border-radius: 3px;
+                                     font-size: 0.7rem;
+                                     white-space: nowrap;
+                                     overflow: hidden;
+                                     text-overflow: ellipsis;
+                                     cursor: pointer;
+                                     pointer-events: auto;
+                                 ">
+                                ${isFirstRow ? escapeHtml(event.title) : '↵ ' + escapeHtml(event.title)}
+                            </div>
+                        `;
+                    }
+                }
             });
 
             html += '</div>'; // month-grid
