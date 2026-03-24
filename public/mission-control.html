@@ -2781,44 +2781,44 @@ function renderTodos() {
     // Render active tasks
     const activeContainer = document.getElementById('activeTasks');
     if (active.length === 0) {
-        activeContainer.innerHTML = \`
+        activeContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <div class="empty-state-icon">📝</div>
                 <p>No active tasks. Click "+ Add Task" to get started!</p>
             </div>
-        \`;
+        `;
     } else {
-        activeContainer.innerHTML = active.map(todo => \`
-            <div class="sticky-note sticky-\${todo.color}" data-id="\${todo.id}">
+        activeContainer.innerHTML = active.map(todo => `
+            <div class="sticky-note sticky-${todo.color}" data-id="${todo.id}">
                 <textarea 
                     class="sticky-note-text" 
-                    data-todo-id="\${todo.id}"
+                    data-todo-id="${todo.id}"
                     placeholder="Type your task..."
-                    oninput="updateTodoText(\${todo.id}, this.value)"
-                >\${todo.text || ''}</textarea>
+                    oninput="updateTodoText(${todo.id}, this.value)"
+                >${todo.text || ''}</textarea>
                 
                 <div class="sticky-actions">
-                    <span class="sticky-timestamp">\${formatTimeAgo(todo.createdAt)}</span>
+                    <span class="sticky-timestamp">${formatTimeAgo(todo.createdAt)}</span>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="sticky-btn" onclick="completeTodo(\${todo.id})" title="Complete">
+                        <button class="sticky-btn" onclick="completeTodo(${todo.id})" title="Complete">
                             ✓ Done
                         </button>
-                        <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" title="Delete">
+                        <button class="sticky-btn" onclick="deleteTodo(${todo.id})" title="Delete">
                             🗑️
                         </button>
                     </div>
                 </div>
             </div>
-        \`).join('');
+        `).join('');
     }
     
     // Add "Add New" button
-    activeContainer.innerHTML += \`
+    activeContainer.innerHTML += `
         <div class="add-sticky" onclick="addTodo()">
             <div class="add-sticky-icon">+</div>
             <div style="font-weight: 600; font-size: 0.95rem;">Add Task</div>
         </div>
-    \`;
+    `;
     
     // Auto-resize textareas
     document.querySelectorAll('.sticky-note-text').forEach(textarea => {
@@ -2834,21 +2834,21 @@ function renderTodos() {
     // Render completed tasks
     const completedContainer = document.getElementById('completedTasks');
     if (completed.length === 0) {
-        completedContainer.innerHTML = \`
+        completedContainer.innerHTML = `
             <div class="empty-state">
                 <p>No tasks completed this week yet. Keep going! 💪</p>
             </div>
-        \`;
+        `;
     } else {
-        completedContainer.innerHTML = completed.map(todo => \`
+        completedContainer.innerHTML = completed.map(todo => `
             <div class="completed-item">
-                <div class="completed-item-text">\${todo.text || '(Empty task)'}</div>
-                <div class="completed-item-date">\${formatDate(todo.completedAt)}</div>
-                <button class="sticky-btn" onclick="deleteTodo(\${todo.id})" style="background: rgba(255,68,68,0.2);">
+                <div class="completed-item-text">${todo.text || '(Empty task)'}</div>
+                <div class="completed-item-date">${formatDate(todo.completedAt)}</div>
+                <button class="sticky-btn" onclick="deleteTodo(${todo.id})" style="background: rgba(255,68,68,0.2);">
                     🗑️
                 </button>
             </div>
-        \`).join('');
+        `).join('');
     }
 }
 
@@ -2868,7 +2868,7 @@ function formatTimeAgo(timestamp) {
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return \`\${days[date.getDay()]} \${date.getHours()}:\${String(date.getMinutes()).padStart(2, '0')}\`;
+    return `${days[date.getDay()]} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 // Initialize
