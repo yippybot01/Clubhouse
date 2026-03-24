@@ -8406,11 +8406,8 @@ loadTodos();
                 const dateStr = date.toISOString().split('T')[0];
                 const isToday = date.toDateString() === today;
                 
-                // Get events for this day
+                // Get events for this day (only show multi-day events on start date)
                 const dayEvents = getVisibleEvents().filter(e => {
-                    if (e.endDate) {
-                        return dateStr >= e.date && dateStr <= e.endDate;
-                    }
                     return e.date === dateStr;
                 });
 
@@ -8426,11 +8423,13 @@ loadTodos();
                                 const cal = calendars.find(c => c.id === event.calendar);
                                 const color = event.color || cal?.color || '#60a5fa';
                                 const time = event.allDay ? '' : (event.startTime || event.time || '');
+                                const isMultiDay = event.endDate && event.endDate !== event.date;
+                                const multiDayIndicator = isMultiDay ? ' →' : '';
                                 return `
                                     <div class="gcal-month-event" 
                                          onclick="event.stopPropagation(); showEventPopup('${event.id}', event)"
                                          style="background: ${color}; color: white;">
-                                        ${time ? time + ' ' : ''}${escapeHtml(event.title)}
+                                        ${time ? time + ' ' : ''}${escapeHtml(event.title)}${multiDayIndicator}
                                     </div>
                                 `;
                             }).join('')}
