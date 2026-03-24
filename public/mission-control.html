@@ -8513,20 +8513,26 @@ loadTodos();
                 }
                 
                 // Find the first available track
-                let assignedTrack = 0;
+                let assignedTrack = -1;
+                let foundTrack = false;
+                
                 for (let t = 0; t < rowTracks.length; t++) {
                     const lastInTrack = rowTracks[t];
                     if (lastInTrack.endIdx < segment.startIdx) {
+                        // This track is available - reuse it
                         assignedTrack = t;
                         rowTracks[t] = segment;
-                        segment.track = assignedTrack;
-                        return;
+                        foundTrack = true;
+                        break;
                     }
                 }
                 
                 // No available track found, create a new one
-                assignedTrack = rowTracks.length;
-                rowTracks.push(segment);
+                if (!foundTrack) {
+                    assignedTrack = rowTracks.length;
+                    rowTracks.push(segment);
+                }
+                
                 segment.track = assignedTrack;
             });
             
