@@ -3214,7 +3214,7 @@ loadTodos();
                 .gcal-month-grid {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    grid-template-rows: repeat(6, minmax(120px, auto));
+                    grid-template-rows: repeat(6, minmax(140px, auto));
                     gap: 1px;
                     position: relative;
                 }
@@ -3228,7 +3228,7 @@ loadTodos();
                     transition: all 0.2s;
                     display: flex;
                     flex-direction: column;
-                    min-height: 120px;
+                    min-height: 140px;
                     z-index: 1;
                     position: relative;
                 }
@@ -3279,6 +3279,7 @@ loadTodos();
                     gap: 2px;
                     flex: 1;
                     overflow: hidden;
+                    padding-top: 70px; /* Reserve space for spanning events above */
                 }
                 
                 .gcal-month-event {
