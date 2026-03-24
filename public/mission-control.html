@@ -8461,6 +8461,96 @@ loadTodos();
         // ============================================
         // INITIALIZATION
         // ============================================
+        // ============================================
+        // ACTIVE AGENTS DATA
+        // ============================================
+        
+        const ACTIVE_AGENTS = [
+            {
+                id: 'yippybot',
+                name: 'Yippybot',
+                avatar: '🤖',
+                role: 'Executive Assistant & Chief of Staff',
+                status: 'active',
+                model: 'Claude Sonnet 4.5',
+                lastActive: new Date().toISOString(),
+                description: 'Main autonomous assistant for Yippy Pouches. Handles operations, analysis, automation, and strategic support. Available 24/7 for business operations, growth initiatives, and day-to-day tasks.',
+                capabilities: [
+                    'Business operations & analysis',
+                    'Financial tracking & reporting',
+                    'Strategic planning & recommendations',
+                    'Automation & integrations',
+                    'Research & competitive analysis',
+                    'Content & marketing support',
+                    '24/7 availability'
+                ],
+                notes: 'Primary agent for all Yippy Pouches operations. Cost-conscious with Haiku-first model selection. Manages Clubhouse dashboard, financial tracking, and daily operations.',
+                recentActivity: [
+                    { time: new Date().toISOString(), task: 'Built sticky-note to-do list with weekly archive feature' },
+                    { time: new Date(Date.now() - 3600000).toISOString(), task: 'Updated dashboard with colorful task cards' },
+                    { time: new Date(Date.now() - 7200000).toISOString(), task: 'Fixed calendar and task system conflicts' }
+                ]
+            },
+            {
+                id: 'devin',
+                name: 'Devin',
+                avatar: '🎨',
+                role: 'UI/UX Designer & Dashboard Specialist',
+                status: 'idle',
+                model: 'Claude Opus 4',
+                lastActive: new Date(Date.now() - 86400000 * 2).toISOString(),
+                description: 'Expert UI/UX designer specializing in dashboard architecture, visual design, and user experience. Uses Impeccable design skills for production-grade interfaces. Available for major redesigns and new components.',
+                capabilities: [
+                    'Dashboard architecture & design',
+                    'Component library development',
+                    'Design system creation',
+                    'Performance optimization',
+                    'Visual design & aesthetics',
+                    'Technical implementation',
+                    'Golf country club aesthetic'
+                ],
+                notes: 'Completed major Clubhouse redesign on Mar 18. Uses Opus model for quality UI work. Available for dashboard improvements, new features, and design system work.',
+                recentActivity: [
+                    { time: new Date(Date.now() - 86400000 * 2).toISOString(), task: 'Completed Clubhouse redesign with golf country club aesthetic' },
+                    { time: new Date(Date.now() - 86400000 * 2.5).toISOString(), task: 'Redesigned 9 dashboard tabs with new color scheme' },
+                    { time: new Date(Date.now() - 86400000 * 3).toISOString(), task: 'Created Agent Command Center visualization' }
+                ]
+            },
+            {
+                id: 'twister',
+                name: 'Twister',
+                avatar: '🌪️',
+                role: 'Twitter/X Trends Analyst',
+                status: 'active',
+                model: 'Haiku (cron jobs)',
+                lastActive: new Date(Date.now() - 3600000 * 4).toISOString(),
+                description: 'Real-time Twitter/X trends monitoring via Chrome CDP. Scrapes trending topics and search results 3x daily. Read-only access - never posts or interacts.',
+                capabilities: [
+                    'Twitter/X trend monitoring',
+                    'Tweet search & discovery',
+                    'Trend analysis (3x daily)',
+                    'Competitive intelligence',
+                    'Content inspiration',
+                    'Brand mention tracking'
+                ],
+                notes: 'Runs autonomously on schedule: 7am, 12pm, 8pm EST. Chrome CDP connection on port 9558. Feeds data to Trends tab in Clubhouse dashboard.',
+                recentActivity: [
+                    { time: new Date(Date.now() - 3600000 * 4).toISOString(), task: 'Evening trends sync (8pm)' },
+                    { time: new Date(Date.now() - 3600000 * 11).toISOString(), task: 'Midday trends sync (12pm)' },
+                    { time: new Date(Date.now() - 3600000 * 16).toISOString(), task: 'Morning trends sync (7am)' }
+                ]
+            }
+        ];
+        
+        // Initialize agents data on page load
+        function initializeActiveAgents() {
+            localStorage.setItem('agents', JSON.stringify(ACTIVE_AGENTS));
+            console.log('✅ Loaded 3 active agents:', ACTIVE_AGENTS.map(a => a.name).join(', '));
+        }
+        
+        // Call on page load
+        initializeActiveAgents();
+        
         async function init() {
             try {
                 // Initialize server connection first
