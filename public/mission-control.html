@@ -8545,11 +8545,11 @@ loadTodos();
                 const cal = calendars.find(c => c.id === event.calendar);
                 const color = event.color || cal?.color || '#60a5fa';
                 
+                const marginTop = 25 + (track * 22);
                 html += `
                     <div class="gcal-month-spanning-event"
                          onclick="showEventPopup('${event.id}', event)"
                          data-track="${track}"
-                         data-event-id="${event.id}"
                          style="
                              grid-column: ${startCol} / span ${colSpan};
                              grid-row: ${gridRow};
@@ -8563,7 +8563,7 @@ loadTodos();
                              text-overflow: ellipsis;
                              cursor: pointer;
                              pointer-events: auto;
-                             margin-top: ${25 + (track * 22)}px;
+                             margin-top: ${marginTop}px;
                          ">
                         ${isFirstSegment ? escapeHtml(event.title) + ' [T' + track + ']' : '↵ ' + escapeHtml(event.title) + ' [T' + track + ']'}
                     </div>
