@@ -2875,38 +2875,708 @@ function formatDate(timestamp) {
 loadTodos();
 </script>
         <div class="tab-content" id="calendar-tab">
+            <style>
+                /* Google Calendar Styles */
+                .gcal-container {
+                    display: flex;
+                    gap: 1.5rem;
+                    height: calc(100vh - 200px);
+                    min-height: 700px;
+                }
+                
+                .gcal-sidebar {
+                    width: 280px;
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    transition: transform 0.3s ease;
+                }
+                
+                .gcal-sidebar.collapsed {
+                    transform: translateX(-100%);
+                    position: absolute;
+                    z-index: -1;
+                }
+                
+                .gcal-main {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                }
+                
+                .gcal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                    gap: 1rem;
+                }
+                
+                .gcal-header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+                
+                .gcal-header-right {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: center;
+                }
+                
+                .gcal-mini-calendar {
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 12px;
+                    padding: 1rem;
+                }
+                
+                .gcal-mini-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.75rem;
+                }
+                
+                .gcal-mini-month {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                }
+                
+                .gcal-mini-nav {
+                    display: flex;
+                    gap: 0.25rem;
+                }
+                
+                .gcal-mini-nav-btn {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    color: var(--text-primary);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.75rem;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-mini-nav-btn:hover {
+                    background: rgba(255,255,255,0.1);
+                }
+                
+                .gcal-mini-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 2px;
+                }
+                
+                .gcal-mini-day-label {
+                    text-align: center;
+                    font-size: 0.7rem;
+                    color: var(--text-muted);
+                    padding: 0.25rem;
+                    font-weight: 600;
+                }
+                
+                .gcal-mini-day {
+                    text-align: center;
+                    font-size: 0.75rem;
+                    padding: 0.375rem;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    color: var(--text-secondary);
+                }
+                
+                .gcal-mini-day:hover {
+                    background: rgba(255,255,255,0.1);
+                }
+                
+                .gcal-mini-day.today {
+                    background: #60a5fa;
+                    color: white;
+                    font-weight: 700;
+                }
+                
+                .gcal-mini-day.selected {
+                    background: rgba(16,185,129,0.2);
+                    color: #10b981;
+                    font-weight: 600;
+                }
+                
+                .gcal-mini-day.other-month {
+                    color: var(--text-muted);
+                    opacity: 0.4;
+                }
+                
+                .gcal-mini-day.has-events {
+                    position: relative;
+                }
+                
+                .gcal-mini-day.has-events::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 2px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 4px;
+                    height: 4px;
+                    background: #10b981;
+                    border-radius: 50%;
+                }
+                
+                .gcal-calendars {
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 12px;
+                    padding: 1rem;
+                }
+                
+                .gcal-calendars-title {
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    margin-bottom: 0.75rem;
+                }
+                
+                .gcal-calendar-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-calendar-item:hover {
+                    background: rgba(255,255,255,0.05);
+                }
+                
+                .gcal-calendar-checkbox {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 4px;
+                    border: 2px solid;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-calendar-checkbox.checked::after {
+                    content: '✓';
+                    color: white;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                }
+                
+                .gcal-calendar-name {
+                    font-size: 0.85rem;
+                    color: var(--text-primary);
+                    flex: 1;
+                }
+                
+                .gcal-view-container {
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 12px;
+                    flex: 1;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .gcal-day-view,
+                .gcal-week-view {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                
+                .gcal-time-header {
+                    display: grid;
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                    background: rgba(255,255,255,0.02);
+                }
+                
+                .gcal-time-body {
+                    flex: 1;
+                    overflow-y: auto;
+                    position: relative;
+                }
+                
+                .gcal-time-grid {
+                    display: grid;
+                    position: relative;
+                    min-height: 100%;
+                }
+                
+                .gcal-time-slot {
+                    height: 48px;
+                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    position: relative;
+                }
+                
+                .gcal-time-label {
+                    position: absolute;
+                    left: 0;
+                    top: -0.5rem;
+                    font-size: 0.7rem;
+                    color: var(--text-muted);
+                    background: var(--bg-primary);
+                    padding: 0 0.5rem;
+                }
+                
+                .gcal-event {
+                    position: absolute;
+                    border-radius: 4px;
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                    overflow: hidden;
+                    border-left: 3px solid;
+                    transition: all 0.2s;
+                    z-index: 1;
+                }
+                
+                .gcal-event:hover {
+                    z-index: 2;
+                    filter: brightness(1.2);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                }
+                
+                .gcal-event-time {
+                    font-weight: 600;
+                    font-size: 0.7rem;
+                    margin-bottom: 0.125rem;
+                }
+                
+                .gcal-event-title {
+                    font-weight: 500;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                .gcal-current-time {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: #ef4444;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+                
+                .gcal-current-time::before {
+                    content: '';
+                    position: absolute;
+                    left: -6px;
+                    top: -5px;
+                    width: 12px;
+                    height: 12px;
+                    background: #ef4444;
+                    border-radius: 50%;
+                }
+                
+                .gcal-month-view {
+                    display: grid;
+                    grid-template-rows: auto 1fr;
+                    height: 100%;
+                    padding: 1rem;
+                }
+                
+                .gcal-month-header {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 1px;
+                    margin-bottom: 1px;
+                }
+                
+                .gcal-month-day-label {
+                    text-align: center;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    padding: 0.75rem;
+                }
+                
+                .gcal-month-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    grid-template-rows: repeat(6, 1fr);
+                    gap: 1px;
+                }
+                
+                .gcal-month-day {
+                    background: rgba(255,255,255,0.02);
+                    border: 1px solid rgba(255,255,255,0.05);
+                    border-radius: 8px;
+                    padding: 0.5rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 100px;
+                }
+                
+                .gcal-month-day:hover {
+                    background: rgba(255,255,255,0.05);
+                    border-color: rgba(16,185,129,0.3);
+                }
+                
+                .gcal-month-day.today {
+                    background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0.05) 100%);
+                    border-color: rgba(16,185,129,0.5);
+                }
+                
+                .gcal-month-day.other-month {
+                    opacity: 0.4;
+                }
+                
+                .gcal-month-day-number {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    margin-bottom: 0.5rem;
+                }
+                
+                .gcal-month-day.today .gcal-month-day-number {
+                    color: #10b981;
+                }
+                
+                .gcal-month-events {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                    flex: 1;
+                    overflow: hidden;
+                }
+                
+                .gcal-month-event {
+                    font-size: 0.7rem;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-month-event:hover {
+                    filter: brightness(1.2);
+                }
+                
+                .gcal-month-more {
+                    font-size: 0.7rem;
+                    color: var(--text-muted);
+                    padding: 2px 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                }
+                
+                .gcal-month-more:hover {
+                    color: #10b981;
+                }
+                
+                .gcal-year-view {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 1.25rem;
+                    padding: 1.5rem;
+                    overflow-y: auto;
+                }
+                
+                .gcal-year-month {
+                    background: rgba(255,255,255,0.02);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 12px;
+                    padding: 1rem;
+                    cursor: pointer;
+                    transition: all 0.25s;
+                }
+                
+                .gcal-year-month:hover {
+                    background: rgba(255,255,255,0.05);
+                    border-color: rgba(16,185,129,0.3);
+                    transform: translateY(-2px);
+                }
+                
+                .gcal-year-month-name {
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin-bottom: 0.75rem;
+                    font-size: 1.1rem;
+                }
+                
+                .gcal-year-month-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 2px;
+                }
+                
+                .gcal-year-day {
+                    font-size: 0.7rem;
+                    text-align: center;
+                    padding: 0.25rem;
+                    border-radius: 3px;
+                    color: var(--text-secondary);
+                }
+                
+                .gcal-year-day.today {
+                    background: #60a5fa;
+                    color: white;
+                    font-weight: 700;
+                }
+                
+                .gcal-year-day.has-events {
+                    color: #10b981;
+                    font-weight: 600;
+                }
+                
+                .gcal-event-popup {
+                    position: fixed;
+                    background: linear-gradient(135deg, rgba(31, 41, 55, 0.98) 0%, rgba(17, 24, 39, 0.98) 100%);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                    z-index: 1000;
+                    min-width: 300px;
+                    max-width: 400px;
+                }
+                
+                .gcal-event-popup-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: start;
+                    margin-bottom: 1rem;
+                    gap: 1rem;
+                }
+                
+                .gcal-event-popup-title {
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    flex: 1;
+                }
+                
+                .gcal-event-popup-close {
+                    background: rgba(255,255,255,0.05);
+                    border: none;
+                    color: var(--text-muted);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-event-popup-close:hover {
+                    background: rgba(255,255,255,0.1);
+                }
+                
+                .gcal-event-popup-detail {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    margin-bottom: 0.75rem;
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                }
+                
+                .gcal-event-popup-icon {
+                    width: 20px;
+                    text-align: center;
+                }
+                
+                .gcal-event-popup-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-top: 1.25rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid rgba(255,255,255,0.08);
+                }
+                
+                .gcal-quick-create {
+                    position: fixed;
+                    background: linear-gradient(135deg, rgba(31, 41, 55, 0.98) 0%, rgba(17, 24, 39, 0.98) 100%);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    border-radius: 12px;
+                    padding: 1rem;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                    z-index: 1000;
+                    min-width: 300px;
+                }
+                
+                .gcal-quick-create-input {
+                    width: 100%;
+                    padding: 0.75rem;
+                    background: rgba(255,255,255,0.06);
+                    border: 1px solid rgba(255,255,255,0.12);
+                    border-radius: 8px;
+                    color: var(--text-primary);
+                    font-size: 0.9rem;
+                    margin-bottom: 0.75rem;
+                }
+                
+                .gcal-quick-create-time {
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                    margin-bottom: 0.75rem;
+                }
+                
+                .gcal-quick-create-calendar {
+                    margin-bottom: 0.75rem;
+                }
+                
+                .gcal-quick-create-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                }
+                
+                .gcal-btn {
+                    padding: 0.6rem 1rem;
+                    border-radius: 8px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-btn-primary {
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+                }
+                
+                .gcal-btn-primary:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 16px rgba(16,185,129,0.4);
+                }
+                
+                .gcal-btn-secondary {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.12);
+                    color: var(--text-primary);
+                }
+                
+                .gcal-btn-secondary:hover {
+                    background: rgba(255,255,255,0.08);
+                }
+                
+                .gcal-btn-text {
+                    background: none;
+                    border: none;
+                    color: #60a5fa;
+                    padding: 0.5rem;
+                }
+                
+                .gcal-btn-text:hover {
+                    color: #93c5fd;
+                }
+                
+                .gcal-all-day-section {
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                    padding: 0.5rem 1rem;
+                    background: rgba(255,255,255,0.02);
+                    min-height: 40px;
+                }
+                
+                .gcal-all-day-label {
+                    font-size: 0.75rem;
+                    color: var(--text-muted);
+                    margin-bottom: 0.25rem;
+                }
+                
+                .gcal-all-day-events {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.25rem;
+                }
+                
+                .gcal-all-day-event {
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                
+                .gcal-all-day-event:hover {
+                    filter: brightness(1.2);
+                }
+            </style>
+            
             <!-- Calendar Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div>
-                    <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        📅 Calendar
-                    </h2>
-                    <p id="calCurrentLabel" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0 0; font-weight: 500;"></p>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; align-items: center;">
-                    <!-- View Toggle -->
-                    <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.3rem; border: 1px solid rgba(255,255,255,0.1);">
-                        <button id="viewWeek" onclick="setCalendarView('week')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Week</button>
-                        <button id="viewMonth" onclick="setCalendarView('month')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: rgba(16,185,129,0.15); color: #10b981; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Month</button>
-                        <button id="viewYear" onclick="setCalendarView('year')" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Year</button>
-                    </div>
-
-                    <!-- Navigation -->
-                    <button onclick="navigateCalendar('prev')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">◀</button>
+            <div class="gcal-header">
+                <div class="gcal-header-left">
+                    <button id="gcalMenuBtn" onclick="toggleCalendarSidebar()" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">☰</button>
                     <button onclick="navigateCalendar('today')" style="padding: 0.6rem 1.2rem; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Today</button>
-                    <button onclick="navigateCalendar('next')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">▶</button>
-
-                    <!-- Add Event Button -->
+                    <div style="display: flex; gap: 0.25rem;">
+                        <button onclick="navigateCalendar('prev')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">◀</button>
+                        <button onclick="navigateCalendar('next')" style="padding: 0.6rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 8px; cursor: pointer; font-weight: 600;">▶</button>
+                    </div>
+                    <h2 id="calCurrentLabel" style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0;"></h2>
+                </div>
+                
+                <div class="gcal-header-right">
+                    <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 0.3rem; border: 1px solid rgba(255,255,255,0.1);">
+                        <button id="viewDay" onclick="setCalendarView('day')" style="padding: 0.6rem 1rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Day</button>
+                        <button id="viewWeek" onclick="setCalendarView('week')" style="padding: 0.6rem 1rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Week</button>
+                        <button id="viewMonth" onclick="setCalendarView('month')" style="padding: 0.6rem 1rem; border-radius: 8px; border: none; background: rgba(16,185,129,0.15); color: #10b981; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Month</button>
+                        <button id="viewYear" onclick="setCalendarView('year')" style="padding: 0.6rem 1rem; border-radius: 8px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;">Year</button>
+                    </div>
                     <button onclick="openAddEventModal()" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(16,185,129,0.2);">
-                        <span style="font-size: 1.1rem;">+</span> Add Event
+                        <span style="font-size: 1.1rem;">+</span> Create
                     </button>
                 </div>
             </div>
-
-            <!-- Calendar View Container -->
-            <div class="glass-card" style="padding: 2rem; min-height: 600px;">
-                <div id="calendarViewContainer"></div>
+            
+            <!-- Calendar Container -->
+            <div class="gcal-container">
+                <!-- Sidebar -->
+                <div class="gcal-sidebar" id="gcalSidebar">
+                    <!-- Mini Calendar -->
+                    <div class="gcal-mini-calendar">
+                        <div class="gcal-mini-header">
+                            <div class="gcal-mini-month" id="miniCalMonth"></div>
+                            <div class="gcal-mini-nav">
+                                <button class="gcal-mini-nav-btn" onclick="navigateMiniCalendar(-1)">◀</button>
+                                <button class="gcal-mini-nav-btn" onclick="navigateMiniCalendar(1)">▶</button>
+                            </div>
+                        </div>
+                        <div class="gcal-mini-grid" id="miniCalGrid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- My Calendars -->
+                    <div class="gcal-calendars">
+                        <div class="gcal-calendars-title">My Calendars</div>
+                        <div id="calendarList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main View -->
+                <div class="gcal-main">
+                    <div class="gcal-view-container" id="calendarViewContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2926,20 +3596,40 @@ loadTodos();
                         <input type="text" id="eventTitle" placeholder="Team meeting, Birthday party, etc." style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; transition: all 0.2s;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'; this.style.background='rgba(255,255,255,0.08)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'; this.style.background='rgba(255,255,255,0.06)'">
                     </div>
                     
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="eventAllDay" onchange="toggleAllDay()" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">All day</span>
+                        </label>
+                    </div>
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
                             <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Start Date</label>
                             <input type="date" id="eventDate" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
                         </div>
+                        <div id="startTimeContainer">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Start Time</label>
+                            <input type="time" id="eventStartTime" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">End Date (optional)</label>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">End Date</label>
                             <input type="date" id="eventEndDate" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        </div>
+                        <div id="endTimeContainer">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">End Time</label>
+                            <input type="time" id="eventEndTime" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
                         </div>
                     </div>
                     
                     <div>
-                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Time (optional)</label>
-                        <input type="time" id="eventTime" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Calendar</label>
+                        <select id="eventCalendar" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; cursor: pointer;" onfocus="this.style.borderColor='rgba(16,185,129,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                            <!-- Populated by JS -->
+                        </select>
                     </div>
                     
                     <div>
@@ -2950,12 +3640,12 @@ loadTodos();
                     <div>
                         <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">Color</label>
                         <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
-                            <button onclick="selectEventColor('#60a5fa')" data-color="#60a5fa" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #60a5fa; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
-                            <button onclick="selectEventColor('#10b981')" data-color="#10b981" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #10b981; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
-                            <button onclick="selectEventColor('#f59e0b')" data-color="#f59e0b" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #f59e0b; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
-                            <button onclick="selectEventColor('#ef4444')" data-color="#ef4444" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ef4444; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
-                            <button onclick="selectEventColor('#8b5cf6')" data-color="#8b5cf6" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #8b5cf6; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
-                            <button onclick="selectEventColor('#ec4899')" data-color="#ec4899" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ec4899; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#60a5fa')" data-color="#60a5fa" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #60a5fa; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#10b981')" data-color="#10b981" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #10b981; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#f59e0b')" data-color="#f59e0b" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #f59e0b; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#ef4444')" data-color="#ef4444" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ef4444; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#8b5cf6')" data-color="#8b5cf6" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #8b5cf6; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
+                            <button onclick="selectEventColor('#ec4899')" data-color="#ec4899" class="color-btn" style="height: 40px; border-radius: 8px; border: 2px solid transparent; background: #ec4899; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="if(!this.classList.contains('selected')) this.style.transform='scale(1)'"></button>
                         </div>
                         <input type="hidden" id="eventColor" value="#60a5fa">
                     </div>
@@ -2973,7 +3663,7 @@ loadTodos();
             </div>
         </div>
 
-        <!-- Day Details Modal -->
+        <!-- Day Details Modal (for month view +N more clicks) -->
         <div id="dayDetailsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;" onclick="closeDayDetailsModal()">
             <div style="background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 2.5rem; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -2993,7 +3683,6 @@ loadTodos();
                 </button>
             </div>
         </div>
-
         <div class="tab-content" id="morning-news-tab">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -7263,14 +7952,51 @@ loadTodos();
 // OLD_TASK_SYSTEM_DISABLED:         }
 // OLD_TASK_SYSTEM_DISABLED:         // ============================================
         // CALENDAR TAB
-        let calendarView = 'month'; // week, month, or year
+        let calendarView = 'month'; // day, week, month, or year
         let calendarDate = new Date();
         let calendarEvents = [];
-
         let golfTournaments = [];
-        
+        let miniCalendarDate = new Date();
+        let selectedDate = null;
+        let calendars = [];
+        let sidebarCollapsed = false;
+        let draggedEvent = null;
+        let currentTimeInterval = null;
+
+        // Initialize calendars from localStorage
+        function initCalendars() {
+            const stored = localStorage.getItem('clubhouse_calendars');
+            if (stored) {
+                calendars = JSON.parse(stored);
+            } else {
+                // Default calendars
+                calendars = [
+                    { id: 'yippy-business', name: 'Yippy Business', color: '#60a5fa', visible: true },
+                    { id: 'personal', name: 'Personal', color: '#10b981', visible: true },
+                    { id: 'golf-tournaments', name: 'Golf Tournaments', color: '#f59e0b', visible: true, readonly: true }
+                ];
+                saveCalendars();
+            }
+        }
+
+        function saveCalendars() {
+            localStorage.setItem('clubhouse_calendars', JSON.stringify(calendars));
+        }
+
+        function toggleCalendarSidebar() {
+            sidebarCollapsed = !sidebarCollapsed;
+            const sidebar = document.getElementById('gcalSidebar');
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+        }
+
         async function loadCalendar() {
             try {
+                initCalendars();
+                
                 // Load personal events
                 const res = await fetch('/api/mc/calendar');
                 const data = await res.json();
@@ -7281,11 +8007,16 @@ loadTodos();
                 const tournData = await tournRes.json();
                 golfTournaments = tournData.tournaments || [];
                 
+                renderMiniCalendar();
+                renderCalendarList();
                 renderCalendar();
+                startCurrentTimeUpdater();
             } catch (err) {
                 console.error('Failed to load calendar:', err);
                 calendarEvents = [];
                 golfTournaments = [];
+                renderMiniCalendar();
+                renderCalendarList();
                 renderCalendar();
             }
         }
@@ -7293,7 +8024,7 @@ loadTodos();
         function setCalendarView(view) {
             calendarView = view;
             // Update button styles
-            ['viewWeek', 'viewMonth', 'viewYear'].forEach(id => {
+            ['viewDay', 'viewWeek', 'viewMonth', 'viewYear'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (id === 'view' + view.charAt(0).toUpperCase() + view.slice(1)) {
                     btn.style.background = 'rgba(16,185,129,0.15)';
@@ -7309,8 +8040,12 @@ loadTodos();
         function navigateCalendar(direction) {
             if (direction === 'today') {
                 calendarDate = new Date();
+                selectedDate = new Date();
+                miniCalendarDate = new Date();
             } else if (direction === 'prev') {
-                if (calendarView === 'week') {
+                if (calendarView === 'day') {
+                    calendarDate.setDate(calendarDate.getDate() - 1);
+                } else if (calendarView === 'week') {
                     calendarDate.setDate(calendarDate.getDate() - 7);
                 } else if (calendarView === 'month') {
                     calendarDate.setMonth(calendarDate.getMonth() - 1);
@@ -7318,7 +8053,9 @@ loadTodos();
                     calendarDate.setFullYear(calendarDate.getFullYear() - 1);
                 }
             } else if (direction === 'next') {
-                if (calendarView === 'week') {
+                if (calendarView === 'day') {
+                    calendarDate.setDate(calendarDate.getDate() + 1);
+                } else if (calendarView === 'week') {
                     calendarDate.setDate(calendarDate.getDate() + 7);
                 } else if (calendarView === 'month') {
                     calendarDate.setMonth(calendarDate.getMonth() + 1);
@@ -7329,13 +8066,24 @@ loadTodos();
             renderCalendar();
         }
 
+        function navigateMiniCalendar(delta) {
+            miniCalendarDate.setMonth(miniCalendarDate.getMonth() + delta);
+            renderMiniCalendar();
+        }
+
         function renderCalendar() {
             updateCalendarLabel();
             const container = document.getElementById('calendarViewContainer');
             if (!container) return;
 
-            if (calendarView === 'week') {
+            if (calendarView === 'day') {
+                container.innerHTML = renderDayView();
+                attachEventListeners();
+                updateCurrentTimeIndicator();
+            } else if (calendarView === 'week') {
                 container.innerHTML = renderWeekView();
+                attachEventListeners();
+                updateCurrentTimeIndicator();
             } else if (calendarView === 'month') {
                 container.innerHTML = renderMonthView();
             } else {
@@ -7347,15 +8095,24 @@ loadTodos();
             const label = document.getElementById('calCurrentLabel');
             if (!label) return;
 
-            if (calendarView === 'week') {
+            if (calendarView === 'day') {
+                label.textContent = calendarDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
+                });
+            } else if (calendarView === 'week') {
                 const weekStart = getWeekStart(calendarDate);
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekEnd.getDate() + 6);
-                label.textContent = `Week of ${weekStart.toLocaleDateString()}`;
+                const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
+                if (sameMonth) {
+                    label.textContent = `${weekStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+                } else {
+                    label.textContent = `${weekStart.toLocaleDateString('en-US', { month: 'short' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+                }
             } else if (calendarView === 'month') {
                 label.textContent = calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             } else {
-                label.textContent = calendarDate.getFullYear();
+                label.textContent = calendarDate.getFullYear().toString();
             }
         }
 
@@ -7367,6 +8124,89 @@ loadTodos();
             return d;
         }
 
+        function getVisibleEvents() {
+            return calendarEvents.filter(event => {
+                const calendar = calendars.find(c => c.id === event.calendar);
+                return !calendar || calendar.visible;
+            });
+        }
+
+        function getVisibleTournaments() {
+            const golfCal = calendars.find(c => c.id === 'golf-tournaments');
+            return (golfCal && golfCal.visible) ? golfTournaments : [];
+        }
+
+        function renderDayView() {
+            const dateStr = calendarDate.toISOString().split('T')[0];
+            const events = getVisibleEvents().filter(e => {
+                if (e.allDay) {
+                    if (e.endDate) {
+                        return dateStr >= e.date && dateStr <= e.endDate;
+                    }
+                    return e.date === dateStr;
+                }
+                return e.date === dateStr;
+            });
+
+            const allDayEvents = events.filter(e => e.allDay);
+            const timedEvents = events.filter(e => !e.allDay);
+
+            let html = '<div class="gcal-day-view">';
+            
+            // All-day section
+            html += '<div class="gcal-all-day-section">';
+            if (allDayEvents.length > 0) {
+                html += '<div class="gcal-all-day-label">All day</div>';
+                html += '<div class="gcal-all-day-events">';
+                allDayEvents.forEach(event => {
+                    const cal = calendars.find(c => c.id === event.calendar);
+                    const color = event.color || cal?.color || '#60a5fa';
+                    html += `
+                        <div class="gcal-all-day-event" onclick="showEventPopup('${event.id}', event)" style="background: ${color}25; color: ${color}; border: 1px solid ${color}50;">
+                            ${escapeHtml(event.title)}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Time grid
+            html += '<div class="gcal-time-header" style="grid-template-columns: 60px 1fr; padding: 0.75rem 1rem;">';
+            html += '<div></div>'; // Empty corner
+            html += `<div style="text-align: center; font-weight: 600; color: var(--text-primary);">
+                ${calendarDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>`;
+            html += '</div>';
+
+            html += '<div class="gcal-time-body">';
+            html += '<div class="gcal-time-grid" style="grid-template-columns: 60px 1fr;">';
+            
+            // 24 hours
+            for (let hour = 0; hour < 24; hour++) {
+                const timeStr = formatHour(hour);
+                html += `
+                    <div class="gcal-time-slot" style="grid-column: 1; position: relative;">
+                        <div class="gcal-time-label">${timeStr}</div>
+                    </div>
+                    <div class="gcal-time-slot" style="grid-column: 2; position: relative;" onclick="createEventAtTime('${dateStr}', ${hour}, 0)" data-hour="${hour}">
+                    </div>
+                `;
+            }
+
+            // Render timed events
+            timedEvents.forEach(event => {
+                const eventHtml = renderTimedEvent(event, 0, 1);
+                html += eventHtml;
+            });
+
+            html += '</div>'; // time-grid
+            html += '</div>'; // time-body
+            html += '</div>'; // day-view
+            
+            return html;
+        }
+
         function renderWeekView() {
             const weekStart = getWeekStart(calendarDate);
             const days = [];
@@ -7376,57 +8216,151 @@ loadTodos();
                 days.push(d);
             }
 
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const today = new Date().toDateString();
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">';
+            let html = '<div class="gcal-week-view">';
             
-            // Day headers with date
+            // Header
+            html += `<div class="gcal-time-header" style="grid-template-columns: 60px repeat(7, 1fr); padding: 0.75rem 1rem;">`;
+            html += '<div></div>'; // Empty corner
             days.forEach((day, i) => {
                 const isToday = day.toDateString() === today;
-                html += `<div style="text-align: center; padding: 1rem; border-radius: 10px; background: ${isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.08) 100%)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isToday ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'};">
-                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">${dayNames[i]}</div>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: ${isToday ? '#10b981' : 'var(--text-primary)'}; ${isToday ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${day.getDate()}</div>
-                </div>`;
+                html += `
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">${dayNames[i]}</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: ${isToday ? '#10b981' : 'var(--text-primary)'}; width: 36px; height: 36px; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; ${isToday ? 'background: rgba(16,185,129,0.15);' : ''}">${day.getDate()}</div>
+                    </div>
+                `;
             });
-
             html += '</div>';
-            
-            // Event cards in rows
-            html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem; margin-top: 1rem;">';
-            
-            days.forEach(day => {
+
+            // All-day section
+            const allDayEventsByDay = days.map(day => {
                 const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => {
+                return getVisibleEvents().filter(e => {
+                    if (!e.allDay) return false;
                     if (e.endDate) {
                         return dateStr >= e.date && dateStr <= e.endDate;
                     }
                     return e.date === dateStr;
                 });
-                const isToday = day.toDateString() === today;
-
-                html += `
-                    <div onclick="showDayDetails('${dateStr}')" style="min-height: 180px; padding: 1rem; border-radius: 12px; border: 2px solid ${isToday ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.1)'}; background: ${isToday ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.03)'}; cursor: pointer; transition: all 0.25s; position: relative; overflow-y: auto;" onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${isToday ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.1)'}'; this.style.background='${isToday ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.03)'}'">
-                        ${dayEvents.length === 0 ? `
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No events</div>
-                        ` : `
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                ${dayEvents.map(event => `
-                                    <div onclick="event.stopPropagation(); editEvent('${event.id}')" style="padding: 0.625rem; border-radius: 8px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}35 0%, ${(event.color || '#60a5fa')}18 100%); border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 4px 12px ${(event.color || '#60a5fa')}30'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
-                                        ${event.time ? `<div style="font-size: 0.7rem; font-weight: 600; color: ${event.color || '#60a5fa'}; margin-bottom: 0.25rem;">🕐 ${event.time}</div>` : ''}
-                                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: ${event.description ? '0.25rem' : '0'};">${event.title}</div>
-                                        ${event.description ? `<div style="font-size: 0.7rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${event.description}</div>` : ''}
-                                        ${event.endDate && event.endDate !== event.date ? `<div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem; font-style: italic;">Multi-day event</div>` : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `}
-                    </div>
-                `;
             });
 
-            html += '</div>';
+            const hasAllDay = allDayEventsByDay.some(arr => arr.length > 0);
+            if (hasAllDay) {
+                html += '<div class="gcal-all-day-section">';
+                html += '<div class="gcal-all-day-label">All day</div>';
+                html += `<div style="display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 4px;">`;
+                html += '<div></div>'; // Empty corner
+                allDayEventsByDay.forEach(events => {
+                    html += '<div style="display: flex; flex-direction: column; gap: 2px;">';
+                    events.forEach(event => {
+                        const cal = calendars.find(c => c.id === event.calendar);
+                        const color = event.color || cal?.color || '#60a5fa';
+                        html += `
+                            <div class="gcal-all-day-event" onclick="showEventPopup('${event.id}', event)" style="background: ${color}25; color: ${color}; border: 1px solid ${color}50; font-size: 0.7rem; padding: 2px 6px;">
+                                ${escapeHtml(event.title)}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                });
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Time grid
+            html += '<div class="gcal-time-body">';
+            html += `<div class="gcal-time-grid" style="grid-template-columns: 60px repeat(7, 1fr);">`;
+            
+            // 24 hours
+            for (let hour = 0; hour < 24; hour++) {
+                const timeStr = formatHour(hour);
+                html += `
+                    <div class="gcal-time-slot" style="grid-column: 1; position: relative;">
+                        <div class="gcal-time-label">${timeStr}</div>
+                    </div>
+                `;
+                
+                days.forEach((day, dayIndex) => {
+                    const dateStr = day.toISOString().split('T')[0];
+                    html += `
+                        <div class="gcal-time-slot" style="grid-column: ${dayIndex + 2}; position: relative; border-left: 1px solid rgba(255,255,255,0.05);" onclick="createEventAtTime('${dateStr}', ${hour}, 0)" data-date="${dateStr}" data-hour="${hour}">
+                        </div>
+                    `;
+                });
+            }
+
+            // Render timed events for each day
+            days.forEach((day, dayIndex) => {
+                const dateStr = day.toISOString().split('T')[0];
+                const dayEvents = getVisibleEvents().filter(e => !e.allDay && e.date === dateStr);
+                
+                dayEvents.forEach(event => {
+                    const eventHtml = renderTimedEvent(event, dayIndex, 7);
+                    html += eventHtml;
+                });
+            });
+
+            html += '</div>'; // time-grid
+            html += '</div>'; // time-body
+            html += '</div>'; // week-view
+            
             return html;
+        }
+
+        function renderTimedEvent(event, columnIndex, totalColumns) {
+            const startTime = event.startTime || event.time || '09:00';
+            const endTime = event.endTime || calculateEndTime(startTime);
+            
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+            const durationMinutes = endMinutes - startMinutes;
+            
+            const top = (startMinutes / 60) * 48; // 48px per hour
+            const height = Math.max((durationMinutes / 60) * 48, 24); // Minimum 24px
+            
+            const cal = calendars.find(c => c.id === event.calendar);
+            const color = event.color || cal?.color || '#60a5fa';
+            
+            const gridColumn = totalColumns === 1 ? 2 : columnIndex + 2;
+            
+            return `
+                <div class="gcal-event" 
+                     onclick="showEventPopup('${event.id}', event)" 
+                     style="
+                         grid-column: ${gridColumn};
+                         grid-row: 1 / -1;
+                         top: ${top}px;
+                         height: ${height}px;
+                         left: 4px;
+                         right: 4px;
+                         background: ${color}25;
+                         color: ${color};
+                         border-left-color: ${color};
+                     "
+                     data-event-id="${event.id}">
+                    <div class="gcal-event-time">${startTime}</div>
+                    <div class="gcal-event-title">${escapeHtml(event.title)}</div>
+                </div>
+            `;
+        }
+
+        function calculateEndTime(startTime) {
+            const [hour, min] = startTime.split(':').map(Number);
+            const endHour = hour + 1;
+            return `${String(endHour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+        }
+
+        function formatHour(hour) {
+            if (hour === 0) return '12 AM';
+            if (hour < 12) return `${hour} AM`;
+            if (hour === 12) return '12 PM';
+            return `${hour - 12} PM`;
         }
 
         function renderMonthView() {
@@ -7436,76 +8370,83 @@ loadTodos();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
             const days = [];
-            for (let i = 0; i < 42; i++) {
-                const dayNum = i - firstDay + 1;
-                if (dayNum < 1 || dayNum > daysInMonth) {
-                    days.push(null);
-                } else {
-                    days.push(new Date(year, month, dayNum));
-                }
+            // Previous month days
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const d = new Date(year, month - 1, prevMonthDays - i);
+                days.push({ date: d, otherMonth: true });
+            }
+            // Current month days
+            for (let i = 1; i <= daysInMonth; i++) {
+                days.push({ date: new Date(year, month, i), otherMonth: false });
+            }
+            // Next month days to fill grid
+            const remaining = 42 - days.length;
+            for (let i = 1; i <= remaining; i++) {
+                const d = new Date(year, month + 1, i);
+                days.push({ date: d, otherMonth: true });
             }
 
             const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date().toDateString();
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">';
+            let html = '<div class="gcal-month-view">';
             
             // Day headers
+            html += '<div class="gcal-month-header">';
             dayNames.forEach(name => {
-                html += `<div style="text-align: center; font-size: 0.875rem; font-weight: 700; color: var(--text-secondary); padding: 0.75rem 0; letter-spacing: 0.5px; text-transform: uppercase;">${name}</div>`;
+                html += `<div class="gcal-month-day-label">${name}</div>`;
             });
+            html += '</div>';
 
-            // Day cells
-            days.forEach(day => {
-                if (!day) {
-                    html += '<div style="min-height: 120px; border-radius: 12px; background: rgba(0,0,0,0.1);"></div>';
-                    return;
-                }
-
-                const dateStr = day.toISOString().split('T')[0];
-                const dayEvents = calendarEvents.filter(e => {
+            // Month grid
+            html += '<div class="gcal-month-grid">';
+            
+            days.forEach(({ date, otherMonth }) => {
+                const dateStr = date.toISOString().split('T')[0];
+                const isToday = date.toDateString() === today;
+                
+                // Get events for this day
+                const dayEvents = getVisibleEvents().filter(e => {
                     if (e.endDate) {
-                        // Multi-day event - check if day is within range
                         return dateStr >= e.date && dateStr <= e.endDate;
                     }
                     return e.date === dateStr;
                 });
-                
-                // Check for tournaments
-                const dayTournaments = golfTournaments.filter(t => {
-                    const start = new Date(t.startDate);
-                    const end = new Date(t.endDate);
-                    const current = new Date(dateStr);
-                    return current >= start && current <= end;
-                });
-                
-                const isToday = day.toDateString() === today;
-                const hasTournament = dayTournaments.length > 0;
-                const hasMajor = dayTournaments.some(t => t.type === 'major');
-                const hasEvents = dayEvents.length > 0 || dayTournaments.length > 0;
+
+                const visibleEvents = dayEvents.slice(0, 3);
+                const moreCount = dayEvents.length - 3;
 
                 html += `
-                    <div onclick="showDayDetails('${dateStr}')" style="min-height: 120px; padding: 0.875rem; border-radius: 12px; border: 2px solid ${isToday ? 'rgba(16,185,129,0.5)' : (hasEvents ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)')}; background: ${hasMajor ? 'linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.03) 100%)' : (isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)')}; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${isToday ? 'rgba(16,185,129,0.5)' : (hasEvents ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)')}'; this.style.background='${hasMajor ? 'linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.03) 100%)' : (isToday ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)')}'">
-                        ${isToday ? '<div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 40px 40px 0; border-color: transparent #10b981 transparent transparent;"></div>' : ''}
-                        <div style="font-size: 1.25rem; font-weight: 700; color: ${isToday ? '#10b981' : 'var(--text-primary)'}; margin-bottom: 0.5rem; ${isToday ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${day.getDate()}</div>
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            ${dayTournaments.map(tournament => `
-                                <div onclick="event.stopPropagation()" style="font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 6px; background: ${tournament.type === 'major' ? 'linear-gradient(135deg, rgba(251,191,36,0.25) 0%, rgba(251,191,36,0.15) 100%)' : 'linear-gradient(135deg, rgba(74,222,128,0.2) 0%, rgba(74,222,128,0.1) 100%)'}; color: ${tournament.type === 'major' ? '#fbbf24' : '#4ade80'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; border: 1px solid ${tournament.type === 'major' ? 'rgba(251,191,36,0.3)' : 'rgba(74,222,128,0.3)'};" title="${tournament.name} (${tournament.tour})">
-                                    ⛳ ${tournament.name.length > 20 ? tournament.name.substring(0, 20) + '...' : tournament.name}
+                    <div class="gcal-month-day ${isToday ? 'today' : ''} ${otherMonth ? 'other-month' : ''}" 
+                         onclick="createEventAtDay('${dateStr}')">
+                        <div class="gcal-month-day-number">${date.getDate()}</div>
+                        <div class="gcal-month-events">
+                            ${visibleEvents.map(event => {
+                                const cal = calendars.find(c => c.id === event.calendar);
+                                const color = event.color || cal?.color || '#60a5fa';
+                                const time = event.allDay ? '' : (event.startTime || event.time || '');
+                                return `
+                                    <div class="gcal-month-event" 
+                                         onclick="event.stopPropagation(); showEventPopup('${event.id}', event)"
+                                         style="background: ${color}; color: white;">
+                                        ${time ? time + ' ' : ''}${escapeHtml(event.title)}
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${moreCount > 0 ? `
+                                <div class="gcal-month-more" onclick="event.stopPropagation(); showDayDetails('${dateStr}')">
+                                    +${moreCount} more
                                 </div>
-                            `).join('')}
-                            ${dayEvents.slice(0, 2).map(event => `
-                                <div onclick="event.stopPropagation(); editEvent('${event.id}')" style="font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 6px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}40 0%, ${(event.color || '#60a5fa')}20 100%); color: ${event.color || '#60a5fa'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" title="${event.title}${event.time ? ' at ' + event.time : ''}" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    ${event.time ? '🕐 ' + event.time + ' - ' : ''}${event.title.length > 18 ? event.title.substring(0, 18) + '...' : event.title}
-                                </div>
-                            `).join('')}
-                            ${(dayEvents.length + dayTournaments.length) > 2 ? `<div style="font-size: 0.7rem; color: var(--text-muted); padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.05); border-radius: 4px; text-align: center; font-weight: 600;">+${(dayEvents.length + dayTournaments.length) - 2} more</div>` : ''}
+                            ` : ''}
                         </div>
                     </div>
                 `;
             });
 
-            html += '</div>';
+            html += '</div>'; // month-grid
+            html += '</div>'; // month-view
+            
             return html;
         }
 
@@ -7516,46 +8457,59 @@ loadTodos();
                 months.push(new Date(year, i, 1));
             }
 
-            let html = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;">';
+            let html = '<div class="gcal-year-view">';
 
-            months.forEach(month => {
-                const monthName = month.toLocaleString('en-US', { month: 'long' });
-                const monthStr = `${year}-${String(month.getMonth() + 1).padStart(2, '0')}`;
-                const monthEvents = calendarEvents.filter(e => {
+            months.forEach(monthDate => {
+                const monthName = monthDate.toLocaleString('en-US', { month: 'long' });
+                const monthStr = `${year}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+                const monthEvents = getVisibleEvents().filter(e => {
                     if (e.endDate) {
-                        // Check if event overlaps with this month
                         return e.date.startsWith(monthStr) || e.endDate.startsWith(monthStr) || 
                                (e.date < monthStr && e.endDate > monthStr);
                     }
                     return e.date.startsWith(monthStr);
                 });
                 
-                const hasEvents = monthEvents.length > 0;
-                const currentMonth = new Date().getMonth() === month.getMonth() && 
+                const currentMonth = new Date().getMonth() === monthDate.getMonth() && 
                                    new Date().getFullYear() === year;
 
+                // Build mini month grid
+                const firstDay = new Date(year, monthDate.getMonth(), 1).getDay();
+                const daysInMonth = new Date(year, monthDate.getMonth() + 1, 0).getDate();
+                const today = new Date().toDateString();
+                
+                let monthGrid = '';
+                // Day labels
+                ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => {
+                    monthGrid += `<div class="gcal-year-day" style="color: var(--text-muted); font-weight: 600;">${d}</div>`;
+                });
+                
+                // Empty cells for first week
+                for (let i = 0; i < firstDay; i++) {
+                    monthGrid += '<div class="gcal-year-day"></div>';
+                }
+                
+                // Days
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, monthDate.getMonth(), day);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const isToday = date.toDateString() === today;
+                    const hasEvents = monthEvents.some(e => {
+                        if (e.endDate) {
+                            return dateStr >= e.date && dateStr <= e.endDate;
+                        }
+                        return e.date === dateStr;
+                    });
+                    
+                    monthGrid += `<div class="gcal-year-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}">${day}</div>`;
+                }
+
                 html += `
-                    <div onclick="jumpToMonth(${month.getMonth()})" style="background: ${currentMonth ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)'}; border: 2px solid ${currentMonth ? 'rgba(16,185,129,0.4)' : (hasEvents ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)')}; border-radius: 16px; padding: 1.5rem; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(16,185,129,0.6)'; this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${currentMonth ? 'rgba(16,185,129,0.4)' : (hasEvents ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)')}'; this.style.background='${currentMonth ? 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.05) 100%)' : 'rgba(255,255,255,0.03)'}'; this.style.boxShadow='none'">
-                        ${currentMonth ? '<div style="position: absolute; top: 0; right: 0; padding: 0.25rem 0.75rem; background: #10b981; color: white; font-size: 0.65rem; font-weight: 700; border-bottom-left-radius: 8px;">CURRENT</div>' : ''}
-                        <div style="font-weight: 700; color: ${currentMonth ? '#10b981' : 'var(--text-primary)'}; margin-bottom: 0.75rem; font-size: 1.3rem; ${currentMonth ? 'text-shadow: 0 0 20px rgba(16,185,129,0.3);' : ''}">${monthName}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: ${monthEvents.length > 0 ? '1rem' : '0'}; display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${hasEvents ? '#10b981' : 'rgba(255,255,255,0.2)'};"></div>
-                            <span>${monthEvents.length} event${monthEvents.length !== 1 ? 's' : ''}</span>
+                    <div class="gcal-year-month" onclick="jumpToMonth(${monthDate.getMonth()})">
+                        <div class="gcal-year-month-name">${monthName}</div>
+                        <div class="gcal-year-month-grid">
+                            ${monthGrid}
                         </div>
-                        ${monthEvents.length > 0 ? `
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
-                                ${monthEvents.slice(0, 4).map(event => `
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.5rem; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}25 0%, ${(event.color || '#60a5fa')}10 100%); border-left: 3px solid ${event.color || '#60a5fa'}; border-radius: 6px;">
-                                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font-weight: 500;">${event.title}</div>
-                                    </div>
-                                `).join('')}
-                                ${monthEvents.length > 4 ? `<div style="font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.03); border-radius: 6px;">+${monthEvents.length - 4} more</div>` : ''}
-                            </div>
-                        ` : `
-                            <div style="margin-top: 1rem; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; font-style: italic; background: rgba(0,0,0,0.1); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
-                                No events
-                            </div>
-                        `}
                     </div>
                 `;
             });
@@ -7569,9 +8523,220 @@ loadTodos();
             setCalendarView('month');
         }
 
+        function renderMiniCalendar() {
+            const month = miniCalendarDate.getMonth();
+            const year = miniCalendarDate.getFullYear();
+            
+            // Update month label
+            document.getElementById('miniCalMonth').textContent = 
+                miniCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            const days = [];
+            
+            // Previous month
+            for (let i = firstDay - 1; i >= 0; i--) {
+                days.push({
+                    day: prevMonthDays - i,
+                    date: new Date(year, month - 1, prevMonthDays - i),
+                    otherMonth: true
+                });
+            }
+            
+            // Current month
+            for (let i = 1; i <= daysInMonth; i++) {
+                days.push({
+                    day: i,
+                    date: new Date(year, month, i),
+                    otherMonth: false
+                });
+            }
+            
+            // Next month
+            const remaining = 42 - days.length;
+            for (let i = 1; i <= remaining; i++) {
+                days.push({
+                    day: i,
+                    date: new Date(year, month + 1, i),
+                    otherMonth: true
+                });
+            }
+            
+            const today = new Date().toDateString();
+            const selected = selectedDate?.toDateString();
+            
+            let html = '';
+            
+            // Day labels
+            ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => {
+                html += `<div class="gcal-mini-day-label">${d}</div>`;
+            });
+            
+            // Days
+            days.forEach(({ day, date, otherMonth }) => {
+                const dateStr = date.toISOString().split('T')[0];
+                const isToday = date.toDateString() === today;
+                const isSelected = date.toDateString() === selected;
+                const hasEvents = calendarEvents.some(e => {
+                    if (e.endDate) {
+                        return dateStr >= e.date && dateStr <= e.endDate;
+                    }
+                    return e.date === dateStr;
+                });
+                
+                const classes = [
+                    'gcal-mini-day',
+                    isToday ? 'today' : '',
+                    isSelected ? 'selected' : '',
+                    otherMonth ? 'other-month' : '',
+                    hasEvents ? 'has-events' : ''
+                ].filter(Boolean).join(' ');
+                
+                html += `<div class="${classes}" onclick="selectMiniCalendarDay('${dateStr}')">${day}</div>`;
+            });
+            
+            document.getElementById('miniCalGrid').innerHTML = html;
+        }
+
+        function selectMiniCalendarDay(dateStr) {
+            const date = new Date(dateStr + 'T12:00:00');
+            selectedDate = date;
+            calendarDate = new Date(date);
+            
+            if (calendarView === 'year') {
+                setCalendarView('month');
+            } else {
+                renderCalendar();
+            }
+            renderMiniCalendar();
+        }
+
+        function renderCalendarList() {
+            const container = document.getElementById('calendarList');
+            if (!container) return;
+            
+            let html = '';
+            calendars.forEach(cal => {
+                html += `
+                    <div class="gcal-calendar-item" onclick="toggleCalendar('${cal.id}')">
+                        <div class="gcal-calendar-checkbox ${cal.visible ? 'checked' : ''}" 
+                             style="border-color: ${cal.color}; ${cal.visible ? `background: ${cal.color};` : ''}">
+                        </div>
+                        <div class="gcal-calendar-name">${escapeHtml(cal.name)}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Also update modal calendar selector
+            const select = document.getElementById('eventCalendar');
+            if (select) {
+                select.innerHTML = calendars
+                    .filter(c => !c.readonly)
+                    .map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`)
+                    .join('');
+            }
+        }
+
+        function toggleCalendar(calendarId) {
+            const cal = calendars.find(c => c.id === calendarId);
+            if (cal) {
+                cal.visible = !cal.visible;
+                saveCalendars();
+                renderCalendarList();
+                renderCalendar();
+            }
+        }
+
+        function attachEventListeners() {
+            // Attach drag listeners if needed
+            // For now, click-to-create is primary interaction
+        }
+
+        function startCurrentTimeUpdater() {
+            if (currentTimeInterval) {
+                clearInterval(currentTimeInterval);
+            }
+            
+            updateCurrentTimeIndicator();
+            currentTimeInterval = setInterval(updateCurrentTimeIndicator, 60000); // Update every minute
+        }
+
+        function updateCurrentTimeIndicator() {
+            if (calendarView !== 'day' && calendarView !== 'week') return;
+            
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+            const topPosition = (totalMinutes / 60) * 48; // 48px per hour
+            
+            // Check if viewing today
+            const today = new Date().toDateString();
+            let showIndicator = false;
+            
+            if (calendarView === 'day') {
+                showIndicator = calendarDate.toDateString() === today;
+            } else if (calendarView === 'week') {
+                const weekStart = getWeekStart(calendarDate);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                showIndicator = now >= weekStart && now <= weekEnd;
+            }
+            
+            // Remove existing indicator
+            document.querySelectorAll('.gcal-current-time').forEach(el => el.remove());
+            
+            if (showIndicator) {
+                const timeGrid = document.querySelector('.gcal-time-grid');
+                if (timeGrid) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'gcal-current-time';
+                    indicator.style.top = topPosition + 'px';
+                    
+                    if (calendarView === 'week') {
+                        const dayOfWeek = now.getDay();
+                        indicator.style.left = `calc(60px + ${dayOfWeek} * (100% - 60px) / 7)`;
+                        indicator.style.right = `calc((6 - ${dayOfWeek}) * (100% - 60px) / 7)`;
+                    } else {
+                        indicator.style.left = '60px';
+                    }
+                    
+                    timeGrid.appendChild(indicator);
+                }
+            }
+        }
+
+        function createEventAtTime(dateStr, hour, minute) {
+            const startTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+            const endTime = calculateEndTime(startTime);
+            
+            document.getElementById('eventDate').value = dateStr;
+            document.getElementById('eventEndDate').value = dateStr;
+            document.getElementById('eventStartTime').value = startTime;
+            document.getElementById('eventEndTime').value = endTime;
+            document.getElementById('eventAllDay').checked = false;
+            
+            openAddEventModal();
+        }
+
+        function createEventAtDay(dateStr) {
+            document.getElementById('eventDate').value = dateStr;
+            document.getElementById('eventEndDate').value = dateStr;
+            document.getElementById('eventStartTime').value = '09:00';
+            document.getElementById('eventEndTime').value = '10:00';
+            document.getElementById('eventAllDay').checked = false;
+            
+            // Don't auto-open, let them click the day to see details or use + button
+        }
+
         function selectDateForEvent(dateStr) {
             document.getElementById('eventDate').value = dateStr;
-            document.getElementById('eventEndDate').value = '';
+            document.getElementById('eventEndDate').value = dateStr;
             openAddEventModal();
         }
 
@@ -7584,35 +8749,60 @@ loadTodos();
             document.getElementById('saveEventBtnText').textContent = 'Add Event';
             document.getElementById('deleteEventBtn').style.display = 'none';
             document.getElementById('eventId').value = '';
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDesc').value = '';
             
             // Set date to today if not already set
             const dateInput = document.getElementById('eventDate');
             if (!dateInput.value) {
                 dateInput.value = new Date().toISOString().split('T')[0];
+                document.getElementById('eventEndDate').value = dateInput.value;
             }
             
-            // Set default color (blue)
+            if (!document.getElementById('eventStartTime').value) {
+                document.getElementById('eventStartTime').value = '09:00';
+                document.getElementById('eventEndTime').value = '10:00';
+            }
+            
+            // Set default calendar
+            const calSelect = document.getElementById('eventCalendar');
+            if (calSelect.options.length > 0 && !calSelect.value) {
+                calSelect.value = calendars.find(c => !c.readonly)?.id || calendars[0]?.id;
+            }
+            
+            // Set default color
             selectEventColor('#60a5fa');
+            
+            toggleAllDay(); // Update visibility based on checkbox
         }
 
         function closeAddEventModal() {
             document.getElementById('addEventModal').style.display = 'none';
-            document.getElementById('eventId').value = '';
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventTime').value = '';
-            document.getElementById('eventDesc').value = '';
-            document.getElementById('eventDate').value = '';
-            document.getElementById('eventEndDate').value = '';
-            document.getElementById('eventColor').value = '#60a5fa';
+        }
+
+        function toggleAllDay() {
+            const isAllDay = document.getElementById('eventAllDay').checked;
+            const startTimeContainer = document.getElementById('startTimeContainer');
+            const endTimeContainer = document.getElementById('endTimeContainer');
+            
+            if (isAllDay) {
+                startTimeContainer.style.display = 'none';
+                endTimeContainer.style.display = 'none';
+            } else {
+                startTimeContainer.style.display = 'block';
+                endTimeContainer.style.display = 'block';
+            }
         }
 
         function selectEventColor(color) {
             document.getElementById('eventColor').value = color;
             // Update visual selection
             document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('selected');
                 if (btn.dataset.color === color) {
                     btn.style.borderColor = '#ffffff';
                     btn.style.transform = 'scale(1.15)';
+                    btn.classList.add('selected');
                 } else {
                     btn.style.borderColor = 'transparent';
                     btn.style.transform = 'scale(1)';
@@ -7631,12 +8821,26 @@ loadTodos();
             document.getElementById('eventId').value = event.id;
             document.getElementById('eventTitle').value = event.title;
             document.getElementById('eventDate').value = event.date;
-            document.getElementById('eventEndDate').value = event.endDate || '';
-            document.getElementById('eventTime').value = event.time || '';
+            document.getElementById('eventEndDate').value = event.endDate || event.date;
             document.getElementById('eventDesc').value = event.description || '';
+            document.getElementById('eventAllDay').checked = event.allDay || false;
+            
+            if (event.allDay) {
+                document.getElementById('eventStartTime').value = '';
+                document.getElementById('eventEndTime').value = '';
+            } else {
+                document.getElementById('eventStartTime').value = event.startTime || event.time || '09:00';
+                document.getElementById('eventEndTime').value = event.endTime || calculateEndTime(event.startTime || event.time || '09:00');
+            }
+            
+            // Set calendar
+            const calSelect = document.getElementById('eventCalendar');
+            calSelect.value = event.calendar || calendars.find(c => !c.readonly)?.id;
             
             // Set color
             selectEventColor(event.color || '#60a5fa');
+            
+            toggleAllDay();
             
             // Show modal
             document.getElementById('addEventModal').style.display = 'flex';
@@ -7656,7 +8860,9 @@ loadTodos();
                 if (res.ok) {
                     calendarEvents = calendarEvents.filter(e => e.id !== eventId);
                     closeAddEventModal();
+                    closeEventPopup();
                     renderCalendar();
+                    renderMiniCalendar();
                 } else {
                     alert('Failed to delete event');
                 }
@@ -7671,9 +8877,18 @@ loadTodos();
             const date = document.getElementById('eventDate').value;
             const endDate = document.getElementById('eventEndDate').value;
             const title = document.getElementById('eventTitle').value;
-            const time = document.getElementById('eventTime').value;
             const description = document.getElementById('eventDesc').value;
             const color = document.getElementById('eventColor').value;
+            const calendarId = document.getElementById('eventCalendar').value;
+            const allDay = document.getElementById('eventAllDay').checked;
+            
+            let startTime = null;
+            let endTime = null;
+            
+            if (!allDay) {
+                startTime = document.getElementById('eventStartTime').value;
+                endTime = document.getElementById('eventEndTime').value;
+            }
 
             if (!date || !title) {
                 alert('Please enter a date and title');
@@ -7684,11 +8899,15 @@ loadTodos();
                 id: eventId || `event_${Date.now()}`,
                 title,
                 date,
-                endDate: endDate || null,
+                endDate: endDate || date,
                 type: 'personal',
-                time: time || null,
+                time: startTime, // Keep for backward compatibility
+                startTime,
+                endTime,
+                allDay,
                 description: description || null,
-                color: color || '#60a5fa'
+                color: color || '#60a5fa',
+                calendar: calendarId
             };
 
             try {
@@ -7710,7 +8929,9 @@ loadTodos();
                         calendarEvents.push(eventData);
                     }
                     closeAddEventModal();
+                    closeEventPopup();
                     renderCalendar();
+                    renderMiniCalendar();
                 } else {
                     alert('Failed to save event');
                 }
@@ -7720,15 +8941,119 @@ loadTodos();
             }
         }
 
+        function showEventPopup(eventId, clickEvent) {
+            if (clickEvent) {
+                clickEvent.stopPropagation();
+            }
+            
+            const event = calendarEvents.find(e => e.id === eventId);
+            if (!event) return;
+            
+            const cal = calendars.find(c => c.id === event.calendar);
+            const calName = cal?.name || 'Personal';
+            const color = event.color || cal?.color || '#60a5fa';
+            
+            let timeStr = '';
+            if (event.allDay) {
+                timeStr = 'All day';
+            } else if (event.startTime && event.endTime) {
+                timeStr = `${event.startTime} - ${event.endTime}`;
+            } else if (event.time) {
+                timeStr = event.time;
+            }
+            
+            let dateStr = new Date(event.date).toLocaleDateString('en-US', { 
+                weekday: 'short', month: 'short', day: 'numeric' 
+            });
+            if (event.endDate && event.endDate !== event.date) {
+                const endDateObj = new Date(event.endDate);
+                dateStr += ' - ' + endDateObj.toLocaleDateString('en-US', { 
+                    weekday: 'short', month: 'short', day: 'numeric' 
+                });
+            }
+            
+            const popup = document.createElement('div');
+            popup.className = 'gcal-event-popup';
+            popup.id = 'eventPopup';
+            popup.innerHTML = `
+                <div class="gcal-event-popup-header">
+                    <div class="gcal-event-popup-title" style="color: ${color};">${escapeHtml(event.title)}</div>
+                    <button class="gcal-event-popup-close" onclick="closeEventPopup()">✕</button>
+                </div>
+                ${timeStr ? `
+                    <div class="gcal-event-popup-detail">
+                        <div class="gcal-event-popup-icon">🕐</div>
+                        <div>${timeStr}</div>
+                    </div>
+                ` : ''}
+                <div class="gcal-event-popup-detail">
+                    <div class="gcal-event-popup-icon">📅</div>
+                    <div>${dateStr}</div>
+                </div>
+                <div class="gcal-event-popup-detail">
+                    <div class="gcal-event-popup-icon">📁</div>
+                    <div>${escapeHtml(calName)}</div>
+                </div>
+                ${event.description ? `
+                    <div class="gcal-event-popup-detail">
+                        <div class="gcal-event-popup-icon">📝</div>
+                        <div>${escapeHtml(event.description)}</div>
+                    </div>
+                ` : ''}
+                <div class="gcal-event-popup-actions">
+                    <button class="gcal-btn gcal-btn-secondary" onclick="closeEventPopup(); editEvent('${event.id}')" style="flex: 1;">
+                        Edit
+                    </button>
+                    <button class="gcal-btn gcal-btn-secondary" onclick="if(confirm('Delete this event?')) { closeEventPopup(); deleteEvent(); }" style="flex: 1; color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                        Delete
+                    </button>
+                </div>
+            `;
+            
+            // Position popup
+            if (clickEvent && clickEvent.target) {
+                const rect = clickEvent.target.getBoundingClientRect();
+                popup.style.left = Math.min(rect.right + 10, window.innerWidth - 420) + 'px';
+                popup.style.top = rect.top + 'px';
+            } else {
+                popup.style.left = '50%';
+                popup.style.top = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            closeEventPopup(); // Close any existing popup
+            document.body.appendChild(popup);
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', closeEventPopupOnOutsideClick);
+            }, 100);
+        }
+
+        function closeEventPopup() {
+            const popup = document.getElementById('eventPopup');
+            if (popup) {
+                popup.remove();
+                document.removeEventListener('click', closeEventPopupOnOutsideClick);
+            }
+        }
+
+        function closeEventPopupOnOutsideClick(e) {
+            const popup = document.getElementById('eventPopup');
+            if (popup && !popup.contains(e.target)) {
+                closeEventPopup();
+            }
+        }
+
         function showDayDetails(dateStr) {
-            const date = new Date(dateStr);
-            const dayEvents = calendarEvents.filter(e => {
+            const date = new Date(dateStr + 'T12:00:00');
+            const dayEvents = getVisibleEvents().filter(e => {
                 if (e.endDate) {
                     return dateStr >= e.date && dateStr <= e.endDate;
                 }
                 return e.date === dateStr;
             });
-            const dayTournaments = golfTournaments.filter(t => {
+            const dayTournaments = getVisibleTournaments().filter(t => {
                 const start = new Date(t.startDate);
                 const end = new Date(t.endDate);
                 const current = new Date(dateStr);
@@ -7756,11 +9081,11 @@ loadTodos();
                             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                                 <span style="font-size: 1.5rem;">⛳</span>
                                 <div>
-                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${tournament.name}</div>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${escapeHtml(tournament.name)}</div>
                                     <div style="font-size: 0.8rem; color: var(--text-secondary);">${tournament.tour} ${tournament.type === 'major' ? '• Major Championship' : ''}</div>
                                 </div>
                             </div>
-                            ${tournament.location ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">📍 ${tournament.location}</div>` : ''}
+                            ${tournament.location ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">📍 ${escapeHtml(tournament.location)}</div>` : ''}
                         </div>
                     `;
                 });
@@ -7769,14 +9094,27 @@ loadTodos();
             // Personal events
             if (dayEvents.length > 0) {
                 dayEvents.forEach(event => {
+                    const cal = calendars.find(c => c.id === event.calendar);
+                    const color = event.color || cal?.color || '#60a5fa';
+                    const calName = cal?.name || 'Personal';
+                    
+                    let timeStr = '';
+                    if (event.allDay) {
+                        timeStr = 'All day';
+                    } else if (event.startTime && event.endTime) {
+                        timeStr = `${event.startTime} - ${event.endTime}`;
+                    } else if (event.time) {
+                        timeStr = event.time;
+                    }
+                    
                     html += `
-                        <div onclick="editEvent('${event.id}')" style="padding: 1.25rem; border-radius: 12px; background: linear-gradient(135deg, ${(event.color || '#60a5fa')}25 0%, ${(event.color || '#60a5fa')}10 100%); border: 1px solid ${(event.color || '#60a5fa')}50; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='${(event.color || '#60a5fa')}'" onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='${(event.color || '#60a5fa')}50'">
+                        <div onclick="editEvent('${event.id}')" style="padding: 1.25rem; border-radius: 12px; background: linear-gradient(135deg, ${color}25 0%, ${color}10 100%); border: 1px solid ${color}50; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='${color}'" onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='${color}50'">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${event.title}</div>
-                                <div style="font-size: 0.7rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-muted);">Personal</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${escapeHtml(event.title)}</div>
+                                <div style="font-size: 0.7rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-muted);">${escapeHtml(calName)}</div>
                             </div>
-                            ${event.time ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">🕐 ${event.time}</div>` : ''}
-                            ${event.description ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">${event.description}</div>` : ''}
+                            ${timeStr ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">🕐 ${timeStr}</div>` : ''}
+                            ${event.description ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">${escapeHtml(event.description)}</div>` : ''}
                             ${event.endDate && event.endDate !== event.date ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-style: italic;">📅 Multi-day: ${event.date} to ${event.endDate}</div>` : ''}
                         </div>
                     `;
@@ -7794,7 +9132,12 @@ loadTodos();
         function closeDayDetailsModal() {
             document.getElementById('dayDetailsModal').style.display = 'none';
         }
-        // MEMORY TAB
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         // ============================================
         // MORNING NEWS TAB
         let morningNewsBriefs = [];
