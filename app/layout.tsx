@@ -5,6 +5,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Clubhouse - Yippybot Dashboard",
   description: "Real-time monitoring and control of Yippybot activities",
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/favicon-192x192.png',
+  },
 };
 
 export default function RootLayout({
