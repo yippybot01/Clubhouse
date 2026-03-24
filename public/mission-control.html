@@ -8466,8 +8466,8 @@ loadTodos();
             // Render multi-day spanning events with track assignment
             const multiDayEvents = getVisibleEvents().filter(e => e.endDate && e.endDate !== e.date);
             
-            // Assign tracks to prevent overlapping
-            const eventsByRow = {};
+            // Build event segments by row and assign tracks
+            const eventSegments = [];
             multiDayEvents.forEach(event => {
                 const startIdx = dateToIndex[event.date];
                 const endIdx = dateToIndex[event.endDate];
@@ -8476,125 +8476,90 @@ loadTodos();
                 const startRow = Math.floor(startIdx / 7);
                 const endRow = Math.floor(endIdx / 7);
                 
-                // For events spanning multiple weeks, add to each row
+                // Create segments for each row this event appears in
                 for (let row = startRow; row <= endRow; row++) {
-                    if (!eventsByRow[row]) eventsByRow[row] = [];
-                    eventsByRow[row].push({
+                    const segmentStartIdx = row === startRow ? startIdx : row * 7;
+                    const segmentEndIdx = row === endRow ? endIdx : (row + 1) * 7 - 1;
+                    
+                    eventSegments.push({
                         event,
-                        startIdx: row === startRow ? startIdx : row * 7,
-                        endIdx: row === endRow ? endIdx : (row + 1) * 7 - 1,
-                        startRow,
-                        endRow,
-                        isFirstRow: row === startRow,
-                        isLastRow: row === endRow
+                        row,
+                        startIdx: segmentStartIdx,
+                        endIdx: segmentEndIdx,
+                        startCol: (segmentStartIdx % 7) + 1,
+                        endCol: (segmentEndIdx % 7) + 1,
+                        isFirstSegment: row === startRow,
+                        isLastSegment: row === endRow,
+                        track: 0  // Will be assigned below
                     });
                 }
             });
             
-            // Assign tracks within each row
-            Object.keys(eventsByRow).forEach(rowKey => {
-                const rowEvents = eventsByRow[rowKey];
-                rowEvents.sort((a, b) => a.startIdx - b.startIdx);
-                
-                const tracks = [];
-                rowEvents.forEach(eventData => {
-                    let assignedTrack = 0;
-                    for (let t = 0; t < tracks.length; t++) {
-                        const lastInTrack = tracks[t][tracks[t].length - 1];
-                        if (lastInTrack.endIdx < eventData.startIdx) {
-                            assignedTrack = t;
-                            break;
-                        }
-                        assignedTrack = t + 1;
-                    }
-                    if (!tracks[assignedTrack]) tracks[assignedTrack] = [];
-                    tracks[assignedTrack].push(eventData);
-                    eventData.track = assignedTrack;
-                });
+            // Sort segments by row, then by startIdx
+            eventSegments.sort((a, b) => {
+                if (a.row !== b.row) return a.row - b.row;
+                return a.startIdx - b.startIdx;
             });
             
-            // Render spanning events with proper vertical spacing
-            multiDayEvents.forEach(event => {
-                const startIdx = dateToIndex[event.date];
-                const endIdx = dateToIndex[event.endDate];
+            // Assign tracks within each row to prevent overlaps
+            let currentRow = -1;
+            let rowTracks = [];
+            
+            eventSegments.forEach(segment => {
+                // Reset tracks when we move to a new row
+                if (segment.row !== currentRow) {
+                    currentRow = segment.row;
+                    rowTracks = [];
+                }
                 
-                if (startIdx === undefined || endIdx === undefined) return;
+                // Find the first available track
+                let assignedTrack = 0;
+                for (let t = 0; t < rowTracks.length; t++) {
+                    const lastInTrack = rowTracks[t];
+                    if (lastInTrack.endIdx < segment.startIdx) {
+                        assignedTrack = t;
+                        rowTracks[t] = segment;
+                        segment.track = assignedTrack;
+                        return;
+                    }
+                }
                 
-                const startRow = Math.floor(startIdx / 7) + 1;
-                const endRow = Math.floor(endIdx / 7) + 1;
-                const startCol = (startIdx % 7) + 1;
-                const endCol = (endIdx % 7) + 1;
+                // No available track found, create a new one
+                assignedTrack = rowTracks.length;
+                rowTracks.push(segment);
+                segment.track = assignedTrack;
+            });
+            
+            // Render all event segments
+            eventSegments.forEach(segment => {
+                const { event, row, startCol, endCol, isFirstSegment, track } = segment;
+                const colSpan = endCol - startCol + 1;
+                const gridRow = row + 1;  // Convert to 1-indexed for CSS grid
                 
                 const cal = calendars.find(c => c.id === event.calendar);
                 const color = event.color || cal?.color || '#60a5fa';
                 
-                // If event spans multiple weeks, render multiple bars
-                if (startRow === endRow) {
-                    // Single row spanning event
-                    const colSpan = endCol - startCol + 1;
-                    const rowIdx = startRow - 1;
-                    const rowEvents = eventsByRow[rowIdx] || [];
-                    const eventData = rowEvents.find(e => e.event.id === event.id);
-                    const track = eventData ? eventData.track : 0;
-                    
-                    html += `
-                        <div class="gcal-month-spanning-event"
-                             onclick="showEventPopup('${event.id}', event)"
-                             style="
-                                 grid-column: ${startCol} / span ${colSpan};
-                                 grid-row: ${startRow};
-                                 background: ${color};
-                                 color: white;
-                                 padding: 2px 6px;
-                                 border-radius: 3px;
-                                 font-size: 0.7rem;
-                                 white-space: nowrap;
-                                 overflow: hidden;
-                                 text-overflow: ellipsis;
-                                 cursor: pointer;
-                                 pointer-events: auto;
-                                 margin-top: ${25 + (track * 22)}px;
-                             ">
-                            ${escapeHtml(event.title)}
-                        </div>
-                    `;
-                } else {
-                    // Multi-week event - render segments
-                    for (let row = startRow; row <= endRow; row++) {
-                        const isFirstRow = row === startRow;
-                        const isLastRow = row === endRow;
-                        const segmentStartCol = isFirstRow ? startCol : 1;
-                        const segmentEndCol = isLastRow ? endCol : 7;
-                        const colSpan = segmentEndCol - segmentStartCol + 1;
-                        
-                        const rowIdx = row - 1;
-                        const rowEvents = eventsByRow[rowIdx] || [];
-                        const eventData = rowEvents.find(e => e.event.id === event.id && e.isFirstRow === isFirstRow);
-                        const track = eventData ? eventData.track : 0;
-                        
-                        html += `
-                            <div class="gcal-month-spanning-event"
-                                 onclick="showEventPopup('${event.id}', event)"
-                                 style="
-                                     grid-column: ${segmentStartCol} / span ${colSpan};
-                                     grid-row: ${row};
-                                     background: ${color};
-                                     color: white;
-                                     padding: 2px 6px;
-                                     border-radius: 3px;
-                                     font-size: 0.7rem;
-                                     white-space: nowrap;
-                                     overflow: hidden;
-                                     text-overflow: ellipsis;
-                                     cursor: pointer;
-                                     pointer-events: auto;
-                                     margin-top: ${25 + (track * 22)}px;
-                                 ">
-                                ${isFirstRow ? escapeHtml(event.title) : '↵ ' + escapeHtml(event.title)}
-                            </div>
-                        `;
-                    }
-                }
+                html += `
+                    <div class="gcal-month-spanning-event"
+                         onclick="showEventPopup('${event.id}', event)"
+                         style="
+                             grid-column: ${startCol} / span ${colSpan};
+                             grid-row: ${gridRow};
+                             background: ${color};
+                             color: white;
+                             padding: 2px 6px;
+                             border-radius: 3px;
+                             font-size: 0.7rem;
+                             white-space: nowrap;
+                             overflow: hidden;
+                             text-overflow: ellipsis;
+                             cursor: pointer;
+                             pointer-events: auto;
+                             margin-top: ${25 + (track * 22)}px;
+                         ">
+                        ${isFirstSegment ? escapeHtml(event.title) : '↵ ' + escapeHtml(event.title)}
+                    </div>
+                `;
             });
 
             html += '</div>'; // month-grid
