@@ -3212,7 +3212,7 @@ loadTodos();
                 .gcal-month-grid {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    grid-template-rows: repeat(6, minmax(100px, auto));
+                    grid-template-rows: repeat(6, minmax(120px, auto));
                     gap: 1px;
                     position: relative;
                 }
@@ -3226,15 +3226,17 @@ loadTodos();
                     transition: all 0.2s;
                     display: flex;
                     flex-direction: column;
-                    min-height: 100px;
+                    min-height: 120px;
                     z-index: 1;
+                    position: relative;
                 }
                 
                 .gcal-month-spanning-event {
-                    margin-top: 25px;
                     z-index: 10;
                     transition: all 0.2s;
                     align-self: start;
+                    height: 18px;
+                    line-height: 18px;
                 }
                 
                 .gcal-month-spanning-event:hover {
@@ -8461,9 +8463,57 @@ loadTodos();
                 `;
             });
 
-            // Render multi-day spanning events
+            // Render multi-day spanning events with track assignment
             const multiDayEvents = getVisibleEvents().filter(e => e.endDate && e.endDate !== e.date);
             
+            // Assign tracks to prevent overlapping
+            const eventsByRow = {};
+            multiDayEvents.forEach(event => {
+                const startIdx = dateToIndex[event.date];
+                const endIdx = dateToIndex[event.endDate];
+                if (startIdx === undefined || endIdx === undefined) return;
+                
+                const startRow = Math.floor(startIdx / 7);
+                const endRow = Math.floor(endIdx / 7);
+                
+                // For events spanning multiple weeks, add to each row
+                for (let row = startRow; row <= endRow; row++) {
+                    if (!eventsByRow[row]) eventsByRow[row] = [];
+                    eventsByRow[row].push({
+                        event,
+                        startIdx: row === startRow ? startIdx : row * 7,
+                        endIdx: row === endRow ? endIdx : (row + 1) * 7 - 1,
+                        startRow,
+                        endRow,
+                        isFirstRow: row === startRow,
+                        isLastRow: row === endRow
+                    });
+                }
+            });
+            
+            // Assign tracks within each row
+            Object.keys(eventsByRow).forEach(rowKey => {
+                const rowEvents = eventsByRow[rowKey];
+                rowEvents.sort((a, b) => a.startIdx - b.startIdx);
+                
+                const tracks = [];
+                rowEvents.forEach(eventData => {
+                    let assignedTrack = 0;
+                    for (let t = 0; t < tracks.length; t++) {
+                        const lastInTrack = tracks[t][tracks[t].length - 1];
+                        if (lastInTrack.endIdx < eventData.startIdx) {
+                            assignedTrack = t;
+                            break;
+                        }
+                        assignedTrack = t + 1;
+                    }
+                    if (!tracks[assignedTrack]) tracks[assignedTrack] = [];
+                    tracks[assignedTrack].push(eventData);
+                    eventData.track = assignedTrack;
+                });
+            });
+            
+            // Render spanning events with proper vertical spacing
             multiDayEvents.forEach(event => {
                 const startIdx = dateToIndex[event.date];
                 const endIdx = dateToIndex[event.endDate];
@@ -8482,6 +8532,11 @@ loadTodos();
                 if (startRow === endRow) {
                     // Single row spanning event
                     const colSpan = endCol - startCol + 1;
+                    const rowIdx = startRow - 1;
+                    const rowEvents = eventsByRow[rowIdx] || [];
+                    const eventData = rowEvents.find(e => e.event.id === event.id);
+                    const track = eventData ? eventData.track : 0;
+                    
                     html += `
                         <div class="gcal-month-spanning-event"
                              onclick="showEventPopup('${event.id}', event)"
@@ -8498,6 +8553,7 @@ loadTodos();
                                  text-overflow: ellipsis;
                                  cursor: pointer;
                                  pointer-events: auto;
+                                 margin-top: ${25 + (track * 22)}px;
                              ">
                             ${escapeHtml(event.title)}
                         </div>
@@ -8510,6 +8566,11 @@ loadTodos();
                         const segmentStartCol = isFirstRow ? startCol : 1;
                         const segmentEndCol = isLastRow ? endCol : 7;
                         const colSpan = segmentEndCol - segmentStartCol + 1;
+                        
+                        const rowIdx = row - 1;
+                        const rowEvents = eventsByRow[rowIdx] || [];
+                        const eventData = rowEvents.find(e => e.event.id === event.id && e.isFirstRow === isFirstRow);
+                        const track = eventData ? eventData.track : 0;
                         
                         html += `
                             <div class="gcal-month-spanning-event"
@@ -8527,6 +8588,7 @@ loadTodos();
                                      text-overflow: ellipsis;
                                      cursor: pointer;
                                      pointer-events: auto;
+                                     margin-top: ${25 + (track * 22)}px;
                                  ">
                                 ${isFirstRow ? escapeHtml(event.title) : '↵ ' + escapeHtml(event.title)}
                             </div>
