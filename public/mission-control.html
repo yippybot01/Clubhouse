@@ -2158,6 +2158,32 @@
                 </div>
             </div>
 
+            <!-- Bulk Buyer KPI -->
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Bulk Buyers (2+ Five-Packs)</div>
+                            <div id="revBulkBuyerRate" style="font-size: 2.8rem; font-weight: 700; color: #d4af37;">0%</div>
+                            <div id="revBulkBuyerSubtext" style="font-size: 0.85rem; margin-top: 0.25rem; color: var(--text-muted);">--</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Bulk Customers</div>
+                                <div id="revBulkCustomers" style="font-size: 1.4rem; font-weight: 600; color: var(--text-primary);">--</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Total Customers</div>
+                                <div id="revTotalCustomers" style="font-size: 1.4rem; font-weight: 600; color: var(--text-primary);">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="revBulkInsight" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
+                        Loading bulk buyer analysis...
+                    </div>
+                </div>
+            </div>
+
             <!-- Repeat Purchase Rate KPI -->
             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1.5rem;">
                 <div class="glass-card" style="padding: 1.5rem; text-align: center;">
@@ -5356,6 +5382,7 @@ loadTodos();
             renderLastSale(paidOrders);
             renderDailySalesChart(paidOrders);
             renderRepeatPurchaseRate(paidOrders);
+            renderBulkBuyerRate(paidOrders);
             drawRevenueChart();
             updateLastSynced();
             
@@ -5774,6 +5801,62 @@ loadTodos();
                 ctx.font = '10px Inter';
                 ctx.fillText(item.label, x, height - 8);
             });
+        }
+        
+        function renderBulkBuyerRate(paidOrders) {
+            // Group orders by customer email
+            const customerData = {};
+            paidOrders.forEach(order => {
+                const customerId = (order.customer && order.customer.email) || 
+                                   (order.customer && order.customer.id) || 
+                                   order.email || 'unknown';
+                if (customerId === 'unknown') return;
+                
+                if (!customerData[customerId]) {
+                    customerData[customerId] = { fivePacks: 0, orders: [] };
+                }
+                
+                // Count five-packs from this order
+                (order.line_items || []).forEach(item => {
+                    const title = item.title || '';
+                    const qty = item.quantity || 0;
+                    
+                    if (title.includes('For the Course (5 Pack)')) {
+                        customerData[customerId].fivePacks += qty;
+                    } else if (title.includes('For the Desk (5 Pack)')) {
+                        customerData[customerId].fivePacks += qty;
+                    } else if (title.includes('Yippy Value Pack') || title.includes('10 Pack')) {
+                        // Value Pack counts as 2 five-packs
+                        customerData[customerId].fivePacks += (qty * 2);
+                    }
+                });
+                
+                customerData[customerId].orders.push(order);
+            });
+            
+            const totalCustomers = Object.keys(customerData).length;
+            const bulkCustomers = Object.values(customerData).filter(c => c.fivePacks >= 2).length;
+            const bulkRate = totalCustomers > 0 ? (bulkCustomers / totalCustomers * 100) : 0;
+            
+            // Color based on rate
+            const rateColor = bulkRate >= 30 ? '#4ade80' : bulkRate >= 20 ? '#d4af37' : '#fbbf24';
+            
+            document.getElementById('revBulkBuyerRate').textContent = `${bulkRate.toFixed(1)}%`;
+            document.getElementById('revBulkBuyerRate').style.color = rateColor;
+            document.getElementById('revBulkCustomers').textContent = bulkCustomers;
+            document.getElementById('revTotalCustomers').textContent = totalCustomers;
+            document.getElementById('revBulkBuyerSubtext').textContent = `${bulkCustomers} of ${totalCustomers} customers bought 2+ five-packs`;
+            
+            // Generate insight
+            let insight = '';
+            if (bulkRate < 20) {
+                insight = `Only ${bulkRate.toFixed(1)}% of customers are buying in bulk (2+ five-packs). This is a significant opportunity to increase AOV and revenue without acquiring new customers. Consider: (1) Adding bundle upsells on product pages, (2) Highlighting Value Pack savings at checkout, (3) Testing "Buy 2, Save 10%" promotions, (4) Email campaigns to single-pack buyers offering bulk discounts. Each conversion from single to bulk adds ~$35 revenue.`;
+            } else if (bulkRate < 30) {
+                insight = `${bulkRate.toFixed(1)}% of customers are bulk buyers — this is good progress. ${bulkCustomers} customers have purchased 2+ five-packs either in one order or across multiple purchases. To push this higher: test pre-checkout bundle suggestions, add "Frequently Bought Together" widgets, and send targeted emails to customers who bought singles offering bulk discounts on their next order.`;
+            } else {
+                insight = `Strong bulk buying behavior at ${bulkRate.toFixed(1)}%! ${bulkCustomers} out of ${totalCustomers} customers bought 2+ five-packs. This indicates customers are getting value and returning for more. Continue highlighting Value Pack savings and consider introducing even larger bundles (15-pack or 20-pack subscription options) to capture the highest-intent buyers.`;
+            }
+            document.getElementById('revBulkInsight').textContent = insight;
         }
         
         // Override calculateMRR to use Shopify data if available
