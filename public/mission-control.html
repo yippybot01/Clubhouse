@@ -2139,7 +2139,7 @@
                     <div id="revThisMonthOrders" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">0 orders</div>
                 </div>
                 <div class="glass-card" style="padding: 1.25rem; text-align: center;">
-                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">Avg Order Value</div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">AOV (This Month)</div>
                     <div id="revAOV" style="font-size: 1.8rem; font-weight: 700; color: #fbbf24;">$0</div>
                     <div id="revAOVChange" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">--</div>
                 </div>
@@ -5263,6 +5263,7 @@ loadTodos();
                 return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
             });
             const thisMonthRevenue = thisMonthOrders.reduce((sum, o) => sum + parseFloat(o.total_price), 0);
+            const thisMonthAOV = thisMonthOrders.length > 0 ? thisMonthRevenue / thisMonthOrders.length : 0;
             const dayOfMonth = now.getDate();
             const ordersPerDay = dayOfMonth > 0 ? thisMonthOrders.length / dayOfMonth : 0;
             
@@ -5283,11 +5284,11 @@ loadTodos();
             document.getElementById('revTotalOrders').textContent = `${totalOrders} orders`;
             document.getElementById('revThisMonth').textContent = `$${thisMonthRevenue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
             document.getElementById('revThisMonthOrders').textContent = `${thisMonthOrders.length} orders`;
-            document.getElementById('revAOV').textContent = `$${aov.toFixed(2)}`;
+            document.getElementById('revAOV').textContent = `$${thisMonthAOV.toFixed(2)}`;
             
             // AOV change vs last month
             if (lastMonthAOV > 0) {
-                const aovChange = ((aov - lastMonthAOV) / lastMonthAOV * 100).toFixed(1);
+                const aovChange = ((thisMonthAOV - lastMonthAOV) / lastMonthAOV * 100).toFixed(1);
                 const aovDir = aovChange >= 0 ? '↑' : '↓';
                 const aovColor = aovChange >= 0 ? '#4ade80' : '#f87171';
                 document.getElementById('revAOVChange').innerHTML = `<span style="color:${aovColor}">${aovDir} ${Math.abs(aovChange)}% vs last month</span>`;
